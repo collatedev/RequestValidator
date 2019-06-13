@@ -1,7 +1,7 @@
-import IFieldValidationConfiguration from "./IFieldValidationConfiguration";
-
-type IValidationTypeConfiguration = { [key: string] : IFieldValidationConfiguration };
+import ITypeConfiguration from "./ITypeConfiguration";
 
 export default interface IValidationSchema {
-    schema: { [key: string]: IValidationTypeConfiguration };
+    getTypeConfiguration(type : string) : ITypeConfiguration;
+    getTypes() : string[];
+    hasType(type : string) : boolean;
 }

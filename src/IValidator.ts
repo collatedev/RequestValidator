@@ -1,5 +1,6 @@
-import IValidationResult from "./IValidationResult";
+import IValidationResult from "./ValidationResult/IValidationResult";
+import IRequest from "./Request/IRequest";
 
 export default interface IValidator {
-    validate(): IValidationResult;
+    validate(request : IRequest) : IValidationResult;
 }

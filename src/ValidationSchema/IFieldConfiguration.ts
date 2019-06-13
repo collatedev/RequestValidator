@@ -1,4 +1,4 @@
-export default interface IFieldValidationConfiguration {
+export default interface IFieldConfiguration {
     required: boolean;
     type: string;
     values?: string[];

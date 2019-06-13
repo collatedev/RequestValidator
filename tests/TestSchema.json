@@ -1,0 +1,10 @@
+{
+    "types": {
+        "body": {
+            "foo": {
+                "required": true,
+                "type": "string"
+            }
+        }
+    }
+}

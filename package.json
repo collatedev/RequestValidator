@@ -4,8 +4,7 @@
 	"description": "A request validator",
 	"main": "./dist/index.js",
 	"scripts": {
-		"start": "npm run lint && tsc -p . && node bin/index.js",
-		"build": "npm run lint && tsc -p .",
+		"build": "npm run lint && tsc -p ./tsconfig.prod.json",
 		"test": "jest",
 		"lint": "tslint src/**/*.ts && tslint tests/**/*.ts"
 	},
@@ -29,10 +28,6 @@
 		"typescript": "^3.5.1"
 	},
 	"dependencies": {
-		"@babel/core": "^7.4.5",
-		"@babel/preset-env": "^7.4.5",
-		"@babel/preset-typescript": "^7.3.3",
-		"babel-jest": "^24.8.0",
 		"tslint": "^5.13.0",
 		"tslint-config-prettier": "^1.18.0",
 		"tslint-config-standard": "^8.0.1"
