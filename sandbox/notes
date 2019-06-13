@@ -1,0 +1,14 @@
+- Use schemas to clearly define what should happen for each parameter of a request
+- Check for malformed inputs (encodings (URI + HTML), injecting js)
+- Have various sanitize methods
+- Custom sanitization through regex
+
+types
+-------------
+- int
+- number (super set of int)
+- string
+- enum
+- bool
+- array
+- #(name of nested obj)

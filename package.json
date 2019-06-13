@@ -1,0 +1,33 @@
+{
+	"name": "request-validator",
+	"version": "1.0.0",
+	"description": "A request validator",
+	"main": "./dist/index.js",
+	"scripts": {
+		"start": "npm run lint && tsc -p . && node bin/index.js",
+		"build": "npm run lint && tsc -p .",
+		"test": "./node_modules/mocha -r ts-node/register tests/**/*.spec.ts",
+		"lint": "tslint src/**/*.ts && tslint tests/**/*.ts"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/collatedev/request-validator.git"
+	},
+	"author": "Evan Coulson",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/collatedev/request-validator/issues"
+	},
+	"homepage": "https://github.com/collatedev/request-validator#readme",
+	"devDependencies": {
+		"@types/node": "^11.9.5",
+		"nodemon": "^1.18.10",
+		"ts-node": "^8.0.2",
+		"typescript": "^3.3.3333"
+	},
+	"dependencies": {
+		"tslint": "^5.13.0",
+		"tslint-config-prettier": "^1.18.0",
+		"tslint-config-standard": "^8.0.1"
+	}
+}
