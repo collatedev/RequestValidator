@@ -2,6 +2,8 @@ import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration"
 import FieldConfiguration from "../../src/ValidationSchema/FieldConfiguration";
 import IllegalSchemaError from "../../src/ValidationSchema/IllegalSchemaError";
 
+const RangeLength : number = 2;
+
 test('It should fail to create a field configuration due to null json', () => {
     expect(createField(null)).toThrow(IllegalSchemaError);
 });
@@ -78,6 +80,26 @@ test('It should fail to create a field configuration due to inncorrect type of t
         required: true,
         range: [1, "1"]
     })).toThrow(IllegalSchemaError);
+});
+
+test('It should create a field configuration with a range parameter', () => {
+    const json : any = {
+        type: "boolean",
+        required: false,
+        range: [0, 1]
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+ 
+    if (!configuration.range) {
+        throw new Error("Range missing from configuration");
+    }
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("boolean");
+    expect(configuration.range).toHaveLength(RangeLength);
+    expect(configuration.range[0]).toEqual(0);
+    expect(configuration.range[1]).toEqual(1);
 });
 
 test('It should create a field configuration', () => {
