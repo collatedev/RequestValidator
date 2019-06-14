@@ -9,7 +9,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
     public readonly startsWith?: string | undefined;
     public readonly length?: number | undefined;
 
-    constructor() {
+    constructor(field : any) {
         this.required = true;
         this.type = "string";
     }

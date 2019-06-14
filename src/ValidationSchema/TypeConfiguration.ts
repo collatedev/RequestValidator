@@ -16,8 +16,8 @@ export default class TypeConfiguration implements ITypeConfiguration {
 
         this.fields = new Map<string, IFieldConfiguration>();
         
-        for (const field of Object.keys(type)) {
-            this.fields.set(field, new FieldConfiguration());
+        for (const fieldName of Object.keys(type)) {
+            this.fields.set(fieldName, new FieldConfiguration(type[fieldName]));
         }
     }
 
