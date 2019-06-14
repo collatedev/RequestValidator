@@ -14,6 +14,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
         if (field == null) {
             throw new IllegalSchemaError('The json configuration of a field must be non null');
         }
+        if (typeof field !== 'object') {
+            throw new IllegalSchemaError('The value passed to the constructor must be a json value');
+        }
         this.required = true;
         this.type = "string";
     }
