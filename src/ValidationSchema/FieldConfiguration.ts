@@ -20,21 +20,11 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.validateField(field);
         this.checkForUnexpectedKeys(field);
         this.checkForRequiredKeys(field);
-        if (field.hasOwnProperty("range")) {
-            if (!Array.isArray(field.range)) {
-                throw new IllegalSchemaError('The key "range" must be an array');
-            }
-            if (field.range.length !== RangeLength) {
-                throw new IllegalSchemaError('The key "range" must be an array of size 2');
-            }
-            if (typeof field.range[0] !== 'number' || typeof field.range[1] !== 'number') {
-                throw new IllegalSchemaError('The values in the "range" array must be numbers');
-            }
-            this.range = field.range;
-        }
 
         this.required = field.required;
         this.type = field.type;
+
+        this.range = this.getRange(field);
     }
 
     private validateField(field : any) : void {
@@ -70,5 +60,21 @@ export default class FieldConfiguration implements IFieldConfiguration {
                 throw new IllegalSchemaError(`Unexpected key "${key}" in the json`);
             }
         }
+    }
+
+    private getRange(field : any) : number[] | undefined {
+        if (field.hasOwnProperty("range")) {
+            if (!Array.isArray(field.range)) {
+                throw new IllegalSchemaError('The key "range" must be an array');
+            }
+            if (field.range.length !== RangeLength) {
+                throw new IllegalSchemaError('The key "range" must be an array of size 2');
+            }
+            if (typeof field.range[0] !== 'number' || typeof field.range[1] !== 'number') {
+                throw new IllegalSchemaError('The values in the "range" array must be numbers');
+            }
+            return field.range as number[];
+        }
+        return undefined;
     }
 }
