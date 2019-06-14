@@ -56,6 +56,14 @@ test('It should fail to create a field configuration due to inncorrect type of "
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should fail to create a field configuration due to inncorrect length of range array', () => {
+    expect(createField({
+        type: "string",
+        required: true,
+        range: []
+    })).toThrow(IllegalSchemaError);
+});
+
 test('It should create a field configuration', () => {
     const json : any = {
         type: "boolean",
