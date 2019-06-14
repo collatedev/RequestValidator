@@ -37,6 +37,12 @@ export default class FieldConfiguration implements IFieldConfiguration {
             throw new IllegalSchemaError('The key "required" must be a boolean');
         }
 
+        if (field.hasOwnProperty("range")) {
+            if (!Array.isArray(field.range)) {
+                throw new IllegalSchemaError('The key "range" must be an array');
+            }
+        }
+
         for (const key in field) {
             if (!this.validKeys.includes(key)) {
                 throw new IllegalSchemaError(`Unexpected key "${key}" in the json`);
