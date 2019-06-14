@@ -28,7 +28,7 @@ test('Creates a type with a field', () => {
     expect(fooField).not.toBeNull();
     expect(fooField.required).toBeTruthy();
     expect(fooField.type).toEqual("string");
-})
+});
 
 function createType(json : any) : () => ITypeConfiguration {
     return (() : ITypeConfiguration => {
