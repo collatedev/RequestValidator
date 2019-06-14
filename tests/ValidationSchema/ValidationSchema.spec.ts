@@ -7,13 +7,16 @@ test('Fails to create a validation schema', () => {
 });
 
 test('Creates a validation schema', () => {
-    const schema : any = {
+    const json : any = {
         types: {
 
         }
     };
 
-    expect(new ValidationSchema(schema)).not.toBeNull();
+    const schema : IValidationSchema = new ValidationSchema(json);
+
+    expect(schema).not.toBeNull();
+    expect(schema.getTypes()).toHaveLength(0);
 });
 
 function createValidationSchema(json : any) : () => IValidationSchema {
