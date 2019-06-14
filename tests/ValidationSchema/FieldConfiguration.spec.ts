@@ -29,14 +29,14 @@ test('It should fail to create a field configuration due to missing the required
 test('It should create a field configuration', () => {
     const json : any = {
         type: "boolean",
-        required: true
+        required: false
     };
 
     const configuration : IFieldConfiguration = new FieldConfiguration(json);
 
-    expect(configuration.required).toBeTruthy();
+    expect(configuration.required).toBeFalsy();
     expect(configuration.type).toEqual("boolean");
-})
+});
 
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {

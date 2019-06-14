@@ -26,7 +26,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
         if (!field.hasOwnProperty("required")) {
             throw new IllegalSchemaError('The json configuration must have the "required" key');
         }
-        this.required = true;
-        this.type = "string";
+        this.required = field.required;
+        this.type = field.type;
     }
 }
