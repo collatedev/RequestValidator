@@ -17,28 +17,8 @@ export default class FieldConfiguration implements IFieldConfiguration {
     public readonly length?: number | undefined;
 
     constructor(field : any) {
-        if (field == null) {
-            throw new IllegalSchemaError('The json configuration of a field must be non null');
-        }
-        if (typeof field !== 'object') {
-            throw new IllegalSchemaError('The value passed to the constructor must be a json value');
-        }
-        if (Object.keys(field).length === 0) {
-            throw new IllegalSchemaError('The json configuration must have keys "type" and "required"');
-        }
-        if (!field.hasOwnProperty("type")) {
-            throw new IllegalSchemaError('The json configuration must have the "type" key');
-        }
-        if (!field.hasOwnProperty("required")) {
-            throw new IllegalSchemaError('The json configuration must have the "required" key');
-        }
-        if (typeof field.type !== 'string') {
-            throw new IllegalSchemaError('The key "type" must be a string');
-        }
-        if (typeof field.required !== 'boolean') {
-            throw new IllegalSchemaError('The key "required" must be a boolean');
-        }
-
+        this.validateField(field);
+        this.checkForRequiredKeys(field);
         if (field.hasOwnProperty("range")) {
             if (!Array.isArray(field.range)) {
                 throw new IllegalSchemaError('The key "range" must be an array');
@@ -60,5 +40,32 @@ export default class FieldConfiguration implements IFieldConfiguration {
 
         this.required = field.required;
         this.type = field.type;
+    }
+
+    private validateField(field : any) : void {
+        if (field == null) {
+            throw new IllegalSchemaError('The json configuration of a field must be non null');
+        }
+        if (typeof field !== 'object') {
+            throw new IllegalSchemaError('The value passed to the constructor must be a json value');
+        }
+        if (Object.keys(field).length === 0) {
+            throw new IllegalSchemaError('The json configuration must have keys "type" and "required"');
+        }
+    }
+
+    private checkForRequiredKeys(field : any) : void {
+        if (!field.hasOwnProperty("type")) {
+            throw new IllegalSchemaError('The json configuration must have the "type" key');
+        }
+        if (!field.hasOwnProperty("required")) {
+            throw new IllegalSchemaError('The json configuration must have the "required" key');
+        }
+        if (typeof field.type !== 'string') {
+            throw new IllegalSchemaError('The key "type" must be a string');
+        }
+        if (typeof field.required !== 'boolean') {
+            throw new IllegalSchemaError('The key "required" must be a boolean');
+        }
     }
 }
