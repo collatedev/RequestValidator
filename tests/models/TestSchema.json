@@ -4,6 +4,16 @@
             "foo": {
                 "required": true,
                 "type": "string"
+            },
+            "bar": {
+                "required": true,
+                "type": "baz"
+            }
+        },
+        "baz": {
+            "qux": {
+                "required": true,
+                "type": "number"
             }
         }
     }
