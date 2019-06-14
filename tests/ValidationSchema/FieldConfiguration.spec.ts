@@ -14,9 +14,15 @@ test('It should fail to create a field configuration due to being empty json', (
     expect(createField({})).toThrow(IllegalSchemaError);
 });
 
-test('It should fail to create a field configuration due to missing the type field json', () => {
+test('It should fail to create a field configuration due to missing the type field in json', () => {
     expect(createField({
         required: true
+    })).toThrow(IllegalSchemaError);
+});
+
+test('It should fail to create a field configuration due to missing the required field in json', () => {
+    expect(createField({
+        type: "string"
     })).toThrow(IllegalSchemaError);
 });
 
