@@ -26,6 +26,13 @@ test('It should fail to create a field configuration due to missing the required
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should fail to create a field configuration due to inncorrect type of "type" key in json', () => {
+    expect(createField({
+        type: 1,
+        required: true
+    })).toThrow(IllegalSchemaError);
+});
+
 test('It should create a field configuration', () => {
     const json : any = {
         type: "boolean",
