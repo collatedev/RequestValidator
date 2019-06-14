@@ -26,6 +26,18 @@ test('It should fail to create a field configuration due to missing the required
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should create a field configuration', () => {
+    const json : any = {
+        type: "boolean",
+        required: true
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    expect(configuration.required).toBeTruthy();
+    expect(configuration.type).toEqual("boolean");
+})
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);
