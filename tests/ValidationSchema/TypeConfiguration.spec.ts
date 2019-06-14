@@ -9,7 +9,7 @@ test('Throws an error creating an illegal type from null json', () => {
 
 test('Throws an error creating a type configuration due to illegal json', () => {
     expect(createType(1)).toThrow(IllegalSchemaError);
-})
+});
 
 test('Creates an empty type', () => {
     const type : ITypeConfiguration = new TypeConfiguration({});

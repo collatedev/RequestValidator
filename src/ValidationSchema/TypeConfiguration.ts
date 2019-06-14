@@ -7,14 +7,19 @@ export default class TypeConfiguration implements ITypeConfiguration {
     private readonly fields : Map<string, IFieldConfiguration>;
 
     constructor(type : any) {
-        if (typeof type !== 'object' || type === null) {
+        if (!this.isJSON(type)) {
             throw new IllegalSchemaError(`The json configuration of a type must be non null json. Recieved: ${type}`);
         }
-        this.fields = new Map<string, IFieldConfiguration>();
 
+        this.fields = new Map<string, IFieldConfiguration>();
+        
         for (const field of Object.keys(type)) {
             this.fields.set(field, new FieldConfiguration());
         }
+    }
+
+    private isJSON(json : any) : boolean {
+        return typeof json === 'object' && json !== null;
     }
 
     public getFields(): string[] {

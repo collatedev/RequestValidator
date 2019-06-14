@@ -3,7 +3,11 @@ import IllegalSchemaError from "../../src/ValidationSchema/IllegalSchemaError";
 import IValidationSchema from "../../src/ValidationSchema/IValidationSchema";
 import ITypeConfiguration from "../../src/ValidationSchema/ITypeConfiguration";
 
-test('Fails to create a validation schema', () => {
+test('Fails to create a validation schema due to null schema', () => {
+    expect(createValidationSchema(null)).toThrow(IllegalSchemaError);
+});
+
+test('Fails to create a validation schema due to empty schema', () => {
     expect(createValidationSchema({})).toThrow(IllegalSchemaError);
 });
 
