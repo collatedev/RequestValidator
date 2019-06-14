@@ -7,8 +7,11 @@ export default class TypeConfiguration implements ITypeConfiguration {
     private readonly fields : Map<string, IFieldConfiguration>;
 
     constructor(type : any) {
-        if (!this.isJSON(type)) {
-            throw new IllegalSchemaError(`The json configuration of a type must be non null json. Recieved: ${type}`);
+        if (type === null) {
+            throw new IllegalSchemaError('The json configuration of a type must be non null');
+        }
+        if (typeof type !== 'object') {
+            throw new IllegalSchemaError(`The json configuration of a type must be valid json. Recieved: ${type}`);
         }
 
         this.fields = new Map<string, IFieldConfiguration>();
@@ -16,10 +19,6 @@ export default class TypeConfiguration implements ITypeConfiguration {
         for (const field of Object.keys(type)) {
             this.fields.set(field, new FieldConfiguration());
         }
-    }
-
-    private isJSON(json : any) : boolean {
-        return typeof json === 'object' && json !== null;
     }
 
     public getFields(): string[] {
