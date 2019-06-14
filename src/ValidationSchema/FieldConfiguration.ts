@@ -1,6 +1,8 @@
 import IFieldConfiguration from "./IFieldConfiguration";
 import IllegalSchemaError from "./IllegalSchemaError";
 
+const RangeLength : number = 2;
+
 export default class FieldConfiguration implements IFieldConfiguration {
     private readonly validKeys : string[] = [
         "required", "type", "values", "range", "isURL", "startsWith", "length"
@@ -40,6 +42,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
         if (field.hasOwnProperty("range")) {
             if (!Array.isArray(field.range)) {
                 throw new IllegalSchemaError('The key "range" must be an array');
+            }
+            if (field.range.length !== RangeLength) {
+                throw new IllegalSchemaError('The key "range" must be an array of size 2');
             }
         }
 
