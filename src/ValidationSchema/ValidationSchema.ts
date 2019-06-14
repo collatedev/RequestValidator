@@ -1,6 +1,7 @@
 import IValidationSchema from "./IValidationSchema";
 import ITypeConfiguration from "./ITypeConfiguration";
 import IllegalSchemaError from "./IllegalSchemaError";
+import TypeConfiguration from "./TypeConfiguration";
 
 export default class ValidationSchema implements IValidationSchema {
     private types : Map<string, ITypeConfiguration>;
@@ -10,6 +11,10 @@ export default class ValidationSchema implements IValidationSchema {
 
         if (!json.hasOwnProperty("types")) {
             throw new IllegalSchemaError("All schemas must begin with the 'types' property");
+        }
+        
+        for (const type of Object.keys(json.types)) {
+            this.types.set(type, new TypeConfiguration());
         }
     }
 
