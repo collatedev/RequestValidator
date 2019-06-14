@@ -14,7 +14,8 @@ export default class ValidationSchema implements IValidationSchema {
         }
         
         for (const type of Object.keys(json.types)) {
-            this.types.set(type, new TypeConfiguration());
+            const typeConfiguration : any = json.types[type];
+            this.types.set(type, new TypeConfiguration(typeConfiguration));
         }
     }
 
