@@ -2,6 +2,10 @@ import IFieldConfiguration from "./IFieldConfiguration";
 import IllegalSchemaError from "./IllegalSchemaError";
 
 export default class FieldConfiguration implements IFieldConfiguration {
+    private readonly validKeys : string[] = [
+        "required", "type", "values", "range", "isURL", "startsWith", "length"
+    ];
+
     public readonly required: boolean;    
     public readonly type: string;
     public readonly values?: string[] | undefined;
@@ -32,6 +36,13 @@ export default class FieldConfiguration implements IFieldConfiguration {
         if (typeof field.required !== 'boolean') {
             throw new IllegalSchemaError('The key "required" must be a boolean');
         }
+
+        for (const key in field) {
+            if (!this.validKeys.includes(key)) {
+                throw new IllegalSchemaError(`Unexpected key "${key}" in the json`);
+            }
+        }
+
         this.required = field.required;
         this.type = field.type;
     }
