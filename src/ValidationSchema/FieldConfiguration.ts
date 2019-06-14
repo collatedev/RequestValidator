@@ -18,6 +18,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
 
     constructor(field : any) {
         this.validateField(field);
+        this.checkForUnexpectedKeys(field);
         this.checkForRequiredKeys(field);
         if (field.hasOwnProperty("range")) {
             if (!Array.isArray(field.range)) {
@@ -30,12 +31,6 @@ export default class FieldConfiguration implements IFieldConfiguration {
                 throw new IllegalSchemaError('The values in the "range" array must be numbers');
             }
             this.range = field.range;
-        }
-
-        for (const key in field) {
-            if (!this.validKeys.includes(key)) {
-                throw new IllegalSchemaError(`Unexpected key "${key}" in the json`);
-            }
         }
 
         this.required = field.required;
@@ -66,6 +61,14 @@ export default class FieldConfiguration implements IFieldConfiguration {
         }
         if (typeof field.required !== 'boolean') {
             throw new IllegalSchemaError('The key "required" must be a boolean');
+        }
+    }
+
+    private checkForUnexpectedKeys(field : any) : void {
+        for (const key in field) {
+            if (!this.validKeys.includes(key)) {
+                throw new IllegalSchemaError(`Unexpected key "${key}" in the json`);
+            }
         }
     }
 }
