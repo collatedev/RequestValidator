@@ -3,9 +3,13 @@ import TypeConfiguration from "../../src/ValidationSchema/TypeConfiguration";
 import IllegalSchemaError from "../../src/ValidationSchema/IllegalSchemaError";
 import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration";
 
-test('Throws an error creating an illegal type', () => {
+test('Throws an error creating an illegal type from null json', () => {
     expect(createType(null)).toThrow(IllegalSchemaError);
 });
+
+test('Throws an error creating a type configuration due to illegal json', () => {
+    expect(createType(1)).toThrow(IllegalSchemaError);
+})
 
 test('Creates an empty type', () => {
     const type : ITypeConfiguration = new TypeConfiguration({});

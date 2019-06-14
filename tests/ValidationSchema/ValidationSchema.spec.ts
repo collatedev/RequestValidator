@@ -27,7 +27,7 @@ test('Creates a validation schema with an empty type', () => {
 
             }
         }
-    }
+    };
 
     const schema : IValidationSchema = new ValidationSchema(json);
     const bodyType : ITypeConfiguration = schema.getTypeConfiguration("body");
