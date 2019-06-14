@@ -3,10 +3,10 @@ import ITypeConfiguration from "./ITypeConfiguration";
 import IllegalSchemaError from "./IllegalSchemaError";
 
 export default class ValidationSchema implements IValidationSchema {
-    private types : string[];
+    private types : Map<string, ITypeConfiguration>;
 
     constructor(json: any) {
-        this.types = [];
+        this.types = new Map<string, ITypeConfiguration>();
 
         if (!json.hasOwnProperty("types")) {
             throw new IllegalSchemaError("All schemas must begin with the 'types' property");
@@ -18,7 +18,11 @@ export default class ValidationSchema implements IValidationSchema {
     }    
     
     public getTypes(): string[] {
-        return this.types;
+        const keys : string[] = [];
+        for (const key of this.types.keys()) {
+            keys.push(key);
+        }
+        return keys;
     }
 
     public hasType(type: string): boolean {
