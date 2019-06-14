@@ -7,8 +7,8 @@ export default class TypeConfiguration implements ITypeConfiguration {
     private readonly fields : Map<string, IFieldConfiguration>;
 
     constructor(type : any) {
-        if (type === null) {
-            throw new IllegalSchemaError("The json configuration of a type must not be null");
+        if (typeof type !== 'object' || type === null) {
+            throw new IllegalSchemaError(`The json configuration of a type must be non null json. Recieved: ${type}`);
         }
         this.fields = new Map<string, IFieldConfiguration>();
 
