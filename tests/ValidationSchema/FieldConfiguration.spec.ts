@@ -40,6 +40,14 @@ test('It should fail to create a field configuration due to inncorrect type of "
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should fail to create a field configuration due to unknown fields being defined in the json', () => {
+    expect(createField({
+        type: "string",
+        required: true,
+        foo: "bar"
+    })).toThrow(IllegalSchemaError);
+});
+
 test('It should create a field configuration', () => {
     const json : any = {
         type: "boolean",
