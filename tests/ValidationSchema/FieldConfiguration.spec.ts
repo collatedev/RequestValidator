@@ -6,6 +6,10 @@ test('It should fail to create a field configuration due to null json', () => {
     expect(createField(null)).toThrow(IllegalSchemaError);
 });
 
+test('It should fail to create a field configuration due to illegal json', () => {
+    expect(createField(1)).toThrow(IllegalSchemaError);
+});
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);
