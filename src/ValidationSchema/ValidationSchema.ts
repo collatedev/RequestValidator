@@ -7,8 +7,11 @@ export default class ValidationSchema implements IValidationSchema {
     private types : Map<string, ITypeConfiguration>;
 
     constructor(json: any) {
-        if (json == null) {
+        if (json === null) {
             throw new IllegalSchemaError("All schemas must not be null");
+        }
+        if (typeof json !== 'object') {
+            throw new IllegalSchemaError(`All schemas must be valid json. Received: ${json}`);
         }
         if (!json.hasOwnProperty("types")) {
             throw new IllegalSchemaError("All schemas must begin with the 'types' property");
