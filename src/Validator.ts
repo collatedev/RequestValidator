@@ -5,16 +5,13 @@ import IRequest from "./Request/IRequest";
 import ValidationResult from "./ValidationResult/ValidationResult";
 
 export default class Validator implements IValidator {
-    private readonly schema : IValidationSchema;
+    // private readonly schema : IValidationSchema;
 
     constructor(schema : IValidationSchema) {
-        this.schema = schema;
+        // this.schema = schema;
     }
 
     public validate(request : IRequest) : IValidationResult {
-        if (this.schema.hasType("body")) {
-            // handle body
-        }
         return new ValidationResult(true, []);
     }
 }
