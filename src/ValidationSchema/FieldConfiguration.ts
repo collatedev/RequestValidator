@@ -49,6 +49,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (typeof field.range[0] !== 'number' || typeof field.range[1] !== 'number') {
                 throw new IllegalSchemaError('The values in the "range" array must be numbers');
             }
+            this.range = field.range;
         }
 
         for (const key in field) {
