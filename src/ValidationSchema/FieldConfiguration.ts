@@ -1,4 +1,5 @@
 import IFieldConfiguration from "./IFieldConfiguration";
+import IllegalSchemaError from "./IllegalSchemaError";
 
 export default class FieldConfiguration implements IFieldConfiguration {
     public readonly required: boolean;    
@@ -10,6 +11,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
     public readonly length?: number | undefined;
 
     constructor(field : any) {
+        if (field == null) {
+            throw new IllegalSchemaError('The json configuration of a field must be non null');
+        }
         this.required = true;
         this.type = "string";
     }
