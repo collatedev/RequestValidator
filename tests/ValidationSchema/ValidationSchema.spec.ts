@@ -6,8 +6,19 @@ test('Fails to create a validation schema', () => {
     expect(createValidationSchema({})).toThrow(IllegalSchemaError);
 });
 
+test('Creates a validation schema', () => {
+    const schema : any = {
+        types: {
+
+        }
+    };
+
+    expect(new ValidationSchema(schema)).not.toBeNull();
+});
+
 function createValidationSchema(json : any) : () => IValidationSchema {
     return (() : IValidationSchema => {
         return new ValidationSchema(json);
     });
 }
+
