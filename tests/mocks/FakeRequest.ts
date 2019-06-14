@@ -1,23 +1,23 @@
-import IRequest from "../src/Request/IRequest";
+import IRequest from "../../src/Request/IRequest";
 
 export default class FakeRequest implements IRequest {
     public getBody(): { [key: string]: any; } {
-        throw new Error("Method not implemented.");
+        return {};
     }    
     
     public getCookie(): { [key: string]: any; } {
-        throw new Error("Method not implemented.");
+        return {};
     }
     
     public getHeaders(): { [key: string]: any; } {
-        throw new Error("Method not implemented.");
+        return {};
     }
     
     public getParams(): { [key: string]: any; } {
-        throw new Error("Method not implemented.");
+        return {};
     }
     
     public getQuery(): { [key: string]: any; } {
-        throw new Error("Method not implemented.");
+        return {};
     }
 }
