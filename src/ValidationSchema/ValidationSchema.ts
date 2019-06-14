@@ -14,7 +14,10 @@ export default class ValidationSchema implements IValidationSchema {
     }
 
     public getTypeConfiguration(type: string): ITypeConfiguration {
-        throw new Error("Method not implemented.");
+        if (!this.hasType(type)) {
+            throw new IllegalSchemaError(`type '${type} is not defined in the schema'`);
+        }
+        return this.types.get(type) as ITypeConfiguration;
     }    
     
     public getTypes(): string[] {
@@ -26,6 +29,6 @@ export default class ValidationSchema implements IValidationSchema {
     }
 
     public hasType(type: string): boolean {
-        throw new Error("Method not implemented.");
+        return this.types.has(type);
     }
 }
