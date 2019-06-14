@@ -20,6 +20,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
         if (Object.keys(field).length === 0) {
             throw new IllegalSchemaError('The json configuration must have keys "type" and "required"');
         }
+        if (!field.hasOwnProperty("type")) {
+            throw new IllegalSchemaError('The json configuration must have the "type" key');
+        }
         this.required = true;
         this.type = "string";
     }
