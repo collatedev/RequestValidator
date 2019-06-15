@@ -5,7 +5,7 @@ export default class FakeRequest implements IRequest {
         return {};
     }    
     
-    public getCookie(): { [key: string]: any; } {
+    public getCookies(): { [key: string]: any; } {
         return {};
     }
     
