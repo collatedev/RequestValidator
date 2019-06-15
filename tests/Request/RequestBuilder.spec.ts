@@ -4,6 +4,7 @@ import IRequestMapping from "../../src/Request/IRequestMapping";
 import RequestBuilder from "../../src/Request/RequestBuilder";
 
 const EmptyMapping : IRequestMapping = {};
+const TestMapping : IRequestMapping = {};
 
 test('creates an empty request', () => {
     const builder : IRequestBuilder = new RequestBuilder();
@@ -15,4 +16,21 @@ test('creates an empty request', () => {
     expect(request.getHeaders()).toEqual(EmptyMapping);
     expect(request.getParams()).toEqual(EmptyMapping);
     expect(request.getQuery()).toEqual(EmptyMapping);
+});
+
+test('creates a full request', () => {
+    const builder : IRequestBuilder = new RequestBuilder();
+
+    const request : IRequest = builder.setBody(TestMapping)
+                                        .setCookies(TestMapping)
+                                        .setHeaders(TestMapping)
+                                        .setParams(TestMapping)
+                                        .setQuery(TestMapping)
+                                        .build();
+
+    expect(request.getBody()).toEqual(TestMapping);
+    expect(request.getCookies()).toEqual(TestMapping);
+    expect(request.getHeaders()).toEqual(TestMapping);
+    expect(request.getParams()).toEqual(TestMapping);
+    expect(request.getQuery()).toEqual(TestMapping);
 });
