@@ -26,6 +26,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.range = this.getRange(field);
 
         if (field.hasOwnProperty("values")) {
+            if (this.type !== "enum") {
+                throw new IllegalSchemaError('The key "values" can only be used when the type is \'enum\'');
+            }
             if (!Array.isArray(field.values)) {
                 throw new IllegalSchemaError('The key "values" must be an array');
             }
