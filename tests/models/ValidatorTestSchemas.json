@@ -1,0 +1,120 @@
+{
+    "schemas": [
+        {
+            "types": {
+                "body": {
+                }
+            }
+        },
+        {
+            "types": {
+                "body": {
+                    "foo": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "body": {
+                    "foo": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "body": {
+                    "foo": {
+                        "type": "number",
+                        "required": false
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "cookies": {
+                    "foo": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "cookies": {
+                    "foo": {
+                        "type": "number",
+                        "required": false
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "headers": {
+                    "foo": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "headers": {
+                    "foo": {
+                        "type": "number",
+                        "required": false
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "params": {
+                    "foo": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "params": {
+                    "foo": {
+                        "type": "number",
+                        "required": false
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "query": {
+                    "foo": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "query": {
+                    "foo": {
+                        "type": "number",
+                        "required": false
+                    }
+                }
+            }
+        }
+    ]
+}

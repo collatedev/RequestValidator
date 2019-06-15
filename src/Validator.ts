@@ -34,13 +34,13 @@ export default class Validator implements IValidator {
             this.handleType("cookies", request.getCookies());
         }
         if (this.schema.hasType("headers")) {
-            this.handleType("headers", request.getCookies());
+            this.handleType("headers", request.getHeaders());
         }
         if (this.schema.hasType("params")) {
-            this.handleType("params", request.getCookies());
+            this.handleType("params", request.getParams());
         }
         if (this.schema.hasType("query")) {
-            this.handleType("query", request.getCookies());
+            this.handleType("query", request.getQuery());
         }
         return new ValidationResult(this.isValid, this.errors);
     }
