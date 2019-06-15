@@ -10,3 +10,19 @@ test('Creates an empty request', () => {
     expect(request.getParams()).toEqual({});
     expect(request.getQuery()).toEqual({});
 });
+
+test('Creates a request with a body', () => {
+    const request : Request = new Request();
+
+    request.setBody({
+        foo: 1
+    });
+
+    expect(request.getBody()).toEqual({
+        foo: 1
+    });
+    expect(request.getCookie()).toEqual({});
+    expect(request.getHeaders()).toEqual({});
+    expect(request.getParams()).toEqual({});
+    expect(request.getQuery()).toEqual({});
+});
