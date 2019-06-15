@@ -22,7 +22,6 @@ export default class FieldConfiguration implements IFieldConfiguration {
 
         this.required = field.required;
         this.type = field.type;
-
         this.range = this.getRange(field);
 
         if (field.hasOwnProperty("values")) {
@@ -34,6 +33,11 @@ export default class FieldConfiguration implements IFieldConfiguration {
             }
             if (field.values.length === 0) {
                 throw new IllegalSchemaError('The key "values" must have at least one enum value');
+            }
+            for (const value of field.values) {
+                if (typeof value !== 'string') {
+                    throw new IllegalSchemaError('All values of the key "values" must be a string');
+                }
             }
         }
     }
