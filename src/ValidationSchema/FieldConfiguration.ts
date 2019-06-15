@@ -32,6 +32,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (this.type !== "string") {
                 throw new IllegalSchemaError('The key "isURL" can only be used when the type is \'string\'');
             }
+            this.isURL = field.isURL as boolean;
         }
     }
 
