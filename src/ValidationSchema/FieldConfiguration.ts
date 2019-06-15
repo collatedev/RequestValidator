@@ -24,6 +24,12 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.type = field.type;
         this.range = this.getRange(field);
         this.values = this.getValues(field);
+
+        if (field.hasOwnProperty("isURL")) {
+            if (typeof field.isURL !== "boolean") {
+                throw new IllegalSchemaError('The key "isURL" must be a boolean');
+            }
+        }
     }
 
     private validateField(field : any) : void {
