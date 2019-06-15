@@ -11,30 +11,41 @@ import IFieldConfiguration from "./ValidationSchema/IFieldConfiguration";
 export default class Validator implements IValidator {
     private readonly schema : IValidationSchema;
 
+    private errors : IValidationError[];
+    private isValid : boolean;
+    private path : string[];
+
     constructor(schema : IValidationSchema) {
         this.schema = schema;
+        this.errors = [];
+        this.isValid = true;
+        this.path = [];
     }
 
     public validate(request : IRequest) : IValidationResult {
-        let isValid : boolean = true;
-        const errors : IValidationError[] = [];
+        this.isValid = true;
+        this.errors = [];
+        this.path = [];
 
         if (this.schema.hasType("body")) {
-            const type : ITypeConfiguration = this.schema.getTypeConfiguration("body");
-            const mapping : IRequestMapping = request.getBody();
-            const fields : string[] = type.getFields();
-
-            for (const field of fields) {
-                const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
-                if (!mapping.has(field) && fieldConfiguration.required) {
-                    isValid = false;
-                    errors.push({
-                        message: `Missing property ${field}`,
-                        location: "body"
-                    });
-                }
-            }
+            this.path.push("body");
+            this.checkForMissingProperties(request.getBody(), this.schema.getTypeConfiguration("body"));
+            this.path.pop();
         }
-        return new ValidationResult(isValid, errors);
+        return new ValidationResult(this.isValid, this.errors);
+    }
+
+    private checkForMissingProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
+        const fields : string[] = type.getFields();
+        for (const field of fields) {
+            const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
+            if (!mapping.has(field) && fieldConfiguration.required) {
+                this.isValid = false;
+                this.errors.push({
+                    message: `Missing property ${field}`,
+                    location: this.path.join(".")
+                });
+            }
+        }   
     }
 }
