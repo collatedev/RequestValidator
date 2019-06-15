@@ -6,6 +6,7 @@
         "sourceMap": true,
         "target": "es6",
         "outDir": "./lib",
+        "lib": ["es2017"],
         "noImplicitAny": true,
         "strictFunctionTypes": true,
         "noImplicitThis": true,

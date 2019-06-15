@@ -4,9 +4,8 @@
 	"description": "A request validator",
 	"main": "./dist/index.js",
 	"scripts": {
-		"build": "npm run lint && tsc -p ./tsconfig.prod.json",
-		"test": "jest",
-		"lint": "tslint src/**/*.ts && tslint tests/**/*.ts"
+		"build": "tsc -p ./tsconfig.prod.json",
+		"test": "jest"
 	},
 	"repository": {
 		"type": "git",
