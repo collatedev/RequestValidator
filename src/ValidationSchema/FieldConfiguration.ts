@@ -25,6 +25,12 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.range = this.getRange(field);
         this.values = this.getValues(field);
         this.isURL = this.getIsURL(field);
+
+        if (field.hasOwnProperty("startsWith")) {
+            if (typeof field.startsWith !== 'string') {
+                throw new IllegalSchemaError('The key "startsWith" must be a string');
+            }
+        }
     }
 
     private validateField(field : any) : void {
