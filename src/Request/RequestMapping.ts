@@ -12,6 +12,10 @@ export default class RequestMapping implements IRequestMapping {
         }
 
         this.mapping = new Map<string, any>();
+
+        for (const key of Object.keys(json)) {
+            this.mapping.set(key, json[key]);
+        }
     }
 
     public keys(): string[] {
@@ -23,6 +27,9 @@ export default class RequestMapping implements IRequestMapping {
     }    
     
     public value(key: string) : any {
+        if (!this.has(key)) {
+            throw new Error(`Does not contain key ${key} in the mapping`);
+        }
         return this.mapping.get(key);
     }
 
