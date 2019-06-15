@@ -24,16 +24,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.type = field.type;
         this.range = this.getRange(field);
         this.values = this.getValues(field);
-
-        if (field.hasOwnProperty("isURL")) {
-            if (typeof field.isURL !== "boolean") {
-                throw new IllegalSchemaError('The key "isURL" must be a boolean');
-            }
-            if (this.type !== "string") {
-                throw new IllegalSchemaError('The key "isURL" can only be used when the type is \'string\'');
-            }
-            this.isURL = field.isURL as boolean;
-        }
+        this.isURL = this.getIsURL(field);
     }
 
     private validateField(field : any) : void {
@@ -104,6 +95,19 @@ export default class FieldConfiguration implements IFieldConfiguration {
                 }
             }
             return field.values as string[];
+        }
+        return undefined;
+    }
+
+    private getIsURL(field : any) : boolean | undefined {
+        if (field.hasOwnProperty("isURL")) {
+            if (typeof field.isURL !== "boolean") {
+                throw new IllegalSchemaError('The key "isURL" must be a boolean');
+            }
+            if (this.type !== "string") {
+                throw new IllegalSchemaError('The key "isURL" can only be used when the type is \'string\'');
+            }
+            return field.isURL as boolean;
         }
         return undefined;
     }
