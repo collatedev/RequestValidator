@@ -4,6 +4,8 @@ import IValidationSchema from "../../src/ValidationSchema/IValidationSchema";
 import ITypeConfiguration from "../../src/ValidationSchema/ITypeConfiguration";
 import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration";
 
+import TestSchema from '../models/TestSchema.json';
+
 test('Fails to create a validation schema due to null json', () => {
     expect(createValidationSchema(null)).toThrow(IllegalSchemaError);
 });
@@ -95,6 +97,45 @@ test('Fails to create a validation schema due to undefined type', () => {
     };
 
     expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
+test('Should create a schema from the TestSchema json file', () => {
+    const schema : IValidationSchema = new ValidationSchema(TestSchema);
+    const MaxLeaseSeconds : number = 864000;
+
+    const bodyType : ITypeConfiguration = schema.getTypeConfiguration("body");
+    const hubModeField : IFieldConfiguration = bodyType.getConfiguration("hub.mode");
+    const hubLeaseSecondsField : IFieldConfiguration = bodyType.getConfiguration("hub.lease_seconds");
+    const hubCallbackField : IFieldConfiguration = bodyType.getConfiguration("hub.callback");
+    const hubTopicField : IFieldConfiguration = bodyType.getConfiguration("hub.topic");
+    const hubSecretField : IFieldConfiguration = bodyType.getConfiguration("hub.secret");
+    const fooField : IFieldConfiguration = bodyType.getConfiguration("foo");
+    const barType : ITypeConfiguration = schema.getTypeConfiguration("bar");
+    const bazField : IFieldConfiguration = barType.getConfiguration("baz");
+
+    expect(hubModeField.type).toEqual("enum");
+    expect(hubModeField.values).toEqual([
+        "subscribe", 
+        "unsubscribe"
+    ]);
+    expect(hubModeField.required).toBeTruthy();
+    expect(hubLeaseSecondsField.type).toEqual("number");
+    expect(hubLeaseSecondsField.required).toBeTruthy();
+    expect(hubLeaseSecondsField.range).toEqual([0, MaxLeaseSeconds]);
+    expect(hubCallbackField.type).toEqual("string");
+    expect(hubCallbackField.required).toBeTruthy();
+    expect(hubCallbackField.isURL).toBeTruthy();
+    expect(hubTopicField.type).toEqual("string");
+    expect(hubTopicField.required).toBeTruthy();
+    expect(hubTopicField.isURL).toBeTruthy();
+    expect(hubTopicField.startsWith).toEqual("https://api.twitch.tv/helix/");
+    expect(hubSecretField.type).toEqual("string");
+    expect(hubSecretField.length).toEqual(16);
+    expect(hubSecretField.required).toBeTruthy();
+    expect(fooField.type).toEqual("bar");
+    expect(fooField.required).toBeTruthy();
+    expect(bazField.type).toEqual("number");
+    expect(bazField.required).toBeFalsy();
 });
 
 function createValidationSchema(json : any) : () => IValidationSchema {
