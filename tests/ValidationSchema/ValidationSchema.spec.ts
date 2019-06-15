@@ -16,6 +16,14 @@ test('Fails to create a validation schema due to empty json', () => {
     expect(createValidationSchema({})).toThrow(IllegalSchemaError);
 });
 
+test('Fails to create a validation schema due to illegal type of "types"', () => {
+    expect(createValidationSchema({ types: 1 })).toThrow(IllegalSchemaError);
+});
+
+test('Fails to create a validation schema due to null "types"', () => {
+    expect(createValidationSchema({ types: null })).toThrow(IllegalSchemaError);
+});
+
 test('Creates a validation schema', () => {
     const json : any = {
         types: {
@@ -85,7 +93,7 @@ test('Fails to create a validation schema due to undefined type', () => {
             }
         }
     };
-    
+
     expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
 });
 
