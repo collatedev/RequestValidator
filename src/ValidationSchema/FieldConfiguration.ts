@@ -23,23 +23,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.required = field.required;
         this.type = field.type;
         this.range = this.getRange(field);
-
-        if (field.hasOwnProperty("values")) {
-            if (this.type !== "enum") {
-                throw new IllegalSchemaError('The key "values" can only be used when the type is \'enum\'');
-            }
-            if (!Array.isArray(field.values)) {
-                throw new IllegalSchemaError('The key "values" must be an array');
-            }
-            if (field.values.length === 0) {
-                throw new IllegalSchemaError('The key "values" must have at least one enum value');
-            }
-            for (const value of field.values) {
-                if (typeof value !== 'string') {
-                    throw new IllegalSchemaError('All values of the key "values" must be a string');
-                }
-            }
-        }
+        this.values = this.getValues(field);
     }
 
     private validateField(field : any) : void {
@@ -89,6 +73,26 @@ export default class FieldConfiguration implements IFieldConfiguration {
                 throw new IllegalSchemaError('The values in the "range" array must be numbers');
             }
             return field.range as number[];
+        }
+        return undefined;
+    }
+
+    private getValues(field : any) : string[] | undefined {
+        if (field.hasOwnProperty("values")) {
+            if (this.type !== "enum") {
+                throw new IllegalSchemaError('The key "values" can only be used when the type is \'enum\'');
+            }
+            if (!Array.isArray(field.values)) {
+                throw new IllegalSchemaError('The key "values" must be an array');
+            }
+            if (field.values.length === 0) {
+                throw new IllegalSchemaError('The key "values" must have at least one enum value');
+            }
+            for (const value of field.values) {
+                if (typeof value !== 'string') {
+                    throw new IllegalSchemaError('All values of the key "values" must be a string');
+                }
+            }
         }
         return undefined;
     }
