@@ -114,9 +114,17 @@ test('It should create a field configuration with a range parameter', () => {
     expect(configuration.range[1]).toEqual(1);
 });
 
-test('It should fail to create a field configuration due to inncorrect type of "values" key in json', () => {
+test('It should fail to create a field configuration becuase values can only be used when the type is an enum', () => {
     expect(createField({
         type: "string",
+        required: true,
+        values: ["test"]
+    })).toThrow(IllegalSchemaError);
+});
+
+test('It should fail to create a field configuration due to inncorrect type of "values" key in json', () => {
+    expect(createField({
+        type: "enum",
         required: true,
         values: 1
     })).toThrow(IllegalSchemaError);
