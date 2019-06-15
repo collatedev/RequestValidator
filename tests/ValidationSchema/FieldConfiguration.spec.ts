@@ -138,6 +138,14 @@ test('It should fail to create a field configuration due to "values" being empty
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should fail to create a field configuration due to "values" not consisting of string values', () => {
+    expect(createField({
+        type: "enum",
+        required: true,
+        values: ["a", 1, "b"]
+    })).toThrow(IllegalSchemaError);
+});
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);
