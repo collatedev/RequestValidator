@@ -2,6 +2,11 @@ import IValidationSchema from "./IValidationSchema";
 import ITypeConfiguration from "./ITypeConfiguration";
 import IllegalSchemaError from "./IllegalSchemaError";
 import TypeConfiguration from "./TypeConfiguration";
+import IFieldConfiguration from "./IFieldConfiguration";
+
+const ValidPrimativeTypes : string[] = [
+    "array", "string", "number", "boolean", "enum"
+]
 
 export default class ValidationSchema implements IValidationSchema {
     private types : Map<string, ITypeConfiguration>;
@@ -22,6 +27,16 @@ export default class ValidationSchema implements IValidationSchema {
         for (const type of Object.keys(json.types)) {
             const typeConfiguration : any = json.types[type];
             this.types.set(type, new TypeConfiguration(typeConfiguration));
+        }
+
+        for (const type of this.getTypes()) {
+            const typeConfiguration : ITypeConfiguration = this.getTypeConfiguration(type);
+            for (const field of typeConfiguration.getFields()) {
+                const fieldConfiguration : IFieldConfiguration = typeConfiguration.getConfiguration(field);
+                if (!this.hasType(fieldConfiguration.type) && !ValidPrimativeTypes.includes(fieldConfiguration.type)) {
+                    throw new IllegalSchemaError(`Undefined type: ${fieldConfiguration.type}`);
+                }
+            }
         }
     }
 

@@ -74,6 +74,21 @@ test('Creates a validation schema with a non-empty type', () => {
     expect(fooField.required).toBeTruthy();
 });
 
+test('Fails to create a validation schema due to undefined type', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "foo"
+                }
+            }
+        }
+    };
+    
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
 function createValidationSchema(json : any) : () => IValidationSchema {
     return (() : IValidationSchema => {
         return new ValidationSchema(json);
