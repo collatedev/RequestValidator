@@ -2,12 +2,11 @@ import IFieldConfiguration from "./IFieldConfiguration";
 import IllegalSchemaError from "./IllegalSchemaError";
 
 const RangeLength : number = 2;
+const ValidKeys : string[] = [
+    "required", "type", "values", "range", "isURL", "startsWith", "length"
+];
 
 export default class FieldConfiguration implements IFieldConfiguration {
-    private readonly validKeys : string[] = [
-        "required", "type", "values", "range", "isURL", "startsWith", "length"
-    ];
-
     public readonly required: boolean;    
     public readonly type: string;
     public readonly values?: string[] | undefined;
@@ -25,6 +24,12 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.type = field.type;
 
         this.range = this.getRange(field);
+
+        if (field.hasOwnProperty("values")) {
+            if (!Array.isArray(field)) {
+                throw new IllegalSchemaError('The key "values" must be an array');
+            }
+        }
     }
 
     private validateField(field : any) : void {
@@ -56,7 +61,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
 
     private checkForUnexpectedKeys(field : any) : void {
         for (const key in field) {
-            if (!this.validKeys.includes(key)) {
+            if (!ValidKeys.includes(key)) {
                 throw new IllegalSchemaError(`Unexpected key "${key}" in the json`);
             }
         }

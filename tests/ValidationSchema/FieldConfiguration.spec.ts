@@ -50,6 +50,18 @@ test('It should fail to create a field configuration due to unknown fields being
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should create a field configuration', () => {
+    const json : any = {
+        type: "boolean",
+        required: false
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("boolean");
+});
+
 test('It should fail to create a field configuration due to inncorrect type of "range" key in json', () => {
     expect(createField({
         type: "string",
@@ -102,16 +114,12 @@ test('It should create a field configuration with a range parameter', () => {
     expect(configuration.range[1]).toEqual(1);
 });
 
-test('It should create a field configuration', () => {
-    const json : any = {
-        type: "boolean",
-        required: false
-    };
-
-    const configuration : IFieldConfiguration = new FieldConfiguration(json);
-
-    expect(configuration.required).toBeFalsy();
-    expect(configuration.type).toEqual("boolean");
+test('It should fail to create a field configuration due to inncorrect type of "values" key in json', () => {
+    expect(createField({
+        type: "string",
+        required: true,
+        values: 1
+    })).toThrow(IllegalSchemaError);
 });
 
 function createField(json : any) : () => IFieldConfiguration {
