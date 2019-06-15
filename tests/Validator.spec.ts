@@ -141,3 +141,147 @@ test('Validates a request cookies with an optional property', () => {
     expect(result.isValid()).toBeTruthy();
     expect(result.errors()).toHaveLength(0);
 });
+
+test('Validates a request headers with a missing property', () => {
+    const validator : IValidator = new Validator(new ValidationSchema({
+        types: {
+            headers: {
+                foo: {
+                    type: "number",
+                    required: true
+                }
+            }
+        }
+    }));
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setHeaders(new RequestMapping({}))
+                                .build();
+
+    const result : IValidationResult = validator.validate(request);
+
+    expect(result.isValid()).toBeFalsy();
+    expect(result.errors()).toHaveLength(1);
+    expect(result.errors()[0].location).toEqual("headers");
+    expect(result.errors()[0].message).toEqual("Missing property foo");
+});
+
+test('Validates a request headers with an optional property', () => {
+    const validator : IValidator = new Validator(new ValidationSchema({
+        types: {
+            headers: {
+                foo: {
+                    type: "number",
+                    required: false
+                }
+            }
+        }
+    }));
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setHeaders(new RequestMapping({}))
+                                .build();
+
+    const result : IValidationResult = validator.validate(request);
+
+    expect(result.isValid()).toBeTruthy();
+    expect(result.errors()).toHaveLength(0);
+});
+
+test('Validates a request params with a missing property', () => {
+    const validator : IValidator = new Validator(new ValidationSchema({
+        types: {
+            params: {
+                foo: {
+                    type: "number",
+                    required: true
+                }
+            }
+        }
+    }));
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setParams(new RequestMapping({}))
+                                .build();
+
+    const result : IValidationResult = validator.validate(request);
+
+    expect(result.isValid()).toBeFalsy();
+    expect(result.errors()).toHaveLength(1);
+    expect(result.errors()[0].location).toEqual("params");
+    expect(result.errors()[0].message).toEqual("Missing property foo");
+});
+
+test('Validates a request params with an optional property', () => {
+    const validator : IValidator = new Validator(new ValidationSchema({
+        types: {
+            params: {
+                foo: {
+                    type: "number",
+                    required: false
+                }
+            }
+        }
+    }));
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setParams(new RequestMapping({}))
+                                .build();
+
+    const result : IValidationResult = validator.validate(request);
+
+    expect(result.isValid()).toBeTruthy();
+    expect(result.errors()).toHaveLength(0);
+});
+
+test('Validates a request query with a missing property', () => {
+    const validator : IValidator = new Validator(new ValidationSchema({
+        types: {
+            query: {
+                foo: {
+                    type: "number",
+                    required: true
+                }
+            }
+        }
+    }));
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setQuery(new RequestMapping({}))
+                                .build();
+
+    const result : IValidationResult = validator.validate(request);
+
+    expect(result.isValid()).toBeFalsy();
+    expect(result.errors()).toHaveLength(1);
+    expect(result.errors()[0].location).toEqual("query");
+    expect(result.errors()[0].message).toEqual("Missing property foo");
+});
+
+test('Validates a request query with an optional property', () => {
+    const validator : IValidator = new Validator(new ValidationSchema({
+        types: {
+            query: {
+                foo: {
+                    type: "number",
+                    required: false
+                }
+            }
+        }
+    }));
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setQuery(new RequestMapping({}))
+                                .build();
+
+    const result : IValidationResult = validator.validate(request);
+
+    expect(result.isValid()).toBeTruthy();
+    expect(result.errors()).toHaveLength(0);
+});

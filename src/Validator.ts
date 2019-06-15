@@ -33,12 +33,24 @@ export default class Validator implements IValidator {
         if (this.schema.hasType("cookies")) {
             this.handleType("cookies", request.getCookies());
         }
+        if (this.schema.hasType("headers")) {
+            this.handleType("headers", request.getCookies());
+        }
+        if (this.schema.hasType("params")) {
+            this.handleType("params", request.getCookies());
+        }
+        if (this.schema.hasType("query")) {
+            this.handleType("query", request.getCookies());
+        }
         return new ValidationResult(this.isValid, this.errors);
     }
 
     private handleType(type : string, mapping : IRequestMapping) : void {
         this.path.push(type);
         this.checkForMissingProperties(mapping, this.schema.getTypeConfiguration(type));
+        // check for extra properties
+        // recurse on nested types
+        // sanitize inputs
         this.path.pop();
     }
 
@@ -46,6 +58,7 @@ export default class Validator implements IValidator {
         const fields : string[] = type.getFields();
         for (const field of fields) {
             const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
+            // Adds an error if and only if the mapping is missing a field and that the missing field is required
             if (!mapping.has(field) && fieldConfiguration.required) {
                 this.isValid = false;
                 this.errors.push({
