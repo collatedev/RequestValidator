@@ -167,6 +167,15 @@ test('It should create a field configuration with a value parameter', () => {
     expect(configuration.values[1]).toEqual("B");
 });
 
+test('It should fail to create a field configuration becuase isURL has wrong type', () => {
+    expect(createField({
+        type: "string",
+        required: true,
+        isURL: 1
+    })).toThrow(IllegalSchemaError);
+});
+
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);
