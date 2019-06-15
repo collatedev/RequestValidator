@@ -1,24 +1,32 @@
 import IRequestMapping from "./IRequestMapping";
 
 export default class RequestMapping implements IRequestMapping {
-    constructor(mapping : any) {
-        if (mapping === null) {
+    private mapping : Map<string, any>;
+
+    constructor(json : any) {
+        if (json === null) {
             throw new TypeError("Mapping can not be null");
         }
-        if (typeof mapping !== 'object') {
+        if (typeof json !== 'object') {
             throw new TypeError("Mapping must be an object");
         }
+
+        this.mapping = new Map<string, any>();
     }
 
     public keys(): string[] {
-        throw new Error("Method not implemented.");
+        const keys : string[] = [];
+        for (const key of this.mapping.keys()) {
+            keys.push(key);
+        }
+        return keys;
     }    
     
     public value(key: string) : any {
-        throw new Error("Method not implemented.");
+        return this.mapping.get(key);
     }
 
     public has(key: string): boolean {
-        throw new Error("Method not implemented.");
+        return this.mapping.has(key);
     }
 }
