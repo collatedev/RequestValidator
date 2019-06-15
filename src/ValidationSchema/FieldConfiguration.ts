@@ -25,16 +25,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.range = this.getRange(field);
         this.values = this.getValues(field);
         this.isURL = this.getIsURL(field);
-
-        if (field.hasOwnProperty("startsWith")) {
-            if (typeof field.startsWith !== 'string') {
-                throw new IllegalSchemaError('The key "startsWith" must be a string');
-            }
-            if (this.type !== 'string') {
-                throw new IllegalSchemaError('The key "startsWith" can only be used when the type is \'string\'');
-            }
-            this.startsWith = field.startsWith as string;
-        }
+        this.startsWith = this.getStartsWith(field);
     }
 
     private validateField(field : any) : void {
@@ -118,6 +109,19 @@ export default class FieldConfiguration implements IFieldConfiguration {
                 throw new IllegalSchemaError('The key "isURL" can only be used when the type is \'string\'');
             }
             return field.isURL as boolean;
+        }
+        return undefined;
+    }
+
+    private getStartsWith(field : any) : string | undefined {
+        if (field.hasOwnProperty("startsWith")) {
+            if (typeof field.startsWith !== 'string') {
+                throw new IllegalSchemaError('The key "startsWith" must be a string');
+            }
+            if (this.type !== 'string') {
+                throw new IllegalSchemaError('The key "startsWith" can only be used when the type is \'string\'');
+            }
+            return field.startsWith as string;
         }
         return undefined;
     }
