@@ -183,6 +183,20 @@ test('It should fail to create a field configuration becuase isURL only works on
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should create a field configuration with isURL key', () => {
+    const json : any = {
+        type: "string",
+        required: false,
+        isURL: true
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("string");
+    expect(configuration.isURL).toBeTruthy();
+});
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);
