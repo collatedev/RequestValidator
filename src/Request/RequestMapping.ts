@@ -5,6 +5,9 @@ export default class RequestMapping implements IRequestMapping {
         if (mapping === null) {
             throw new TypeError("Mapping can not be null");
         }
+        if (typeof mapping !== 'object') {
+            throw new TypeError("Mapping must be an object");
+        }
     }
 
     public keys(): string[] {
