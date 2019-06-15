@@ -32,6 +32,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (!Array.isArray(field.values)) {
                 throw new IllegalSchemaError('The key "values" must be an array');
             }
+            if (field.values.length === 0) {
+                throw new IllegalSchemaError('The key "values" must have at least one enum value');
+            }
         }
     }
 
