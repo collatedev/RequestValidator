@@ -269,6 +269,13 @@ test('It should create a field configuration with length key', () => {
     expect(configuration.length).toEqual(1);
 });
 
+test('It should fail to create a field configuration becuase the type is enum and its missing the "values" key', () => {
+    expect(createField({
+        type: "enum",
+        required: true,
+    })).toThrow(IllegalSchemaError);
+});
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);

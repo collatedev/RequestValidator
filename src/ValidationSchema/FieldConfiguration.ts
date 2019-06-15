@@ -27,6 +27,10 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.isURL = this.getIsURL(field);
         this.startsWith = this.getStartsWith(field);
         this.length = this.getLength(field);
+
+        if (this.type === "enum" && !this.values) {
+            throw new IllegalSchemaError('The type "enum" requires a "values" key in its field definition');
+        }
     }
 
     private validateField(field : any) : void {
