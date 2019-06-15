@@ -192,6 +192,10 @@ test('It should create a field configuration with isURL key', () => {
 
     const configuration : IFieldConfiguration = new FieldConfiguration(json);
 
+    if (!configuration.isURL) {
+        throw new Error("Is URL missing from configuration");
+    }
+
     expect(configuration.required).toBeFalsy();
     expect(configuration.type).toEqual("string");
     expect(configuration.isURL).toBeTruthy();
@@ -222,9 +226,47 @@ test('It should create a field configuration with isURL key', () => {
 
     const configuration : IFieldConfiguration = new FieldConfiguration(json);
 
+    if (!configuration.startsWith) {
+        throw new Error("Starts With missing from configuration");
+    }
+
     expect(configuration.required).toBeFalsy();
     expect(configuration.type).toEqual("string");
     expect(configuration.startsWith).toEqual("asdf");
+});
+
+test('It should fail to create a field configuration becuase length has wrong type', () => {
+    expect(createField({
+        type: "string",
+        required: true,
+        length: true
+    })).toThrow(IllegalSchemaError);
+});
+
+test('It should fail to create a field configuration becuase length only works on strings and arrays', () => {
+    expect(createField({
+        type: "enum",
+        required: true,
+        length: 1
+    })).toThrow(IllegalSchemaError);
+});
+
+test('It should create a field configuration with length key', () => {
+    const json : any = {
+        type: "string",
+        required: false,
+        length: 1
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    if (!configuration.length) {
+        throw new Error("Length missing from configuration");
+    }
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("string");
+    expect(configuration.length).toEqual(1);
 });
 
 function createField(json : any) : () => IFieldConfiguration {

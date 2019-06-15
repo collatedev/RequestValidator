@@ -26,6 +26,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.values = this.getValues(field);
         this.isURL = this.getIsURL(field);
         this.startsWith = this.getStartsWith(field);
+        this.length = this.getLength(field);
     }
 
     private validateField(field : any) : void {
@@ -122,6 +123,21 @@ export default class FieldConfiguration implements IFieldConfiguration {
                 throw new IllegalSchemaError('The key "startsWith" can only be used when the type is \'string\'');
             }
             return field.startsWith as string;
+        }
+        return undefined;
+    }
+
+    private getLength(field : any) : number | undefined {
+        if (field.hasOwnProperty("length")) {
+            if (typeof field.length !== 'number') {
+                throw new IllegalSchemaError('The key "length" must be a number');
+            }
+            if (this.type !== 'string') {
+                throw new IllegalSchemaError(
+                    'The key "length" can only be used when the type is \'string\' or \'array\''
+                );
+            }
+            return field.length as number;
         }
         return undefined;
     }
