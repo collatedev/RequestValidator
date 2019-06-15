@@ -1,0 +1,1 @@
+export default interface IRequestMapping { [key: string]: any; }
