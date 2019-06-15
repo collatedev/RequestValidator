@@ -146,6 +146,27 @@ test('It should fail to create a field configuration due to "values" not consist
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should create a field configuration with a value parameter', () => {
+    const values : string[] = ["A", "B"];
+    const json : any = {
+        type: "enum",
+        required: false,
+        values
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+ 
+    if (!configuration.values) {
+        throw new Error("Values missing from configuration");
+    }
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("enum");
+    expect(configuration.values).toHaveLength(values.length);
+    expect(configuration.values[0]).toEqual("A");
+    expect(configuration.values[1]).toEqual("B");
+});
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);

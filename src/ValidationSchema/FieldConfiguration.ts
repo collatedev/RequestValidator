@@ -93,6 +93,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
                     throw new IllegalSchemaError('All values of the key "values" must be a string');
                 }
             }
+            return field.values as string[];
         }
         return undefined;
     }
