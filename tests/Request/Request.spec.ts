@@ -1,11 +1,12 @@
 import Request from "../../src/Request/Request";
 import IRequest from "../../src/Request/IRequest";
 import IRequestMapping from "../../src/Request/IRequestMapping";
+import RequestMapping from "../../src/Request/RequestMapping";
 
-const EmptyMapping : IRequestMapping = {};
-const TestMapping : IRequestMapping = {
+const EmptyMapping : IRequestMapping = new RequestMapping({});
+const TestMapping : IRequestMapping = new RequestMapping({
     foo: "bar"
-};
+});
 
 test('Creates an empty request', () => {
     testRequest(EmptyMapping, EmptyMapping, EmptyMapping, EmptyMapping, EmptyMapping);

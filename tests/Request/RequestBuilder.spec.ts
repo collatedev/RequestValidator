@@ -2,9 +2,12 @@ import IRequestBuilder from "../../src/Request/IRequestBuilder";
 import IRequest from "../../src/Request/IRequest";
 import IRequestMapping from "../../src/Request/IRequestMapping";
 import RequestBuilder from "../../src/Request/RequestBuilder";
+import RequestMapping from "../../src/Request/RequestMapping";
 
-const EmptyMapping : IRequestMapping = {};
-const TestMapping : IRequestMapping = {};
+const EmptyMapping : IRequestMapping = new RequestMapping({});
+const TestMapping : IRequestMapping = new RequestMapping({
+    foo: 1
+});
 
 test('creates an empty request', () => {
     const builder : IRequestBuilder = new RequestBuilder();

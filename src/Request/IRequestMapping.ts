@@ -1,5 +1,5 @@
 export default interface IRequestMapping { 
-//     keys(): string[];
-//     value(key : string) : any;
-    [key: string]: any; 
+    keys(): string[];
+    value(key : string) : any;
+    has(key : string) : boolean;
 }

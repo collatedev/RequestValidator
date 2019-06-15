@@ -2,7 +2,7 @@ import IRequestBuilder from "./IRequestBuilder";
 import IRequestMapping from "./IRequestMapping";
 import IRequest from "./IRequest";
 import Request from "./Request";
-import RequestError from "./RequestError";
+import RequestMapping from "./RequestMapping";
 
 export default class RequestBuilder implements IRequestBuilder {
     private body : IRequestMapping;
@@ -12,11 +12,11 @@ export default class RequestBuilder implements IRequestBuilder {
     private query : IRequestMapping;
 
     constructor() {
-        this.body = {};
-        this.cookies = {};
-        this.headers = {};
-        this.params = {};
-        this.query = {};
+        this.body = new RequestMapping({});
+        this.cookies = new RequestMapping({});
+        this.headers = new RequestMapping({});
+        this.params = new RequestMapping({});
+        this.query = new RequestMapping({});
     }
 
     public setBody(body: IRequestMapping): IRequestBuilder {
