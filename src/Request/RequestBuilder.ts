@@ -2,6 +2,7 @@ import IRequestBuilder from "./IRequestBuilder";
 import IRequestMapping from "./IRequestMapping";
 import IRequest from "./IRequest";
 import Request from "./Request";
+import RequestError from "./RequestError";
 
 export default class RequestBuilder implements IRequestBuilder {
     private body : IRequestMapping;
