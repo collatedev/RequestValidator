@@ -197,6 +197,14 @@ test('It should create a field configuration with isURL key', () => {
     expect(configuration.isURL).toBeTruthy();
 });
 
+test('It should fail to create a field configuration becuase startsWith has wrong type', () => {
+    expect(createField({
+        type: "string",
+        required: true,
+        startsWith: 1
+    })).toThrow(IllegalSchemaError);
+});
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);
