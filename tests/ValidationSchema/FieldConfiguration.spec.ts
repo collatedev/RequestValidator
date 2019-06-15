@@ -205,6 +205,14 @@ test('It should fail to create a field configuration becuase startsWith has wron
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should fail to create a field configuration becuase startsWith only works on strings', () => {
+    expect(createField({
+        type: "enum",
+        required: true,
+        startsWith: "http://"
+    })).toThrow(IllegalSchemaError);
+});
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);

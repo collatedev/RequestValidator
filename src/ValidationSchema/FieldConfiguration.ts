@@ -30,6 +30,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (typeof field.startsWith !== 'string') {
                 throw new IllegalSchemaError('The key "startsWith" must be a string');
             }
+            if (this.type !== 'string') {
+                throw new IllegalSchemaError('The key "startsWith" can only be used when the type is \'string\'');
+            }
         }
     }
 
