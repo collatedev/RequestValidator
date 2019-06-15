@@ -213,6 +213,20 @@ test('It should fail to create a field configuration becuase startsWith only wor
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should create a field configuration with isURL key', () => {
+    const json : any = {
+        type: "string",
+        required: false,
+        startsWith: "asdf"
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("string");
+    expect(configuration.startsWith).toEqual("asdf");
+});
+
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
         return new FieldConfiguration(json);
