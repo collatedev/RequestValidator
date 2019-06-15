@@ -29,6 +29,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (typeof field.isURL !== "boolean") {
                 throw new IllegalSchemaError('The key "isURL" must be a boolean');
             }
+            if (this.type !== "string") {
+                throw new IllegalSchemaError('The key "isURL" can only be used when the type is \'string\'');
+            }
         }
     }
 

@@ -175,6 +175,13 @@ test('It should fail to create a field configuration becuase isURL has wrong typ
     })).toThrow(IllegalSchemaError);
 });
 
+test('It should fail to create a field configuration becuase isURL only works on strings', () => {
+    expect(createField({
+        type: "enum",
+        required: true,
+        isURL: true
+    })).toThrow(IllegalSchemaError);
+});
 
 function createField(json : any) : () => IFieldConfiguration {
     return (() : IFieldConfiguration => {
