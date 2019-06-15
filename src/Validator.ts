@@ -28,11 +28,18 @@ export default class Validator implements IValidator {
         this.path = [];
 
         if (this.schema.hasType("body")) {
-            this.path.push("body");
-            this.checkForMissingProperties(request.getBody(), this.schema.getTypeConfiguration("body"));
-            this.path.pop();
+            this.handleType("body", request.getBody());
+        }
+        if (this.schema.hasType("cookies")) {
+            this.handleType("cookies", request.getCookies());
         }
         return new ValidationResult(this.isValid, this.errors);
+    }
+
+    private handleType(type : string, mapping : IRequestMapping) : void {
+        this.path.push(type);
+        this.checkForMissingProperties(mapping, this.schema.getTypeConfiguration(type));
+        this.path.pop();
     }
 
     private checkForMissingProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {

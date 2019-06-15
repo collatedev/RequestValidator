@@ -93,3 +93,51 @@ test('Validates a request body with an optional property', () => {
     expect(result.isValid()).toBeTruthy();
     expect(result.errors()).toHaveLength(0);
 });
+
+test('Validates a request cookies with a missing property', () => {
+    const validator : IValidator = new Validator(new ValidationSchema({
+        types: {
+            cookies: {
+                foo: {
+                    type: "number",
+                    required: true
+                }
+            }
+        }
+    }));
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setCookies(new RequestMapping({}))
+                                .build();
+
+    const result : IValidationResult = validator.validate(request);
+
+    expect(result.isValid()).toBeFalsy();
+    expect(result.errors()).toHaveLength(1);
+    expect(result.errors()[0].location).toEqual("cookies");
+    expect(result.errors()[0].message).toEqual("Missing property foo");
+});
+
+test('Validates a request cookies with an optional property', () => {
+    const validator : IValidator = new Validator(new ValidationSchema({
+        types: {
+            cookies: {
+                foo: {
+                    type: "number",
+                    required: false
+                }
+            }
+        }
+    }));
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setCookies(new RequestMapping({}))
+                                .build();
+
+    const result : IValidationResult = validator.validate(request);
+
+    expect(result.isValid()).toBeTruthy();
+    expect(result.errors()).toHaveLength(0);
+});
