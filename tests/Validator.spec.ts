@@ -197,6 +197,20 @@ test('Validates a request thats missing query', () => {
     assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing query");
 });
 
+test('Validates a request body with extra properties', () => {
+    const schemaIndex : number = 0;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    foo: "bar"
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body", "Unexpected property 'foo'");
+});
+
 function getValidator(schemaIndex : number) : IValidator {
     return new Validator(new ValidationSchema(ValidatorTestSchemas.schemas[schemaIndex]));
 }

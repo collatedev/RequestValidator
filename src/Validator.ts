@@ -47,22 +47,30 @@ export default class Validator implements IValidator {
 
     private handleType(type : string, mapping : IRequestMapping) : void {
         this.path.push(type);
-        this.checkForMissingProperties(mapping, this.schema.getTypeConfiguration(type));
-        // check for extra properties
+        const typeDefinition : ITypeConfiguration = this.schema.getTypeConfiguration(type);
+        this.checkForMissingProperties(mapping, typeDefinition);
+        this.checkForExtraProperties(mapping, typeDefinition);
         // recurse on nested types
         // sanitize inputs
         this.path.pop();
     }
 
     private checkForMissingProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
-        const fields : string[] = type.getFields();
-        for (const field of fields) {
+        for (const field of type.getFields()) {
             const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
             // Adds an error if and only if the mapping is missing a field and that the missing field is required
             if (!mapping.has(field) && fieldConfiguration.required) {
                 this.addError(`Missing property ${field}`, this.path.join("."));
             }
         }   
+    }
+
+    private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
+        for (const key of mapping.keys()) {
+            if (!type.hasField(key)) {
+                this.addError(`Unexpected property '${key}'`, this.path.join("."));
+            }
+        }
     }
 
     private addError(message : string, location : string) : void {

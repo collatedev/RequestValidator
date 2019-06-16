@@ -29,6 +29,7 @@ test('Creates a type with a field', () => {
     const fooField : IFieldConfiguration = type.getConfiguration("foo");
 
     expect(type.getFields()).toHaveLength(1);
+    expect(type.hasField("foo")).toBeTruthy();
     expect(fooField).not.toBeNull();
     expect(fooField.required).toBeTruthy();
     expect(fooField.type).toEqual("string");

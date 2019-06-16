@@ -102,6 +102,7 @@ test('Fails to create a validation schema due to undefined type', () => {
 test('Should create a schema from the TestSchema json file', () => {
     const schema : IValidationSchema = new ValidationSchema(TestSchema);
     const MaxLeaseSeconds : number = 864000;
+    const BodySize : number = 6;
 
     const bodyType : ITypeConfiguration = schema.getTypeConfiguration("body");
     const hubModeField : IFieldConfiguration = bodyType.getConfiguration("hub.mode");
@@ -112,6 +113,15 @@ test('Should create a schema from the TestSchema json file', () => {
     const fooField : IFieldConfiguration = bodyType.getConfiguration("foo");
     const barType : ITypeConfiguration = schema.getTypeConfiguration("bar");
     const bazField : IFieldConfiguration = barType.getConfiguration("baz");
+
+    expect(bodyType.getFields()).toHaveLength(BodySize);
+    expect(bodyType.hasField("hub.mode")).toBeTruthy();
+    expect(bodyType.hasField("hub.lease_seconds")).toBeTruthy();
+    expect(bodyType.hasField("hub.callback")).toBeTruthy();
+    expect(bodyType.hasField("hub.topic")).toBeTruthy();
+    expect(bodyType.hasField("hub.secret")).toBeTruthy();
+    expect(bodyType.hasField("foo")).toBeTruthy();
+
 
     expect(hubModeField.type).toEqual("enum");
     expect(hubModeField.values).toEqual([
@@ -132,6 +142,10 @@ test('Should create a schema from the TestSchema json file', () => {
     expect(hubSecretField.type).toEqual("string");
     expect(hubSecretField.length).toEqual(16);
     expect(hubSecretField.required).toBeTruthy();
+
+    expect(barType.getFields()).toHaveLength(1);
+    expect(barType.hasField("baz")).toBeTruthy();
+
     expect(fooField.type).toEqual("bar");
     expect(fooField.required).toBeTruthy();
     expect(bazField.type).toEqual("number");
