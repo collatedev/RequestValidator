@@ -26,6 +26,20 @@ test('Fails to create a validation schema due to null "types"', () => {
     expect(createValidationSchema({ types: null })).toThrow(IllegalSchemaError);
 });
 
+test('Should throw an exception due to getting a type that does not exist', () => {
+    const json : any = {
+        types: {
+
+        }
+    };
+
+    const schema : IValidationSchema = new ValidationSchema(json);
+
+    expect(() : void => {
+        schema.getTypeConfiguration("foo");
+    }).toThrow(IllegalSchemaError);
+});
+
 test('Creates a validation schema', () => {
     const json : any = {
         types: {
