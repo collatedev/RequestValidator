@@ -92,25 +92,27 @@ export default class Validator implements IValidator {
                 const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
                 if (mapping.has(fieldName)) {
                     const value : any = mapping.value(fieldName);
-                    const fieldType : string = fieldConfiguration.type;
-                    if (this.isEnum(fieldConfiguration) && !this.isTypeOf('string', value)) {
-                        this.addError(
-                            `Property '${fieldName}' should be type '${fieldType}'`, 
-                            this.pathToString()
-                        );
+                    const fieldType : string = fieldConfiguration.type.toLowerCase();
+                    const message : string = `Property '${fieldName}' should be type '${fieldType}'`;
+
+                    if (this.isArray(fieldType) && !Array.isArray(value)) {
+                        this.addError(message, this.pathToString());
+                    } else if (this.isEnum(fieldType) && !this.isTypeOf('string', value)) {
+                        this.addError(message, this.pathToString());
                     } else if (this.isPrimative(fieldConfiguration) && !this.isTypeOf(fieldType, value)) {
-                        this.addError(
-                            `Property '${fieldName}' should be type '${fieldType}'`, 
-                            this.pathToString()
-                        );
+                        this.addError(message, this.pathToString());
                     }
                 }
             }
         }
     }
 
-    private isEnum(fieldConfiguration : IFieldConfiguration) : boolean {
-        return fieldConfiguration.type.toLowerCase() === "enum";
+    private isArray(fieldType : string) : boolean {
+        return fieldType === "array";
+    }
+
+    private isEnum(fieldType : string) : boolean {
+        return fieldType === "enum";
     }
 
     private isTypeOf(type : string, value : any) : boolean {

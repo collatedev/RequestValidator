@@ -281,6 +281,34 @@ test('Validates a request with correct enum type', () => {
     assertValidResult(validator.validate(request));
 });
 
+test('Validates a request with incorrect array type', () => {
+    const schemaIndex : number = 15;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: 1
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'array'");
+});
+
+test('Validates a request with correct array type', () => {
+    const schemaIndex : number = 15;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: []
+                                }))
+                                .build();
+
+    assertValidResult(validator.validate(request));
+});
+
 function getValidator(schemaIndex : number) : IValidator {
     return new Validator(new ValidationSchema(ValidatorTestSchemas.schemas[schemaIndex]));
 }

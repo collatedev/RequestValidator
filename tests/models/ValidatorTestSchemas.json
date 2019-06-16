@@ -146,6 +146,16 @@
                     }
                 }
             }
+        },
+        {
+            "types": {
+                "body": {
+                    "bar": {
+                        "type": "array",
+                        "required": true
+                    }
+                }
+            }
         }
     ]
 }
