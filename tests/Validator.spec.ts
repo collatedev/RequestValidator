@@ -211,6 +211,20 @@ test('Validates a request body with extra properties', () => {
     assertResultHasError(validator.validate(request), "body", "Unexpected property 'foo'");
 });
 
+test('Validates a request with incorrect type', () => {
+    const schemaIndex : number = 1;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    foo: true
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body", "Property 'foo' should be type 'number'");
+});
+
 function getValidator(schemaIndex : number) : IValidator {
     return new Validator(new ValidationSchema(ValidatorTestSchemas.schemas[schemaIndex]));
 }

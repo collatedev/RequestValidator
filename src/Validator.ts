@@ -40,35 +40,7 @@ export default class Validator implements IValidator {
             if (mapping === null) {
                 this.addError(`Request is missing ${type}`, "[Request]");
             } else {
-                this.handleType(type, mapping as IRequestMapping);
-            }
-        }
-    }
-
-    private handleType(type : string, mapping : IRequestMapping) : void {
-        this.path.push(type);
-        const typeDefinition : ITypeConfiguration = this.schema.getTypeConfiguration(type);
-        this.checkForMissingProperties(mapping, typeDefinition);
-        this.checkForExtraProperties(mapping, typeDefinition);
-        // recurse on nested types
-        // sanitize inputs
-        this.path.pop();
-    }
-
-    private checkForMissingProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
-        for (const field of type.getFields()) {
-            const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
-            // Adds an error if and only if the mapping is missing a field and that the missing field is required
-            if (!mapping.has(field) && fieldConfiguration.required) {
-                this.addError(`Missing property ${field}`, this.path.join("."));
-            }
-        }   
-    }
-
-    private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
-        for (const key of mapping.keys()) {
-            if (!type.hasField(key)) {
-                this.addError(`Unexpected property '${key}'`, this.path.join("."));
+                this.handleType(type, mapping);
             }
         }
     }
@@ -79,5 +51,46 @@ export default class Validator implements IValidator {
             message,
             location
         });
+    }
+
+    private handleType(type : string, mapping : IRequestMapping) : void {
+        this.path.push(type);
+        const typeDefinition : ITypeConfiguration = this.schema.getTypeConfiguration(type);
+        this.checkForMissingProperties(mapping, typeDefinition);
+        this.checkForExtraProperties(mapping, typeDefinition);
+        // check for incorrect types
+        for (const field of typeDefinition.getFields()) {
+            if (typeDefinition.hasField(field)) {
+                const fieldDefinition : IFieldConfiguration = typeDefinition.getConfiguration(field);
+                if (mapping.has(field) && fieldDefinition.type !== typeof mapping.value(field)) {
+                    this.addError("Property 'foo' should be type 'number'", this.pathToString());
+                }
+            }
+        }
+        // recurse on nested types
+        // sanitize inputs
+        this.path.pop();
+    }
+
+    private pathToString() : string {
+        return this.path.join(".");
+    }
+
+    private checkForMissingProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
+        for (const field of type.getFields()) {
+            const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
+            // Adds an error if and only if the mapping is missing a field and that the missing field is required
+            if (!mapping.has(field) && fieldConfiguration.required) {
+                this.addError(`Missing property ${field}`, this.pathToString());
+            }
+        }   
+    }
+
+    private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
+        for (const key of mapping.keys()) {
+            if (!type.hasField(key)) {
+                this.addError(`Unexpected property '${key}'`, this.pathToString());
+            }
+        }
     }
 }
