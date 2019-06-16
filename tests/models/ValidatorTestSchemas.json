@@ -115,6 +115,37 @@
                     }
                 }
             }
+        },
+        {
+            "types": {
+                "body": {
+                    "bar": {
+                        "type": "string",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "body": {
+                    "bar": {
+                        "type": "boolean",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "body": {
+                    "bar": {
+                        "type": "enum",
+                        "values": ["A", "B"],
+                        "required": true
+                    }
+                }
+            }
         }
     ]
 }

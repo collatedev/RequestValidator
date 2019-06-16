@@ -6,7 +6,7 @@ import IFieldConfiguration from "./IFieldConfiguration";
 
 const ValidPrimativeTypes : string[] = [
     "array", "string", "number", "boolean", "enum"
-]
+];
 
 export default class ValidationSchema implements IValidationSchema {
     private types : Map<string, ITypeConfiguration>;

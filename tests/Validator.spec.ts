@@ -211,7 +211,7 @@ test('Validates a request body with extra properties', () => {
     assertResultHasError(validator.validate(request), "body", "Unexpected property 'foo'");
 });
 
-test('Validates a request with incorrect type', () => {
+test('Validates a request with incorrect number type', () => {
     const schemaIndex : number = 1;
     const validator : IValidator = getValidator(schemaIndex);
     
@@ -223,6 +223,62 @@ test('Validates a request with incorrect type', () => {
                                 .build();
 
     assertResultHasError(validator.validate(request), "body", "Property 'foo' should be type 'number'");
+});
+
+test('Validates a request with incorrect string type', () => {
+    const schemaIndex : number = 12;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: true
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'string'");
+});
+
+test('Validates a request with incorrect boolean type', () => {
+    const schemaIndex : number = 13;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: 1
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'boolean'");
+});
+
+test('Validates a request with incorrect enum type', () => {
+    const schemaIndex : number = 14;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: 1
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'enum'");
+});
+
+test('Validates a request with correct enum type', () => {
+    const schemaIndex : number = 14;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: "A"
+                                }))
+                                .build();
+
+    assertValidResult(validator.validate(request));
 });
 
 function getValidator(schemaIndex : number) : IValidator {

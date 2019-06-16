@@ -35,12 +35,12 @@ export default class Validator implements IValidator {
         return new ValidationResult(this.isValid, this.errors);
     }
 
-    private handleRootTypes(type : string, mapping : IRequestMapping | null) : void {
-        if (this.schema.hasType(type)) {
+    private handleRootTypes(typeName : string, mapping : IRequestMapping | null) : void {
+        if (this.schema.hasType(typeName)) {
             if (mapping === null) {
-                this.addError(`Request is missing ${type}`, "[Request]");
+                this.addError(`Request is missing ${typeName}`, "[Request]");
             } else {
-                this.handleType(type, mapping);
+                this.handleType(typeName, mapping);
             }
         }
     }
@@ -53,12 +53,12 @@ export default class Validator implements IValidator {
         });
     }
 
-    private handleType(type : string, mapping : IRequestMapping) : void {
-        this.path.push(type);
-        const typeDefinition : ITypeConfiguration = this.schema.getTypeConfiguration(type);
-        this.checkForMissingProperties(mapping, typeDefinition);
-        this.checkForExtraProperties(mapping, typeDefinition);
-        this.checkForIncorrectTypes(mapping, typeDefinition);
+    private handleType(typeName : string, mapping : IRequestMapping) : void {
+        this.path.push(typeName);
+        const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
+        this.checkForMissingProperties(mapping, typeConfiguration);
+        this.checkForExtraProperties(mapping, typeConfiguration);
+        this.checkForIncorrectTypes(mapping, typeConfiguration);
         // recurse on nested types
         // sanitize inputs
         this.path.pop();
@@ -87,13 +87,38 @@ export default class Validator implements IValidator {
     }
 
     private checkForIncorrectTypes(mapping : IRequestMapping, type : ITypeConfiguration) : void {
-        for (const field of type.getFields()) {
-            if (type.hasField(field)) {
-                const fieldDefinition : IFieldConfiguration = type.getConfiguration(field);
-                if (mapping.has(field) && fieldDefinition.type !== typeof mapping.value(field)) {
-                    this.addError("Property 'foo' should be type 'number'", this.pathToString());
+        for (const fieldName of type.getFields()) {
+            if (type.hasField(fieldName)) {
+                const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
+                if (mapping.has(fieldName)) {
+                    const value : any = mapping.value(fieldName);
+                    const fieldType : string = fieldConfiguration.type;
+                    if (this.isEnum(fieldConfiguration) && !this.isTypeOf('string', value)) {
+                        this.addError(
+                            `Property '${fieldName}' should be type '${fieldType}'`, 
+                            this.pathToString()
+                        );
+                    } else if (this.isPrimative(fieldConfiguration) && !this.isTypeOf(fieldType, value)) {
+                        this.addError(
+                            `Property '${fieldName}' should be type '${fieldType}'`, 
+                            this.pathToString()
+                        );
+                    }
                 }
             }
         }
+    }
+
+    private isEnum(fieldConfiguration : IFieldConfiguration) : boolean {
+        return fieldConfiguration.type.toLowerCase() === "enum";
+    }
+
+    private isTypeOf(type : string, value : any) : boolean {
+        return typeof value === type.toLowerCase();
+    }
+
+    private isPrimative(fieldConfiguration : IFieldConfiguration) : boolean {
+        const typeName : string = fieldConfiguration.type.toLowerCase();
+        return typeName === 'string' || typeName === 'boolean' || typeName === 'number';
     }
 }
