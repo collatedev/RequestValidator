@@ -58,15 +58,7 @@ export default class Validator implements IValidator {
         const typeDefinition : ITypeConfiguration = this.schema.getTypeConfiguration(type);
         this.checkForMissingProperties(mapping, typeDefinition);
         this.checkForExtraProperties(mapping, typeDefinition);
-        // check for incorrect types
-        for (const field of typeDefinition.getFields()) {
-            if (typeDefinition.hasField(field)) {
-                const fieldDefinition : IFieldConfiguration = typeDefinition.getConfiguration(field);
-                if (mapping.has(field) && fieldDefinition.type !== typeof mapping.value(field)) {
-                    this.addError("Property 'foo' should be type 'number'", this.pathToString());
-                }
-            }
-        }
+        this.checkForIncorrectTypes(mapping, typeDefinition);
         // recurse on nested types
         // sanitize inputs
         this.path.pop();
@@ -90,6 +82,17 @@ export default class Validator implements IValidator {
         for (const key of mapping.keys()) {
             if (!type.hasField(key)) {
                 this.addError(`Unexpected property '${key}'`, this.pathToString());
+            }
+        }
+    }
+
+    private checkForIncorrectTypes(mapping : IRequestMapping, type : ITypeConfiguration) : void {
+        for (const field of type.getFields()) {
+            if (type.hasField(field)) {
+                const fieldDefinition : IFieldConfiguration = type.getConfiguration(field);
+                if (mapping.has(field) && fieldDefinition.type !== typeof mapping.value(field)) {
+                    this.addError("Property 'foo' should be type 'number'", this.pathToString());
+                }
             }
         }
     }
