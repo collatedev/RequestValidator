@@ -152,13 +152,49 @@ test('Validates a request query with an optional property', () => {
     assertValidResult(validator.validate(request));
 });
 
-test('Validates a request thats missing a required body', () => {
+test('Validates a request thats missing a body', () => {
     const schemaIndex : number = 0;
     const validator : IValidator = getValidator(schemaIndex);
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
 
-    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing a body");
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing body");
+});
+
+test('Validates a request thats missing cookies', () => {
+    const schemaIndex : number = 4;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing cookies");
+});
+
+test('Validates a request thats missing headers', () => {
+    const schemaIndex : number = 6;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing headers");
+});
+
+test('Validates a request thats missing params', () => {
+    const schemaIndex : number = 8;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing params");
+});
+
+test('Validates a request thats missing query', () => {
+    const schemaIndex : number = 10;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing query");
 });
 
 function getValidator(schemaIndex : number) : IValidator {

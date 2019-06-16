@@ -27,26 +27,22 @@ export default class Validator implements IValidator {
         this.errors = [];
         this.path = [];
 
-        if (this.schema.hasType("body") && request.getBody() === null) {
-            this.addError("Request is missing a body", "[Request]");
-        }
-
-        if (this.schema.hasType("body")) {
-            this.handleType("body", request.getBody() as IRequestMapping);
-        }
-        if (this.schema.hasType("cookies")) {
-            this.handleType("cookies", request.getCookies() as IRequestMapping);
-        }
-        if (this.schema.hasType("headers")) {
-            this.handleType("headers", request.getHeaders() as IRequestMapping);
-        }
-        if (this.schema.hasType("params")) {
-            this.handleType("params", request.getParams() as IRequestMapping);
-        }
-        if (this.schema.hasType("query")) {
-            this.handleType("query", request.getQuery() as IRequestMapping);
-        }
+        this.handleRootTypes("body", request.getBody());
+        this.handleRootTypes("cookies", request.getCookies());
+        this.handleRootTypes("headers", request.getHeaders());
+        this.handleRootTypes("params", request.getParams());
+        this.handleRootTypes("query", request.getQuery());
         return new ValidationResult(this.isValid, this.errors);
+    }
+
+    private handleRootTypes(type : string, mapping : IRequestMapping | null) : void {
+        if (this.schema.hasType(type)) {
+            if (mapping === null) {
+                this.addError(`Request is missing ${type}`, "[Request]");
+            } else {
+                this.handleType(type, mapping as IRequestMapping);
+            }
+        }
     }
 
     private handleType(type : string, mapping : IRequestMapping) : void {
