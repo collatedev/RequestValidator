@@ -27,20 +27,24 @@ export default class Validator implements IValidator {
         this.errors = [];
         this.path = [];
 
+        if (this.schema.hasType("body") && request.getBody() === null) {
+            this.addError("Request is missing a body", "[Request]");
+        }
+
         if (this.schema.hasType("body")) {
-            this.handleType("body", request.getBody());
+            this.handleType("body", request.getBody() as IRequestMapping);
         }
         if (this.schema.hasType("cookies")) {
-            this.handleType("cookies", request.getCookies());
+            this.handleType("cookies", request.getCookies() as IRequestMapping);
         }
         if (this.schema.hasType("headers")) {
-            this.handleType("headers", request.getHeaders());
+            this.handleType("headers", request.getHeaders() as IRequestMapping);
         }
         if (this.schema.hasType("params")) {
-            this.handleType("params", request.getParams());
+            this.handleType("params", request.getParams() as IRequestMapping);
         }
         if (this.schema.hasType("query")) {
-            this.handleType("query", request.getQuery());
+            this.handleType("query", request.getQuery() as IRequestMapping);
         }
         return new ValidationResult(this.isValid, this.errors);
     }
@@ -60,12 +64,16 @@ export default class Validator implements IValidator {
             const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
             // Adds an error if and only if the mapping is missing a field and that the missing field is required
             if (!mapping.has(field) && fieldConfiguration.required) {
-                this.isValid = false;
-                this.errors.push({
-                    message: `Missing property ${field}`,
-                    location: this.path.join(".")
-                });
+                this.addError(`Missing property ${field}`, this.path.join("."));
             }
         }   
+    }
+
+    private addError(message : string, location : string) : void {
+        this.isValid = false;
+        this.errors.push({
+            message,
+            location
+        });
     }
 }

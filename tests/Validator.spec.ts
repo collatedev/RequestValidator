@@ -13,7 +13,9 @@ test('Validates empty body', () => {
     const schemaIndex : number = 0;
     const validator : IValidator = getValidator(schemaIndex);
     const requestBuilder : IRequestBuilder = new RequestBuilder();
-    const request : IRequest = requestBuilder.build();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({}))
+                                .build();
 
     assertValidResult(validator.validate(request));
 });
@@ -148,6 +150,15 @@ test('Validates a request query with an optional property', () => {
                                 .build();
 
     assertValidResult(validator.validate(request));
+});
+
+test('Validates a request thats missing a required body', () => {
+    const schemaIndex : number = 0;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing a body");
 });
 
 function getValidator(schemaIndex : number) : IValidator {

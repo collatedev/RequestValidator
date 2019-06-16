@@ -4,8 +4,8 @@ import IRequestMapping from "../../src/Request/IRequestMapping";
 import RequestBuilder from "../../src/Request/RequestBuilder";
 import RequestMapping from "../../src/Request/RequestMapping";
 
-const EmptyMapping : IRequestMapping = new RequestMapping({});
-const TestMapping : IRequestMapping = new RequestMapping({
+const EmptyMapping : IRequestMapping | null = null;
+const TestMapping : IRequestMapping | null = new RequestMapping({
     foo: 1
 });
 

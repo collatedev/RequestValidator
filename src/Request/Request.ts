@@ -2,18 +2,18 @@ import IRequest from "./IRequest";
 import IRequestMapping from "./IRequestMapping";
 
 export default class Request implements IRequest {
-    private readonly body : IRequestMapping;
-    private readonly cookies : IRequestMapping;
-    private readonly headers : IRequestMapping;
-    private readonly params : IRequestMapping;
-    private readonly query : IRequestMapping;
+    private readonly body : IRequestMapping | null;
+    private readonly cookies : IRequestMapping | null;
+    private readonly headers : IRequestMapping | null;
+    private readonly params : IRequestMapping | null;
+    private readonly query : IRequestMapping | null;
 
     constructor(
-        body : IRequestMapping, 
-        cookies : IRequestMapping, 
-        headers : IRequestMapping, 
-        params : IRequestMapping, 
-        query : IRequestMapping
+        body : IRequestMapping | null, 
+        cookies : IRequestMapping | null, 
+        headers : IRequestMapping | null, 
+        params : IRequestMapping | null, 
+        query : IRequestMapping | null
     ) {
         this.body = body;
         this.cookies = cookies;
@@ -22,23 +22,23 @@ export default class Request implements IRequest {
         this.query = query;
     }
 
-    public getBody(): IRequestMapping {
+    public getBody(): IRequestMapping | null {
         return this.body;
     }
     
-    public getCookies(): IRequestMapping {
+    public getCookies(): IRequestMapping | null {
         return this.cookies;
     }
     
-    public getHeaders(): IRequestMapping {
+    public getHeaders(): IRequestMapping | null {
         return this.headers;
     }
     
-    public getParams(): IRequestMapping {
+    public getParams(): IRequestMapping | null {
         return this.params;
     }
     
-    public getQuery(): IRequestMapping {
+    public getQuery(): IRequestMapping | null {
         return this.query;
     }
 
