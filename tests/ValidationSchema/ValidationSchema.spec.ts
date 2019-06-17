@@ -197,6 +197,20 @@ test('Fails to create a validation schema due to illegal array definition', () =
     expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
 });
 
+test('Fails to create a validation schema due to illegal array definition', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array[array[array[string]a]"
+                }
+            }
+        }
+    };
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
 test('Creates validation schema with nested array', () => {
     const json : any = {
         types: {
