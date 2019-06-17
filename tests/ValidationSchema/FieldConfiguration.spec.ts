@@ -251,7 +251,7 @@ test('It should fail to create a field configuration becuase length only works o
     })).toThrow(IllegalSchemaError);
 });
 
-test('It should create a field configuration with length key', () => {
+test('It should create a field configuration with length key for string type', () => {
     const json : any = {
         type: "string",
         required: false,
@@ -266,6 +266,24 @@ test('It should create a field configuration with length key', () => {
 
     expect(configuration.required).toBeFalsy();
     expect(configuration.type).toEqual("string");
+    expect(configuration.length).toEqual(1);
+});
+
+test('It should create a field configuration with length key for array type', () => {
+    const json : any = {
+        type: "array",
+        required: false,
+        length: 1
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    if (!configuration.length) {
+        throw new Error("Length missing from configuration");
+    }
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("array");
     expect(configuration.length).toEqual(1);
 });
 

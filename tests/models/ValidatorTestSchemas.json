@@ -151,7 +151,7 @@
             "types": {
                 "body": {
                     "bar": {
-                        "type": "array",
+                        "type": "array[string]",
                         "required": true
                     }
                 }
@@ -168,6 +168,22 @@
                 "bar": {
                     "baz": {
                         "type": "number",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+                "body": {
+                    "bar": {
+                        "type": "array[array[string]]",
+                        "required": true
+                    }
+                },
+                "foo": {
+                    "baz": {
+                        "type": "string",
                         "required": true
                     }
                 }

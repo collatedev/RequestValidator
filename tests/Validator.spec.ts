@@ -292,10 +292,10 @@ test('Validates a request with incorrect array type', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'array'");
+    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'array[string]'");
 });
 
-test('Validates a request with correct array type', () => {
+test('Validates a request with an empty array', () => {
     const schemaIndex : number = 15;
     const validator : IValidator = getValidator(schemaIndex);
     
@@ -303,6 +303,88 @@ test('Validates a request with correct array type', () => {
     const request : IRequest = requestBuilder
                                 .setBody(new RequestMapping({
                                     bar: []
+                                }))
+                                .build();
+
+    assertValidResult(validator.validate(request));
+});
+
+test('Validates a request with an array that has incorrect element types', () => {
+    const schemaIndex : number = 15;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [1]
+                                }))
+                                .build();
+
+    assertResultHasError(
+        validator.validate(request), 
+        "body.bar[0]", 
+        "Element at index '0' of property 'bar' should be type 'string'"
+    );
+});
+
+test('Validates a request with a nested array that has an incorrect structure', () => {
+    const schemaIndex : number = 17;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [1]
+                                }))
+                                .build();
+
+    assertResultHasError(
+        validator.validate(request), 
+        "body.bar[0]", 
+        "Property 'bar[0]' should be type 'array'"
+    );
+});
+
+test('Validates a request with an array that has nested arrays', () => {
+    const schemaIndex : number = 17;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [[1]]
+                                }))
+                                .build();
+
+    assertResultHasError(
+        validator.validate(request), 
+        "body.bar[0][0]", 
+        "Element at index '0' of property 'bar[0]' should be type 'string'"
+    );
+});
+
+test('Validates a request with an array that has nested arrays', () => {
+    const schemaIndex : number = 17;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [["A"]]
+                                }))
+                                .build();
+
+    assertValidResult(validator.validate(request));
+});
+
+test('Validates a request with an array that has a correct array', () => {
+    const schemaIndex : number = 15;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: ["A"]
                                 }))
                                 .build();
 

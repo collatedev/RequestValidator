@@ -7,13 +7,13 @@ const ValidKeys : string[] = [
 ];
 
 export default class FieldConfiguration implements IFieldConfiguration {
-    public readonly required: boolean;    
-    public readonly type: string;
-    public readonly range?: number[] | undefined;
-    public readonly values?: string[] | undefined;
-    public readonly isURL?: boolean | undefined;
-    public readonly startsWith?: string | undefined;
-    public readonly length?: number | undefined;
+    public readonly required : boolean;    
+    public readonly type : string;
+    public readonly range? : number[] | undefined;
+    public readonly values? : string[] | undefined;
+    public readonly isURL? : boolean | undefined;
+    public readonly startsWith? : string | undefined;
+    public readonly length? : number | undefined;
 
     constructor(field : any) {
         this.validateField(field);
@@ -136,7 +136,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (typeof field.length !== 'number') {
                 throw new IllegalSchemaError('The key "length" must be a number');
             }
-            if (this.type !== 'string') {
+            if (this.type !== 'string' && this.type !== 'array') {
                 throw new IllegalSchemaError(
                     'The key "length" can only be used when the type is \'string\' or \'array\''
                 );
