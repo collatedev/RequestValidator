@@ -156,6 +156,22 @@
                     }
                 }
             }
+        },
+        {
+            "types": {
+                "body": {
+                    "foo": {
+                        "type": "bar",
+                        "required": true
+                    }
+                },
+                "bar": {
+                    "baz": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
         }
     ]
 }

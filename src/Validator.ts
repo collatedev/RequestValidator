@@ -7,6 +7,7 @@ import IRequestMapping from "./Request/IRequestMapping";
 import ITypeConfiguration from "./ValidationSchema/ITypeConfiguration";
 import IValidationError from "./ValidationResult/IValidationError";
 import IFieldConfiguration from "./ValidationSchema/IFieldConfiguration";
+import RequestMapping from "./Request/RequestMapping";
 
 export default class Validator implements IValidator {
     private readonly schema : IValidationSchema;
@@ -36,16 +37,18 @@ export default class Validator implements IValidator {
     }
 
     private handleRootTypes(typeName : string, mapping : IRequestMapping | null) : void {
+        this.path.push(typeName);
         if (this.schema.hasType(typeName)) {
             if (mapping === null) {
-                this.addError(`Request is missing ${typeName}`, "[Request]");
+                this.addErrorWithLocation(`Request is missing ${typeName}`, "[Request]");
             } else {
                 this.handleType(typeName, mapping);
             }
         }
+        this.path.pop();
     }
 
-    private addError(message : string, location : string) : void {
+    private addErrorWithLocation(message : string, location : string) : void {
         this.isValid = false;
         this.errors.push({
             message,
@@ -54,18 +57,24 @@ export default class Validator implements IValidator {
     }
 
     private handleType(typeName : string, mapping : IRequestMapping) : void {
-        this.path.push(typeName);
         const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
         this.checkForMissingProperties(mapping, typeConfiguration);
         this.checkForExtraProperties(mapping, typeConfiguration);
         this.checkForIncorrectTypes(mapping, typeConfiguration);
         // recurse on nested types
+        for (const fieldName of typeConfiguration.getFields()) {
+            if (typeConfiguration.hasField(fieldName) && mapping.has(fieldName)) {
+                const fieldConfiguration : IFieldConfiguration = typeConfiguration.getConfiguration(fieldName);
+                const value : any = mapping.value(fieldName);
+                
+                if (this.isUserDefinedType(fieldConfiguration.type) && this.isTypeOf('object', value)) {
+                    this.path.push(fieldName);
+                    this.handleType(fieldConfiguration.type, new RequestMapping(value));
+                    this.path.pop();
+                }
+            }
+        }
         // sanitize inputs
-        this.path.pop();
-    }
-
-    private pathToString() : string {
-        return this.path.join(".");
     }
 
     private checkForMissingProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
@@ -73,35 +82,39 @@ export default class Validator implements IValidator {
             const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
             // Adds an error if and only if the mapping is missing a field and that the missing field is required
             if (!mapping.has(field) && fieldConfiguration.required) {
-                this.addError(`Missing property ${field}`, this.pathToString());
+                this.addError(`Missing property ${field}`);
             }
         }   
+    }
+
+    private addError(message : string) : void {
+        this.addErrorWithLocation(message, this.path.join("."));
     }
 
     private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
         for (const key of mapping.keys()) {
             if (!type.hasField(key)) {
-                this.addError(`Unexpected property '${key}'`, this.pathToString());
+                this.addError(`Unexpected property '${key}'`);
             }
         }
     }
 
     private checkForIncorrectTypes(mapping : IRequestMapping, type : ITypeConfiguration) : void {
         for (const fieldName of type.getFields()) {
-            if (type.hasField(fieldName)) {
+            if (type.hasField(fieldName) && mapping.has(fieldName)) {
                 const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
-                if (mapping.has(fieldName)) {
-                    const value : any = mapping.value(fieldName);
-                    const fieldType : string = fieldConfiguration.type.toLowerCase();
-                    const message : string = `Property '${fieldName}' should be type '${fieldType}'`;
+                const value : any = mapping.value(fieldName);
+                const fieldType : string = fieldConfiguration.type;
+                const message : string = `Property '${fieldName}' should be type '${fieldType}'`;
 
-                    if (this.isArray(fieldType) && !Array.isArray(value)) {
-                        this.addError(message, this.pathToString());
-                    } else if (this.isEnum(fieldType) && !this.isTypeOf('string', value)) {
-                        this.addError(message, this.pathToString());
-                    } else if (this.isPrimative(fieldConfiguration) && !this.isTypeOf(fieldType, value)) {
-                        this.addError(message, this.pathToString());
-                    }
+                if (this.isArray(fieldType) && !Array.isArray(value)) {
+                    this.addError(message);
+                } else if (this.isEnum(fieldType) && !this.isTypeOf('string', value)) {
+                    this.addError(message);
+                } else if (this.isUserDefinedType(fieldType) && !this.isTypeOf('object', value)) {
+                    this.addError(message);
+                } else if (this.isPrimative(fieldType) && !this.isTypeOf(fieldType, value)) {
+                    this.addError(message);
                 }
             }
         }
@@ -116,11 +129,14 @@ export default class Validator implements IValidator {
     }
 
     private isTypeOf(type : string, value : any) : boolean {
-        return typeof value === type.toLowerCase();
+        return typeof value === type;
     }
 
-    private isPrimative(fieldConfiguration : IFieldConfiguration) : boolean {
-        const typeName : string = fieldConfiguration.type.toLowerCase();
-        return typeName === 'string' || typeName === 'boolean' || typeName === 'number';
+    private isUserDefinedType(fieldType : string) : boolean {
+        return this.schema.hasType(fieldType);
+    }
+
+    private isPrimative(fieldType : string) : boolean {
+        return fieldType === 'string' || fieldType === 'boolean' || fieldType === 'number';
     }
 }

@@ -309,6 +309,52 @@ test('Validates a request with correct array type', () => {
     assertValidResult(validator.validate(request));
 });
 
+test('Validates a request with incorrect custom type', () => {
+    const schemaIndex : number = 16;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    foo: 1
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body", "Property 'foo' should be type 'bar'");
+});
+
+test('Validates a request with incorrect nested custom type', () => {
+    const schemaIndex : number = 16;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    foo: {
+                                        baz: "a"
+                                    }
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body.foo", "Property 'baz' should be type 'number'");
+});
+
+test('Validates a request with correct nested custom type', () => {
+    const schemaIndex : number = 16;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    foo: {
+                                        baz: 1
+                                    }
+                                }))
+                                .build();
+
+    assertValidResult(validator.validate(request));
+});
+
 function getValidator(schemaIndex : number) : IValidator {
     return new Validator(new ValidationSchema(ValidatorTestSchemas.schemas[schemaIndex]));
 }
