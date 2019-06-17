@@ -61,19 +61,7 @@ export default class Validator implements IValidator {
         this.checkForMissingProperties(mapping, typeConfiguration);
         this.checkForExtraProperties(mapping, typeConfiguration);
         this.checkForIncorrectTypes(mapping, typeConfiguration);
-        // recurse on nested types
-        for (const fieldName of typeConfiguration.getFields()) {
-            if (typeConfiguration.hasField(fieldName) && mapping.has(fieldName)) {
-                const fieldConfiguration : IFieldConfiguration = typeConfiguration.getConfiguration(fieldName);
-                const value : any = mapping.value(fieldName);
-                
-                if (this.isUserDefinedType(fieldConfiguration.type) && this.isTypeOf('object', value)) {
-                    this.path.push(fieldName);
-                    this.handleType(fieldConfiguration.type, new RequestMapping(value));
-                    this.path.pop();
-                }
-            }
-        }
+        this.validateNestedTypes(mapping, typeConfiguration);
         // sanitize inputs
     }
 
@@ -138,5 +126,20 @@ export default class Validator implements IValidator {
 
     private isPrimative(fieldType : string) : boolean {
         return fieldType === 'string' || fieldType === 'boolean' || fieldType === 'number';
+    }
+
+    private validateNestedTypes(mapping : IRequestMapping, type : ITypeConfiguration, ) : void {
+        for (const fieldName of type.getFields()) {
+            if (type.hasField(fieldName) && mapping.has(fieldName)) {
+                const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
+                const value : any = mapping.value(fieldName);
+                
+                if (this.isUserDefinedType(fieldConfiguration.type) && this.isTypeOf('object', value)) {
+                    this.path.push(fieldName);
+                    this.handleType(fieldConfiguration.type, new RequestMapping(value));
+                    this.path.pop();
+                }
+            }
+        }
     }
 }
