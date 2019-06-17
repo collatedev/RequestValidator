@@ -180,10 +180,15 @@
                         "type": "array[array[string]]",
                         "required": true
                     }
-                },
-                "foo": {
-                    "baz": {
-                        "type": "string",
+                }
+            }
+        },
+        {
+            "types": {
+                "body": {
+                    "bar": {
+                        "type": "array[array[enum]]",
+                        "values": ["A", "B"],
                         "required": true
                     }
                 }

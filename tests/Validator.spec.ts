@@ -267,6 +267,20 @@ test('Validates a request with incorrect enum type', () => {
     assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'enum'");
 });
 
+test('Validates a request with incorrect enum value', () => {
+    const schemaIndex : number = 14;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: "C"
+                                }))
+                                .build();
+
+    assertResultHasError(validator.validate(request), "body", `Enum 'bar' must have one of these values 'A, B'`);
+});
+
 test('Validates a request with correct enum type', () => {
     const schemaIndex : number = 14;
     const validator : IValidator = getValidator(schemaIndex);
@@ -370,7 +384,21 @@ test('Validates a request with an array that has nested arrays', () => {
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
                                 .setBody(new RequestMapping({
-                                    bar: [["A"]]
+                                    bar: [["A", "B"]]
+                                }))
+                                .build();
+
+    assertValidResult(validator.validate(request));
+});
+
+test('Validates a request with an array that has nested arrays of enums', () => {
+    const schemaIndex : number = 18;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [["A", "B"]]
                                 }))
                                 .build();
 
