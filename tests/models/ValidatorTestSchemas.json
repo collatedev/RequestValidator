@@ -193,6 +193,22 @@
                     }
                 }
             }
+        },
+        {
+            "types": {
+                "body": {
+                    "bar": {
+                        "type": "array[array[foo]]",
+                        "required": true
+                    }
+                },
+                "foo": {
+                    "baz": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
         }
     ]
 }

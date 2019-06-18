@@ -222,7 +222,7 @@ test('Validates a request with incorrect number type', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Property 'foo' should be type 'number'");
+    assertResultHasError(validator.validate(request), "body.foo", "Property 'foo' should be type 'number'");
 });
 
 test('Validates a request with incorrect string type', () => {
@@ -236,7 +236,7 @@ test('Validates a request with incorrect string type', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'string'");
+    assertResultHasError(validator.validate(request), "body.bar", "Property 'bar' should be type 'string'");
 });
 
 test('Validates a request with incorrect boolean type', () => {
@@ -250,7 +250,7 @@ test('Validates a request with incorrect boolean type', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'boolean'");
+    assertResultHasError(validator.validate(request), "body.bar", "Property 'bar' should be type 'boolean'");
 });
 
 test('Validates a request with incorrect enum type', () => {
@@ -264,7 +264,7 @@ test('Validates a request with incorrect enum type', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'enum'");
+    assertResultHasError(validator.validate(request), "body.bar", "Property 'bar' should be type 'enum'");
 });
 
 test('Validates a request with incorrect enum value', () => {
@@ -278,7 +278,7 @@ test('Validates a request with incorrect enum value', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", `Enum 'bar' must have one of these values 'A, B'`);
+    assertResultHasError(validator.validate(request), "body.bar", `Enum 'bar' must have one of these values 'A, B'`);
 });
 
 test('Validates a request with correct enum type', () => {
@@ -306,7 +306,7 @@ test('Validates a request with incorrect array type', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Property 'bar' should be type 'array[string]'");
+    assertResultHasError(validator.validate(request), "body.bar", "Property 'bar' should be type 'array[string]'");
 });
 
 test('Validates a request with an empty array', () => {
@@ -337,7 +337,7 @@ test('Validates a request with an array that has incorrect element types', () =>
     assertResultHasError(
         validator.validate(request), 
         "body.bar[0]", 
-        "Element at index '0' of property 'bar' should be type 'string'"
+        "Property 'bar[0]' should be type 'string'"
     );
 });
 
@@ -373,7 +373,7 @@ test('Validates a request with an array that has nested arrays', () => {
     assertResultHasError(
         validator.validate(request), 
         "body.bar[0][0]", 
-        "Element at index '0' of property 'bar[0]' should be type 'string'"
+        "Property 'bar[0][0]' should be type 'string'"
     );
 });
 
@@ -391,6 +391,24 @@ test('Validates a request with an array that has nested arrays', () => {
     assertValidResult(validator.validate(request));
 });
 
+test('Validates a request with an array that has nested arrays of enums with illegall values', () => {
+    const schemaIndex : number = 18;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [["C"]]
+                                }))
+                                .build();
+
+    assertResultHasError(
+        validator.validate(request), 
+        "body.bar[0][0]", 
+        "Enum 'bar' must have one of these values 'A, B'"
+    );
+});
+
 test('Validates a request with an array that has nested arrays of enums', () => {
     const schemaIndex : number = 18;
     const validator : IValidator = getValidator(schemaIndex);
@@ -403,6 +421,44 @@ test('Validates a request with an array that has nested arrays of enums', () => 
                                 .build();
 
     assertValidResult(validator.validate(request));
+});
+
+test('Validates a request with nested arrays expecting a nested type', () => {
+    const schemaIndex : number = 19;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [[false]]
+                                }))
+                                .build();
+
+    assertResultHasError(
+        validator.validate(request), 
+        "body.bar[0][0]", 
+        "Property 'bar[0][0]' should be type 'foo'"
+    );
+});
+
+test('Validates a request with with nested arrays and finds an error on the baz property', () => {
+    const schemaIndex : number = 19;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [[{
+                                        baz: false
+                                    }]]
+                                }))
+                                .build();
+
+    assertResultHasError(
+        validator.validate(request), 
+        "body.bar[0][0].baz", 
+        "Property 'baz' should be type 'number'"
+    );
 });
 
 test('Validates a request with an array that has a correct array', () => {
@@ -430,7 +486,7 @@ test('Validates a request with incorrect custom type', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Property 'foo' should be type 'bar'");
+    assertResultHasError(validator.validate(request), "body.foo", "Property 'foo' should be type 'bar'");
 });
 
 test('Validates a request with incorrect nested custom type', () => {
@@ -446,7 +502,7 @@ test('Validates a request with incorrect nested custom type', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body.foo", "Property 'baz' should be type 'number'");
+    assertResultHasError(validator.validate(request), "body.foo.baz", "Property 'baz' should be type 'number'");
 });
 
 test('Validates a request with correct nested custom type', () => {

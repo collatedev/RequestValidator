@@ -8,21 +8,22 @@ import ITypeConfiguration from "./ValidationSchema/ITypeConfiguration";
 import IValidationError from "./ValidationResult/IValidationError";
 import IFieldConfiguration from "./ValidationSchema/IFieldConfiguration";
 import RequestMapping from "./Request/RequestMapping";
+import IPathComponent from "./PathBuilder/IPathComponent";
+import PropertyPathComponent from "./PathBuilder/PropertyPathComponent";
+import IndexPathComponent from "./PathBuilder/IndexPathComponent";
 
 export default class Validator implements IValidator {
 	private readonly schema : IValidationSchema;
 
 	private errors : IValidationError[];
-	private indexes : number[];
 	private isValid : boolean;
-	private path : string[];
+	private path : IPathComponent[];
 
 	constructor(schema : IValidationSchema) {
 		this.schema = schema;
 		this.errors = [];
 		this.isValid = true;
 		this.path = [];
-		this.indexes = [];
 	}
 
 	public validate(request : IRequest) : IValidationResult {
@@ -39,7 +40,7 @@ export default class Validator implements IValidator {
 	}
 
 	private handleRootTypes(typeName : string, mapping : IRequestMapping | null) : void {
-		this.path.push(typeName);
+		this.path.push(new PropertyPathComponent(typeName));
 		if (this.schema.hasType(typeName)) {
 			if (mapping === null) {
 				this.addErrorWithLocation(`Request is missing ${typeName}`, "[Request]");
@@ -63,7 +64,6 @@ export default class Validator implements IValidator {
 		this.checkForMissingProperties(mapping, typeConfiguration);
 		this.checkForExtraProperties(mapping, typeConfiguration);
 		this.checkForIncorrectTypes(mapping, typeConfiguration);
-		this.validateNestedTypes(mapping, typeConfiguration);
 		// sanitize inputs
 	}
 
@@ -82,15 +82,14 @@ export default class Validator implements IValidator {
 	}
 
 	private getPath() : string {
-		return this.path.join(".") + this.getIndexSuffix();
-	}
-
-	private getIndexSuffix() : string {
-		let indexSuffix : string = "";
-		for (const index of this.indexes) {
-			indexSuffix += `[${index}]`;
+		let path : string = "";
+		for (const component of this.path) {
+			path += component.toString();
 		}
-		return indexSuffix;
+		if (path.startsWith(".")) {
+			path = path.substring(1, path.length);
+		}
+		return path;
 	}
 
 	private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
@@ -104,6 +103,7 @@ export default class Validator implements IValidator {
 	private checkForIncorrectTypes(mapping : IRequestMapping, type : ITypeConfiguration) : void {
 		for (const fieldName of type.getFields()) {
 			if (type.hasField(fieldName) && mapping.has(fieldName)) {
+				this.path.push(new PropertyPathComponent(fieldName));
 				const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
 				const value : any = mapping.value(fieldName);
 				const fieldType : string = fieldConfiguration.type;
@@ -113,9 +113,7 @@ export default class Validator implements IValidator {
 					if (!Array.isArray(value)) {
 						this.addError(message);
 					} else {
-						this.path.push(fieldName);
 						this.checkTypesOfArrayElements(this.parseArrayType(fieldType), value, fieldName, fieldConfiguration);
-						this.path.pop();
 					}
 				} else if (this.isEnum(fieldType)) {
 					if (!this.isTypeOf('string', value)) {
@@ -126,11 +124,17 @@ export default class Validator implements IValidator {
 							this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
 						}
 					}
-				} else if (this.isUserDefinedType(fieldType) && !this.isTypeOf('object', value)) {
-					this.addError(message);
+				} else if (this.isUserDefinedType(fieldType)) {
+					if (!this.isTypeOf('object', value)) {
+						this.addError(message);
+					} else {
+						this.handleType(fieldConfiguration.type, new RequestMapping(value));
+					}
 				} else if (this.isPrimative(fieldType) && !this.isTypeOf(fieldType, value)) {
 					this.addError(message);
 				}
+
+				this.path.pop();
 			}
 		}
 	}
@@ -147,10 +151,13 @@ export default class Validator implements IValidator {
 		}
 
 		// remove extra array tag as we know that this field is an array
-		types.pop(); 
+		// otherwise this field is not an array and should give an empty array
+		if (types.length !== 0) {
+			types.pop(); 
 
-		type = type.substring(0, type.indexOf("]"));
-		types.push(type);
+			type = type.substring(0, type.indexOf("]"));
+			types.push(type);
+		}
 		return types;
 	}
 
@@ -158,19 +165,16 @@ export default class Validator implements IValidator {
 		types : string[], values : any[], fieldName : string, fieldConfiguration : IFieldConfiguration
 	) : void {
 		for (let i : number = 0; i < values.length; i++) {
-			this.indexes.push(i);
+			this.path.push(new IndexPathComponent(i));
 			const type : string = types[0];
-			const suffix : string = this.getIndexSuffix();
-			const baseSuffix : string = suffix.substring(0, suffix.lastIndexOf("["));
-			const message : string = `Element at index '${i}' of property '${fieldName}${baseSuffix}' should be type '${type}'`;
+			const message : string = `Property '${fieldName}${this.getIndex()}' should be type '${type}'`;
+			const removedType : string = types.shift() as string;
 
 			if (this.isArray(type)) {
 				if (!Array.isArray(values[i])) {
-					this.addError(`Property '${fieldName}${suffix}' should be type '${type}'`);
+					this.addError(message);
 				} else {
-					const removedType : string = types.shift() as string;
 					this.checkTypesOfArrayElements(types, values[i], fieldName, fieldConfiguration);
-					types.unshift(removedType);
 				}
 			} else if (this.isEnum(type)) {
 				if (!this.isTypeOf('string', values[i])) {
@@ -181,15 +185,29 @@ export default class Validator implements IValidator {
 						this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
 					}
 				}
-			} else if (this.isUserDefinedType(type) && !this.isTypeOf('object', values[i])) {
-				this.addError(message);
+			} else if (this.isUserDefinedType(type)) {
+				if (!this.isTypeOf('object', values[i])) {
+					this.addError(message);
+				} else {
+					this.handleType(type, new RequestMapping(values[i]));
+				}
 			} else if (this.isPrimative(type) && !this.isTypeOf(type, values[i])) {
 				this.addError(message);
 			}
-			this.indexes.pop();
+			
+			types.unshift(removedType);
+			this.path.pop();
 		}
 	}
 
+	private getIndex() : string {
+		let indexes : string = "";
+		let i : number = this.path.length - 1;
+		while (this.path[i] instanceof IndexPathComponent) {
+			indexes += this.path[i--].toString();
+		}
+		return indexes;
+	}
 	
 	private isEnum(fieldType : string) : boolean {
 		return fieldType === "enum";
@@ -205,20 +223,5 @@ export default class Validator implements IValidator {
 
 	private isPrimative(fieldType : string) : boolean {
 		return fieldType === 'string' || fieldType === 'boolean' || fieldType === 'number';
-	}
-
-	private validateNestedTypes(mapping : IRequestMapping, type : ITypeConfiguration, ) : void {
-		for (const fieldName of type.getFields()) {
-			if (type.hasField(fieldName) && mapping.has(fieldName)) {
-				const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
-				const value : any = mapping.value(fieldName);
-				
-				if (this.isUserDefinedType(fieldConfiguration.type) && this.isTypeOf('object', value)) {
-					this.path.push(fieldName);
-					this.handleType(fieldConfiguration.type, new RequestMapping(value));
-					this.path.pop();
-				}
-			}
-		}
 	}
 }
