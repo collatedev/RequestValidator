@@ -2,8 +2,19 @@ import IPathBuilder from "./IPathBuilder";
 import IPathComponent from "./IPathComponent";
 
 export default class PathBuilder implements IPathBuilder {
+    private pathComponents : IPathComponent[];
+
+    constructor() {
+        this.pathComponents = [];
+    }
+
     public getPath() : string {
-        return "";
+        let path : string = "";
+        for (const component of this.pathComponents) {
+            path += component.toString();
+        }
+        path = path.substring(1, path.length);
+        return path;
     }
 
     public getCurrentIndex() : string {
@@ -11,6 +22,6 @@ export default class PathBuilder implements IPathBuilder {
     }
 
     public addPathComponent(component : IPathComponent) : void {
-        throw new Error("Method not implemented");
+        this.pathComponents.push(component);
     }
 }
