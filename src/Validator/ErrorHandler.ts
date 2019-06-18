@@ -26,15 +26,24 @@ export default class ErrorHandler implements IErrorHandler {
     }
 
     public addUnexpectedPropertyError(field: string): void {
-        throw new Error("Method not implemented.");
+        this.errors.push({
+            location: this.pathBuilder.getPath(),
+            message: `Unexpected property '${field}'`
+        });
     }
 
     public addTypeError(fieldName: string, fieldType: string): void {
-        throw new Error("Method not implemented.");
+        this.errors.push({
+            location: this.pathBuilder.getPath(),
+            message: `Property '${fieldName}${this.pathBuilder.getCurrentIndex()}' should be type '${fieldType}'`
+        });
     }
 
     public addEnumValueError(fieldName: string, enumValues: string[]): void {
-        throw new Error("Method not implemented.");
+        this.errors.push({
+            location: this.pathBuilder.getPath(),
+            message: `Enum '${fieldName}' must have one of these values [${enumValues.join(", ")}]`
+        });
     }
 
     public hasErrors(): boolean {
@@ -44,6 +53,4 @@ export default class ErrorHandler implements IErrorHandler {
     public getErrors(): IValidationError[] {
         return this.errors;
     }
-
-
 }
