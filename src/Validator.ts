@@ -17,18 +17,15 @@ export default class Validator implements IValidator {
 	private readonly schema : IValidationSchema;
 
 	private errors : IValidationError[];
-	private isValid : boolean;
 	private pathBuilder : IPathBuilder;
 
 	constructor(schema : IValidationSchema) {
 		this.schema = schema;
 		this.errors = [];
-		this.isValid = true;
 		this.pathBuilder = new PathBuilder();
 	}
 
 	public validate(request : IRequest) : IValidationResult {
-		this.isValid = true;
 		this.errors = [];
 		this.pathBuilder = new PathBuilder();
 
@@ -37,7 +34,7 @@ export default class Validator implements IValidator {
 		this.handleRootTypes("headers", request.getHeaders());
 		this.handleRootTypes("params", request.getParams());
 		this.handleRootTypes("query", request.getQuery());
-		return new ValidationResult(this.isValid, this.errors);
+		return new ValidationResult(this.errors.length === 0, this.errors);
 	}
 
 	private handleRootTypes(typeName : string, mapping : IRequestMapping | null) : void {
@@ -53,7 +50,6 @@ export default class Validator implements IValidator {
 	}
 
 	private addErrorWithLocation(message : string, location : string) : void {
-		this.isValid = false;
 		this.errors.push({
 			message,
 			location
