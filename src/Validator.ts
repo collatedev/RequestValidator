@@ -109,33 +109,39 @@ export default class Validator implements IValidator {
 				const fieldType : string = fieldConfiguration.type;
 				const message : string = `Property '${fieldName}' should be type '${fieldType}'`;
 
-				if (this.isArray(fieldType)) {
-					if (!Array.isArray(value)) {
-						this.addError(message);
-					} else {
-						this.checkTypesOfArrayElements(this.parseArrayType(fieldType), value, fieldName, fieldConfiguration);
-					}
-				} else if (this.isEnum(fieldType)) {
-					if (!this.isTypeOf('string', value)) {
-						this.addError(message);
-					} else {
-						const enumValues : string[] = fieldConfiguration.values as string[];
-						if (!enumValues.includes(value)) {
-							this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
-						}
-					}
-				} else if (this.isUserDefinedType(fieldType)) {
-					if (!this.isTypeOf('object', value)) {
-						this.addError(message);
-					} else {
-						this.handleType(fieldConfiguration.type, new RequestMapping(value));
-					}
-				} else if (this.isPrimative(fieldType) && !this.isTypeOf(fieldType, value)) {
-					this.addError(message);
-				}
+				this.typeCheck(fieldType, value, fieldName, fieldConfiguration, message);
 
 				this.path.pop();
 			}
+		}
+	}
+
+	private typeCheck(
+		fieldType : string, value : any, fieldName : string, fieldConfiguration : IFieldConfiguration, message : string
+	) : void {
+		if (this.isArray(fieldType)) {
+			if (!Array.isArray(value)) {
+				this.addError(message);
+			} else {
+				this.checkTypesOfArrayElements(this.parseArrayType(fieldType), value, fieldName, fieldConfiguration);
+			}
+		} else if (this.isEnum(fieldType)) {
+			if (!this.isTypeOf('string', value)) {
+				this.addError(message);
+			} else {
+				const enumValues : string[] = fieldConfiguration.values as string[];
+				if (!enumValues.includes(value)) {
+					this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
+				}
+			}
+		} else if (this.isUserDefinedType(fieldType)) {
+			if (!this.isTypeOf('object', value)) {
+				this.addError(message);
+			} else {
+				this.handleType(fieldConfiguration.type, new RequestMapping(value));
+			}
+		} else if (this.isPrimative(fieldType) && !this.isTypeOf(fieldType, value)) {
+			this.addError(message);
 		}
 	}
 
