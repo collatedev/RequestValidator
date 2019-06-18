@@ -182,31 +182,6 @@ export default class Validator implements IValidator {
 			const removedType : string = types.shift() as string;
 
 			this.typeCheck(type, values[i], fieldName, fieldConfiguration, message, types, type);
-
-			// if (this.isArray(type)) {
-			// 	if (!Array.isArray(values[i])) {
-			// 		this.addError(message);
-			// 	} else {
-			// 		this.checkTypesOfArrayElements(types, values[i], fieldName, fieldConfiguration);
-			// 	}
-			// } else if (this.isEnum(type)) {
-			// 	if (!this.isTypeOf('string', values[i])) {
-			// 		this.addError(message);
-			// 	} else {
-			// 		const enumValues : string[] = fieldConfiguration.values as string[];
-			// 		if (!enumValues.includes(values[i])) {
-			// 			this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
-			// 		}
-			// 	}
-			// } else if (this.isUserDefinedType(type)) {
-			// 	if (!this.isTypeOf('object', values[i])) {
-			// 		this.addError(message);
-			// 	} else {
-			// 		this.handleType(type, new RequestMapping(values[i]));
-			// 	}
-			// } else if (this.isPrimative(type) && !this.isTypeOf(type, values[i])) {
-			// 	this.addError(message);
-			// }
 			
 			types.unshift(removedType);
 			this.path.pop();
