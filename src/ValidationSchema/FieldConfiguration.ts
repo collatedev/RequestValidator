@@ -86,7 +86,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
 
     private getValues(field : any) : string[] | undefined {
         if (field.hasOwnProperty("values")) {
-            if (this.type !== "enum") {
+            if (this.type !== "enum" && !this.isArrayOfEnums()) {
                 throw new IllegalSchemaError('The key "values" can only be used when the type is \'enum\'');
             }
             if (!Array.isArray(field.values)) {
@@ -103,6 +103,10 @@ export default class FieldConfiguration implements IFieldConfiguration {
             return field.values as string[];
         }
         return undefined;
+    }
+
+    private isArrayOfEnums() : boolean {
+        return this.type.startsWith("array") && this.type.includes("enum");
     }
 
     private getIsURL(field : any) : boolean | undefined {
@@ -136,7 +140,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (typeof field.length !== 'number') {
                 throw new IllegalSchemaError('The key "length" must be a number');
             }
-            if (this.type !== 'string' && this.type !== 'array') {
+            if (this.type !== 'string' && !this.type.startsWith('array')) {
                 throw new IllegalSchemaError(
                     'The key "length" can only be used when the type is \'string\' or \'array\''
                 );

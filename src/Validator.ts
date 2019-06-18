@@ -114,7 +114,7 @@ export default class Validator implements IValidator {
 						this.addError(message);
 					} else {
 						this.path.push(fieldName);
-						this.checkTypesOfArrayElements(this.parseArrayType(fieldType), value, fieldName);
+						this.checkTypesOfArrayElements(this.parseArrayType(fieldType), value, fieldName, fieldConfiguration);
 						this.path.pop();
 					}
 				} else if (this.isEnum(fieldType)) {
@@ -154,30 +154,37 @@ export default class Validator implements IValidator {
 		return types;
 	}
 
-	private checkTypesOfArrayElements(types : string[], values : any[], fieldName : string) : void {
+	private checkTypesOfArrayElements(
+		types : string[], values : any[], fieldName : string, fieldConfiguration : IFieldConfiguration
+	) : void {
 		for (let i : number = 0; i < values.length; i++) {
 			this.indexes.push(i);
 			const type : string = types[0];
 			const suffix : string = this.getIndexSuffix();
 			const baseSuffix : string = suffix.substring(0, suffix.lastIndexOf("["));
+			const message : string = `Element at index '${i}' of property '${fieldName}${baseSuffix}' should be type '${type}'`;
 
 			if (this.isArray(type)) {
 				if (!Array.isArray(values[i])) {
 					this.addError(`Property '${fieldName}${suffix}' should be type '${type}'`);
 				} else {
 					const removedType : string = types.shift() as string;
-					this.checkTypesOfArrayElements(types, values[i], fieldName);
+					this.checkTypesOfArrayElements(types, values[i], fieldName, fieldConfiguration);
 					types.unshift(removedType);
 				}
-			} else {
-				const message : string = `Element at index '${i}' of property '${fieldName}${baseSuffix}' should be type '${type}'`;
-				if (this.isEnum(type) && !this.isTypeOf('string', values[i])) {
+			} else if (this.isEnum(type)) {
+				if (!this.isTypeOf('string', values[i])) {
 					this.addError(message);
-				} else if (this.isUserDefinedType(type) && !this.isTypeOf('object', values[i])) {
-					this.addError(message);
-				} else if (this.isPrimative(type) && !this.isTypeOf(type, values[i])) {
-					this.addError(message);
+				} else {
+					const enumValues : string[] = fieldConfiguration.values as string[];
+					if (!enumValues.includes(values[i])) {
+						this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
+					}
 				}
+			} else if (this.isUserDefinedType(type) && !this.isTypeOf('object', values[i])) {
+				this.addError(message);
+			} else if (this.isPrimative(type) && !this.isTypeOf(type, values[i])) {
+				this.addError(message);
 			}
 			this.indexes.pop();
 		}

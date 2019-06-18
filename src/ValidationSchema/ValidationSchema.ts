@@ -54,21 +54,26 @@ export default class ValidationSchema implements IValidationSchema {
         if (!type.startsWith("array[") || !type.endsWith("]")) {
             return false;
         }
-        let count : number = 0;
+
+        let numberOfNestedArrays : number = 0;
         while (type.includes("array[")) {
             type = type.replace("array[", "");
-            count++;
+            numberOfNestedArrays++;
         }
-        const brackets : string = type.substring(type.indexOf("]"), type.length);
+
+        const closingBrackets : string = type.substring(type.indexOf("]"), type.length);
         type = type.substring(0, type.indexOf("]"));
+
         if (type.length === 0 || type.includes("[")) {
             return false;
         }
-        if (brackets.length !== count) {
+
+        if (closingBrackets.length !== numberOfNestedArrays) {
             return false;
         }
-        for (let i : number = 0; i < count; i++) {
-            if (brackets.charAt(i) !== ']') {
+        
+        for (let i : number = 0; i < numberOfNestedArrays; i++) {
+            if (closingBrackets.charAt(i) !== ']') {
                 return false;
             }
         }

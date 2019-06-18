@@ -271,7 +271,7 @@ test('It should create a field configuration with length key for string type', (
 
 test('It should create a field configuration with length key for array type', () => {
     const json : any = {
-        type: "array",
+        type: "array[string]",
         required: false,
         length: 1
     };
@@ -283,7 +283,7 @@ test('It should create a field configuration with length key for array type', ()
     }
 
     expect(configuration.required).toBeFalsy();
-    expect(configuration.type).toEqual("array");
+    expect(configuration.type).toEqual("array[string]");
     expect(configuration.length).toEqual(1);
 });
 
@@ -292,6 +292,24 @@ test('It should fail to create a field configuration becuase the type is enum an
         type: "enum",
         required: true,
     })).toThrow(IllegalSchemaError);
+});
+
+test('It should create a field configuration as the array is of type enum', () => {
+    const json : any = {
+        type: "array[enum]",
+        required: true,
+        values: ["A"]
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    if (!configuration.values) {
+        throw new Error("Length missing from configuration");
+    }
+
+    expect(configuration.required).toBeTruthy();
+    expect(configuration.type).toEqual("array[enum]");
+    expect(configuration.values).toEqual(["A"]);
 });
 
 function createField(json : any) : () => IFieldConfiguration {
