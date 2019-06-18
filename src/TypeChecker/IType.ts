@@ -4,5 +4,5 @@ export default interface IType {
     name() : string;
     configuration() : IFieldConfiguration;
     arrayStructure() : string[];
-    arrayType() : string;
+    getNestedType() : string;
 }
