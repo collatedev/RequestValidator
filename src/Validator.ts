@@ -8,28 +8,29 @@ import ITypeConfiguration from "./ValidationSchema/ITypeConfiguration";
 import IValidationError from "./ValidationResult/IValidationError";
 import IFieldConfiguration from "./ValidationSchema/IFieldConfiguration";
 import RequestMapping from "./Request/RequestMapping";
-import IPathComponent from "./PathBuilder/IPathComponent";
 import PropertyPathComponent from "./PathBuilder/PropertyPathComponent";
 import IndexPathComponent from "./PathBuilder/IndexPathComponent";
+import IPathBuilder from "./PathBuilder/IPathBuilder";
+import PathBuilder from "./PathBuilder/PathBuilder";
 
 export default class Validator implements IValidator {
 	private readonly schema : IValidationSchema;
 
 	private errors : IValidationError[];
 	private isValid : boolean;
-	private path : IPathComponent[];
+	private pathBuilder : IPathBuilder;
 
 	constructor(schema : IValidationSchema) {
 		this.schema = schema;
 		this.errors = [];
 		this.isValid = true;
-		this.path = [];
+		this.pathBuilder = new PathBuilder();
 	}
 
 	public validate(request : IRequest) : IValidationResult {
 		this.isValid = true;
 		this.errors = [];
-		this.path = [];
+		this.pathBuilder = new PathBuilder();
 
 		this.handleRootTypes("body", request.getBody());
 		this.handleRootTypes("cookies", request.getCookies());
@@ -40,7 +41,7 @@ export default class Validator implements IValidator {
 	}
 
 	private handleRootTypes(typeName : string, mapping : IRequestMapping | null) : void {
-		this.path.push(new PropertyPathComponent(typeName));
+		this.pathBuilder.addPathComponent(new PropertyPathComponent(typeName));
 		if (this.schema.hasType(typeName)) {
 			if (mapping === null) {
 				this.addErrorWithLocation(`Request is missing ${typeName}`, "[Request]");
@@ -48,7 +49,7 @@ export default class Validator implements IValidator {
 				this.handleType(typeName, mapping);
 			}
 		}
-		this.path.pop();
+		this.pathBuilder.popComponent();
 	}
 
 	private addErrorWithLocation(message : string, location : string) : void {
@@ -78,18 +79,7 @@ export default class Validator implements IValidator {
 	}
 
 	private addError(message : string) : void {
-		this.addErrorWithLocation(message, this.getPath());
-	}
-
-	private getPath() : string {
-		let path : string = "";
-		for (const component of this.path) {
-			path += component.toString();
-		}
-		if (path.startsWith(".")) {
-			path = path.substring(1, path.length);
-		}
-		return path;
+		this.addErrorWithLocation(message, this.pathBuilder.getPath());
 	}
 
 	private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
@@ -103,7 +93,7 @@ export default class Validator implements IValidator {
 	private checkForIncorrectTypes(mapping : IRequestMapping, type : ITypeConfiguration) : void {
 		for (const fieldName of type.getFields()) {
 			if (type.hasField(fieldName) && mapping.has(fieldName)) {
-				this.path.push(new PropertyPathComponent(fieldName));
+				this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
 				const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
 				const value : any = mapping.value(fieldName);
 				const fieldType : string = fieldConfiguration.type;
@@ -113,7 +103,7 @@ export default class Validator implements IValidator {
 					this.parseArrayType(fieldType), fieldType
 				);
 
-				this.path.pop();
+				this.pathBuilder.popComponent();
 			}
 		}
 	}
@@ -123,7 +113,7 @@ export default class Validator implements IValidator {
 		fieldConfiguration : IFieldConfiguration, types : string[],
 		nestedType : string
 	) : void {
-		const message : string = `Property '${fieldName}${this.getIndex()}' should be type '${fieldType}'`;
+		const message : string = `Property '${fieldName}${this.pathBuilder.getCurrentIndex()}' should be type '${fieldType}'`;
 		if (this.isArray(fieldType)) {
 			if (!Array.isArray(value)) {
 				this.addError(message);
@@ -176,24 +166,15 @@ export default class Validator implements IValidator {
 		types : string[], values : any[], fieldName : string, fieldConfiguration : IFieldConfiguration
 	) : void {
 		for (let i : number = 0; i < values.length; i++) {
-			this.path.push(new IndexPathComponent(i));
+			this.pathBuilder.addPathComponent(new IndexPathComponent(i));
 			const type : string = types[0];
 			const removedType : string = types.shift() as string;
 
 			this.typeCheck(type, values[i], fieldName, fieldConfiguration, types, type);
 			
 			types.unshift(removedType);
-			this.path.pop();
+			this.pathBuilder.popComponent();
 		}
-	}
-
-	private getIndex() : string {
-		let indexes : string = "";
-		let i : number = this.path.length - 1;
-		while (this.path[i] instanceof IndexPathComponent) {
-			indexes += this.path[i--].toString();
-		}
-		return indexes;
 	}
 	
 	private isEnum(fieldType : string) : boolean {
