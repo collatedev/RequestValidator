@@ -107,11 +107,10 @@ export default class Validator implements IValidator {
 				const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
 				const value : any = mapping.value(fieldName);
 				const fieldType : string = fieldConfiguration.type;
-				const message : string = `Property '${fieldName}' should be type '${fieldType}'`;
 
 				this.typeCheck(
 					fieldType, value, fieldName, fieldConfiguration, 
-					message, this.parseArrayType(fieldType), fieldConfiguration.type
+					this.parseArrayType(fieldType), fieldType
 				);
 
 				this.path.pop();
@@ -121,9 +120,10 @@ export default class Validator implements IValidator {
 
 	private typeCheck(
 		fieldType : string, value : any, fieldName : string, 
-		fieldConfiguration : IFieldConfiguration, message : string, types : string[],
+		fieldConfiguration : IFieldConfiguration, types : string[],
 		nestedType : string
 	) : void {
+		const message : string = `Property '${fieldName}${this.getIndex()}' should be type '${fieldType}'`;
 		if (this.isArray(fieldType)) {
 			if (!Array.isArray(value)) {
 				this.addError(message);
@@ -178,10 +178,9 @@ export default class Validator implements IValidator {
 		for (let i : number = 0; i < values.length; i++) {
 			this.path.push(new IndexPathComponent(i));
 			const type : string = types[0];
-			const message : string = `Property '${fieldName}${this.getIndex()}' should be type '${type}'`;
 			const removedType : string = types.shift() as string;
 
-			this.typeCheck(type, values[i], fieldName, fieldConfiguration, message, types, type);
+			this.typeCheck(type, values[i], fieldName, fieldConfiguration, types, type);
 			
 			types.unshift(removedType);
 			this.path.pop();
