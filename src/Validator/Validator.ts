@@ -13,6 +13,7 @@ import IPathBuilder from "../PathBuilder/IPathBuilder";
 import PathBuilder from "../PathBuilder/PathBuilder";
 import IErrorHandler from "./IErrorHandler";
 import ErrorHandler from "./ErrorHandler";
+import ParseArrayElementType from "./ParseArrayElementType";
 
 export default class Validator implements IValidator {
 	private readonly schema : IValidationSchema;
@@ -86,7 +87,7 @@ export default class Validator implements IValidator {
 
 				this.typeCheck(
 					fieldType, value, fieldName, fieldConfiguration, 
-					this.parseArrayType(fieldType), fieldType
+					ParseArrayElementType.parse(fieldType), fieldType
 				);
 
 				this.pathBuilder.popComponent();
@@ -127,24 +128,6 @@ export default class Validator implements IValidator {
 
 	private isArray(fieldType : string) : boolean {
 		return fieldType.startsWith("array");
-	}
-
-	private parseArrayType(type : string) : string[] {
-		const types : string[] = [];
-		while(type.includes("array[")) {
-			type = type.replace("array[", "");
-			types.push("array");
-		}
-
-		// remove extra array tag as we know that this field is an array
-		// otherwise this field is not an array and should give an empty array
-		if (types.length !== 0) {
-			types.pop(); 
-
-			type = type.substring(0, type.indexOf("]"));
-			types.push(type);
-		}
-		return types;
 	}
 
 	private checkTypesOfArrayElements(
