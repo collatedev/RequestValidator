@@ -461,6 +461,83 @@ test('Validates a request with with nested arrays and finds an error on the baz 
     );
 });
 
+test('Validates a request with with nested arrays of nested types', () => {
+    const schemaIndex : number = 19;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [[{
+                                        baz: 1
+                                    }]]
+                                }))
+                                .build();
+
+    assertValidResult(validator.validate(request));
+});
+
+test('Validates a request with with nested arrays and finds an error on the quux property', () => {
+    const schemaIndex : number = 20;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [[{
+                                        baz: false
+                                    }]]
+                                }))
+                                .build();
+
+    assertResultHasError(
+        validator.validate(request), 
+        "body.bar[0][0].baz", 
+        "Property 'baz' should be type 'qux'"
+    );
+});
+
+test('Validates a request with with nested arrays and finds an error on the quux property', () => {
+    const schemaIndex : number = 20;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [[{
+                                        baz: {
+                                            quux: false
+                                        }
+                                    }]]
+                                }))
+                                .build();
+
+    assertResultHasError(
+        validator.validate(request), 
+        "body.bar[0][0].baz.quux", 
+        "Property 'quux' should be type 'number'"
+    );
+});
+
+test('Validates a request with with nested arrays of nested types', () => {
+    const schemaIndex : number = 20;
+    const validator : IValidator = getValidator(schemaIndex);
+    
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder
+                                .setBody(new RequestMapping({
+                                    bar: [[{
+                                        baz: {
+                                            quux: 1
+                                        }
+                                    }]]
+                                }))
+                                .build();
+
+    assertValidResult(validator.validate(request));
+});
+
+
 test('Validates a request with an array that has a correct array', () => {
     const schemaIndex : number = 15;
     const validator : IValidator = getValidator(schemaIndex);

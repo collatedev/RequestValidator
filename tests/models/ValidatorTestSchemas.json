@@ -209,6 +209,28 @@
                     }
                 }
             }
+        },
+        {
+            "types": {
+                "body": {
+                    "bar": {
+                        "type": "array[array[foo]]",
+                        "required": true
+                    }
+                },
+                "foo": {
+                    "baz": {
+                        "type": "qux",
+                        "required": true
+                    }
+                },
+                "qux": {
+                    "quux": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
         }
     ]
 }
