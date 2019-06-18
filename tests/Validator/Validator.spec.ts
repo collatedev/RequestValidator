@@ -1,13 +1,13 @@
-import IValidator from '../src/IValidator';
-import IValidationResult from '../src/ValidationResult/IValidationResult';
-import Validator from '../src/Validator';
-import ValidationSchema from '../src/ValidationSchema/ValidationSchema';
-import IRequestBuilder from '../src/Request/IRequestBuilder';
-import RequestBuilder from '../src/Request/RequestBuilder';
-import IRequest from '../src/Request/IRequest';
-import RequestMapping from '../src/Request/RequestMapping';
+import IValidator from '../../src/Validator/IValidator';
+import IValidationResult from '../../src/ValidationResult/IValidationResult';
+import Validator from '../../src/Validator/Validator';
+import ValidationSchema from '../../src/ValidationSchema/ValidationSchema';
+import IRequestBuilder from '../../src/Request/IRequestBuilder';
+import RequestBuilder from '../../src/Request/RequestBuilder';
+import IRequest from '../../src/Request/IRequest';
+import RequestMapping from '../../src/Request/RequestMapping';
 
-import ValidatorTestSchemas from './models/ValidatorTestSchemas.json';
+import ValidatorTestSchemas from '../models/ValidatorTestSchemas.json';
 
 test('Validates empty body', () => {
     const schemaIndex : number = 0;
