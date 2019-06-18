@@ -79,9 +79,9 @@ export default class Validator implements IValidator {
 	}
 
 	private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
-		for (const key of mapping.keys()) {
-			if (!type.hasField(key)) {
-				this.addError(`Unexpected property '${key}'`);
+		for (const field of mapping.keys()) {
+			if (!type.hasField(field)) {
+				this.addError(`Unexpected property '${field}'`);
 			}
 		}
 	}
