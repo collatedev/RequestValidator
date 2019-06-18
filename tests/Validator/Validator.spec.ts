@@ -41,7 +41,7 @@ test('Validates a request body with a missing property', () => {
                                 .setBody(new RequestMapping({}))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Missing property foo");
+    assertResultHasError(validator.validate(request), "body", "Missing property 'foo'");
 });
 
 test('Validates a request body with an optional property', () => {
@@ -65,7 +65,7 @@ test('Validates a request cookies with a missing property', () => {
                                 .setCookies(new RequestMapping({}))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "cookies", "Missing property foo");
+    assertResultHasError(validator.validate(request), "cookies", "Missing property 'foo'");
 });
 
 test('Validates a request cookies with an optional property', () => {
@@ -89,7 +89,7 @@ test('Validates a requests headers with a missing property', () => {
                                 .setHeaders(new RequestMapping({}))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "headers", "Missing property foo");
+    assertResultHasError(validator.validate(request), "headers", "Missing property 'foo'");
 });
 
 test('Validates a request headers with an optional property', () => {
@@ -113,7 +113,7 @@ test('Validates a request params with a missing property', () => {
                                 .setParams(new RequestMapping({}))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "params", "Missing property foo");
+    assertResultHasError(validator.validate(request), "params", "Missing property 'foo'");
 });
 
 test('Validates a request params with an optional property', () => {
@@ -137,7 +137,7 @@ test('Validates a request query with a missing property', () => {
                                 .setQuery(new RequestMapping({}))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "query", "Missing property foo");
+    assertResultHasError(validator.validate(request), "query", "Missing property 'foo'");
 });
 
 test('Validates a request query with an optional property', () => {
@@ -158,7 +158,7 @@ test('Validates a request thats missing a body', () => {
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
 
-    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing body");
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing 'body'");
 });
 
 test('Validates a request thats missing cookies', () => {
@@ -167,7 +167,7 @@ test('Validates a request thats missing cookies', () => {
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
 
-    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing cookies");
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing 'cookies'");
 });
 
 test('Validates a request thats missing headers', () => {
@@ -176,7 +176,7 @@ test('Validates a request thats missing headers', () => {
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
 
-    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing headers");
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing 'headers'");
 });
 
 test('Validates a request thats missing params', () => {
@@ -185,7 +185,7 @@ test('Validates a request thats missing params', () => {
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
 
-    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing params");
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing 'params'");
 });
 
 test('Validates a request thats missing query', () => {
@@ -194,7 +194,7 @@ test('Validates a request thats missing query', () => {
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
 
-    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing query");
+    assertResultHasError(validator.validate(requestBuilder.build()), "[Request]", "Request is missing 'query'");
 });
 
 test('Validates a request body with extra properties', () => {
@@ -278,7 +278,7 @@ test('Validates a request with incorrect enum value', () => {
                                 }))
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body.bar", `Enum 'bar' must have one of these values 'A, B'`);
+    assertResultHasError(validator.validate(request), "body.bar", `Enum 'bar' must have one of these values [A, B]`);
 });
 
 test('Validates a request with correct enum type', () => {
@@ -405,7 +405,7 @@ test('Validates a request with an array that has nested arrays of enums with ill
     assertResultHasError(
         validator.validate(request), 
         "body.bar[0][0]", 
-        "Enum 'bar' must have one of these values 'A, B'"
+        "Enum 'bar' must have one of these values [A, B]"
     );
 });
 

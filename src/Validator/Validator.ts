@@ -5,55 +5,49 @@ import IRequest from "../Request/IRequest";
 import ValidationResult from "../ValidationResult/ValidationResult";
 import IRequestMapping from "../Request/IRequestMapping";
 import ITypeConfiguration from "../ValidationSchema/ITypeConfiguration";
-import IValidationError from "../ValidationResult/IValidationError";
 import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
 import RequestMapping from "../Request/RequestMapping";
 import PropertyPathComponent from "../PathBuilder/PropertyPathComponent";
 import IndexPathComponent from "../PathBuilder/IndexPathComponent";
 import IPathBuilder from "../PathBuilder/IPathBuilder";
 import PathBuilder from "../PathBuilder/PathBuilder";
+import IErrorHandler from "./IErrorHandler";
+import ErrorHandler from "./ErrorHandler";
 
 export default class Validator implements IValidator {
 	private readonly schema : IValidationSchema;
 
-	private errors : IValidationError[];
+	private errorHandler : IErrorHandler;
 	private pathBuilder : IPathBuilder;
 
 	constructor(schema : IValidationSchema) {
 		this.schema = schema;
-		this.errors = [];
 		this.pathBuilder = new PathBuilder();
+		this.errorHandler = new ErrorHandler(this.pathBuilder);
 	}
 
 	public validate(request : IRequest) : IValidationResult {
-		this.errors = [];
 		this.pathBuilder = new PathBuilder();
+		this.errorHandler = new ErrorHandler(this.pathBuilder);
 
 		this.handleRootTypes("body", request.getBody());
 		this.handleRootTypes("cookies", request.getCookies());
 		this.handleRootTypes("headers", request.getHeaders());
 		this.handleRootTypes("params", request.getParams());
 		this.handleRootTypes("query", request.getQuery());
-		return new ValidationResult(this.errors.length === 0, this.errors);
+		return new ValidationResult(!this.errorHandler.hasErrors(), this.errorHandler.getErrors());
 	}
 
 	private handleRootTypes(typeName : string, mapping : IRequestMapping | null) : void {
 		this.pathBuilder.addPathComponent(new PropertyPathComponent(typeName));
 		if (this.schema.hasType(typeName)) {
 			if (mapping === null) {
-				this.addErrorWithLocation(`Request is missing ${typeName}`, "[Request]");
+				this.errorHandler.addRootError(typeName);
 			} else {
 				this.handleType(typeName, mapping);
 			}
 		}
 		this.pathBuilder.popComponent();
-	}
-
-	private addErrorWithLocation(message : string, location : string) : void {
-		this.errors.push({
-			message,
-			location
-		});
 	}
 
 	private handleType(typeName : string, mapping : IRequestMapping) : void {
@@ -69,19 +63,15 @@ export default class Validator implements IValidator {
 			const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
 			// Adds an error if and only if the mapping is missing a field and that the missing field is required
 			if (!mapping.has(field) && fieldConfiguration.required) {
-				this.addError(`Missing property ${field}`);
+				this.errorHandler.addMisingPropertyError(field);
 			}
 		}   
-	}
-
-	private addError(message : string) : void {
-		this.addErrorWithLocation(message, this.pathBuilder.getPath());
 	}
 
 	private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
 		for (const field of mapping.keys()) {
 			if (!type.hasField(field)) {
-				this.addError(`Unexpected property '${field}'`);
+				this.errorHandler.addUnexpectedPropertyError(field);
 			}
 		}
 	}
@@ -109,30 +99,29 @@ export default class Validator implements IValidator {
 		fieldConfiguration : IFieldConfiguration, types : string[],
 		nestedType : string
 	) : void {
-		const message : string = `Property '${fieldName}${this.pathBuilder.getCurrentIndex()}' should be type '${fieldType}'`;
 		if (this.isArray(fieldType)) {
 			if (!Array.isArray(value)) {
-				this.addError(message);
+				this.errorHandler.addTypeError(fieldName, fieldType);
 			} else {
 				this.checkTypesOfArrayElements(types, value, fieldName, fieldConfiguration);
 			}
 		} else if (this.isEnum(fieldType)) {
 			if (!this.isTypeOf('string', value)) {
-				this.addError(message);
+				this.errorHandler.addTypeError(fieldName, fieldType);
 			} else {
 				const enumValues : string[] = fieldConfiguration.values as string[];
 				if (!enumValues.includes(value)) {
-					this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
+					this.errorHandler.addEnumValueError(fieldName, enumValues);
 				}
 			}
 		} else if (this.isUserDefinedType(fieldType)) {
 			if (!this.isTypeOf('object', value)) {
-				this.addError(message);
+				this.errorHandler.addTypeError(fieldName, fieldType);
 			} else {
 				this.handleType(nestedType, new RequestMapping(value));
 			}
 		} else if (this.isPrimative(fieldType) && !this.isTypeOf(fieldType, value)) {
-			this.addError(message);
+			this.errorHandler.addTypeError(fieldName, fieldType);
 		}
 	}
 
