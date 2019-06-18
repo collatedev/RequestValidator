@@ -109,7 +109,10 @@ export default class Validator implements IValidator {
 				const fieldType : string = fieldConfiguration.type;
 				const message : string = `Property '${fieldName}' should be type '${fieldType}'`;
 
-				this.typeCheck(fieldType, value, fieldName, fieldConfiguration, message);
+				this.typeCheck(
+					fieldType, value, fieldName, fieldConfiguration, 
+					message, this.parseArrayType(fieldType), fieldConfiguration.type
+				);
 
 				this.path.pop();
 			}
@@ -117,13 +120,15 @@ export default class Validator implements IValidator {
 	}
 
 	private typeCheck(
-		fieldType : string, value : any, fieldName : string, fieldConfiguration : IFieldConfiguration, message : string
+		fieldType : string, value : any, fieldName : string, 
+		fieldConfiguration : IFieldConfiguration, message : string, types : string[],
+		nestedType : string
 	) : void {
 		if (this.isArray(fieldType)) {
 			if (!Array.isArray(value)) {
 				this.addError(message);
 			} else {
-				this.checkTypesOfArrayElements(this.parseArrayType(fieldType), value, fieldName, fieldConfiguration);
+				this.checkTypesOfArrayElements(types, value, fieldName, fieldConfiguration);
 			}
 		} else if (this.isEnum(fieldType)) {
 			if (!this.isTypeOf('string', value)) {
@@ -138,7 +143,7 @@ export default class Validator implements IValidator {
 			if (!this.isTypeOf('object', value)) {
 				this.addError(message);
 			} else {
-				this.handleType(fieldConfiguration.type, new RequestMapping(value));
+				this.handleType(nestedType, new RequestMapping(value));
 			}
 		} else if (this.isPrimative(fieldType) && !this.isTypeOf(fieldType, value)) {
 			this.addError(message);
@@ -176,30 +181,32 @@ export default class Validator implements IValidator {
 			const message : string = `Property '${fieldName}${this.getIndex()}' should be type '${type}'`;
 			const removedType : string = types.shift() as string;
 
-			if (this.isArray(type)) {
-				if (!Array.isArray(values[i])) {
-					this.addError(message);
-				} else {
-					this.checkTypesOfArrayElements(types, values[i], fieldName, fieldConfiguration);
-				}
-			} else if (this.isEnum(type)) {
-				if (!this.isTypeOf('string', values[i])) {
-					this.addError(message);
-				} else {
-					const enumValues : string[] = fieldConfiguration.values as string[];
-					if (!enumValues.includes(values[i])) {
-						this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
-					}
-				}
-			} else if (this.isUserDefinedType(type)) {
-				if (!this.isTypeOf('object', values[i])) {
-					this.addError(message);
-				} else {
-					this.handleType(type, new RequestMapping(values[i]));
-				}
-			} else if (this.isPrimative(type) && !this.isTypeOf(type, values[i])) {
-				this.addError(message);
-			}
+			this.typeCheck(type, values[i], fieldName, fieldConfiguration, message, types, type);
+
+			// if (this.isArray(type)) {
+			// 	if (!Array.isArray(values[i])) {
+			// 		this.addError(message);
+			// 	} else {
+			// 		this.checkTypesOfArrayElements(types, values[i], fieldName, fieldConfiguration);
+			// 	}
+			// } else if (this.isEnum(type)) {
+			// 	if (!this.isTypeOf('string', values[i])) {
+			// 		this.addError(message);
+			// 	} else {
+			// 		const enumValues : string[] = fieldConfiguration.values as string[];
+			// 		if (!enumValues.includes(values[i])) {
+			// 			this.addError(`Enum '${fieldName}' must have one of these values '${enumValues.join(", ")}'`);
+			// 		}
+			// 	}
+			// } else if (this.isUserDefinedType(type)) {
+			// 	if (!this.isTypeOf('object', values[i])) {
+			// 		this.addError(message);
+			// 	} else {
+			// 		this.handleType(type, new RequestMapping(values[i]));
+			// 	}
+			// } else if (this.isPrimative(type) && !this.isTypeOf(type, values[i])) {
+			// 	this.addError(message);
+			// }
 			
 			types.unshift(removedType);
 			this.path.pop();
