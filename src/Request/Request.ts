@@ -1,19 +1,20 @@
 import IRequest from "./IRequest";
 import IRequestMapping from "./IRequestMapping";
+import RequestMapping from "./RequestMapping";
 
 export default class Request implements IRequest {
-    private readonly body : IRequestMapping | null;
-    private readonly cookies : IRequestMapping | null;
-    private readonly headers : IRequestMapping | null;
-    private readonly params : IRequestMapping | null;
-    private readonly query : IRequestMapping | null;
+    private readonly body : any;
+    private readonly cookies : any;
+    private readonly headers : any;
+    private readonly params : any;
+    private readonly query : any;
 
     constructor(
-        body : IRequestMapping | null, 
-        cookies : IRequestMapping | null, 
-        headers : IRequestMapping | null, 
-        params : IRequestMapping | null, 
-        query : IRequestMapping | null
+        body : any, 
+        cookies : any, 
+        headers : any, 
+        params : any, 
+        query : any
     ) {
         this.body = body;
         this.cookies = cookies;
@@ -22,25 +23,23 @@ export default class Request implements IRequest {
         this.query = query;
     }
 
-    public getBody(): IRequestMapping | null {
-        return this.body;
-    }
-    
-    public getCookies(): IRequestMapping | null {
-        return this.cookies;
-    }
-    
-    public getHeaders(): IRequestMapping | null {
-        return this.headers;
-    }
-    
-    public getParams(): IRequestMapping | null {
-        return this.params;
-    }
-    
-    public getQuery(): IRequestMapping | null {
-        return this.query;
-    }
-
-
+	public getRequest() : IRequestMapping {
+		const json : any = {};
+		if (this.body) {
+			json.body = this.body;
+		}
+		if (this.cookies) {
+			json.cookies = this.cookies;
+		}
+		if (this.headers) {
+			json.headers = this.headers;
+		}
+		if (this.params) {
+			json.params = this.params;
+		}
+		if (this.query) {
+			json.query = this.query;
+		}
+		return new RequestMapping(json);
+	}
 }

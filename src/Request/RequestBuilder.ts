@@ -1,14 +1,13 @@
 import IRequestBuilder from "./IRequestBuilder";
-import IRequestMapping from "./IRequestMapping";
 import IRequest from "./IRequest";
 import Request from "./Request";
 
 export default class RequestBuilder implements IRequestBuilder {
-    private body : IRequestMapping | null;
-    private cookies : IRequestMapping | null;
-    private headers : IRequestMapping | null;
-    private params : IRequestMapping | null;
-    private query : IRequestMapping | null;
+    private body : any;
+    private cookies : any;
+    private headers : any;
+    private params : any;
+    private query : any;
 
     constructor() {
         this.body = null;
@@ -18,27 +17,27 @@ export default class RequestBuilder implements IRequestBuilder {
         this.query = null;
     }
 
-    public setBody(body: IRequestMapping | null): IRequestBuilder {
+    public setBody(body: any): IRequestBuilder {
         this.body = body;
         return this;
     }    
     
-    public setCookies(cookies: IRequestMapping | null): IRequestBuilder {
+    public setCookies(cookies: any): IRequestBuilder {
         this.cookies = cookies;
         return this;
     }
 
-    public setHeaders(headers: IRequestMapping | null): IRequestBuilder {
+    public setHeaders(headers: any): IRequestBuilder {
         this.headers = headers;
         return this;
     }
 
-    public setParams(params: IRequestMapping | null): IRequestBuilder {
+    public setParams(params: any): IRequestBuilder {
         this.params = params;
         return this;
     }
 
-    public setQuery(query: IRequestMapping | null): IRequestBuilder {
+    public setQuery(query: any): IRequestBuilder {
         this.query = query;
         return this;
     }

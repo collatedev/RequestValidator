@@ -17,6 +17,8 @@ import IType from "../TypeChecker/IType";
 import Type from "../TypeChecker/Type";
 import ArrayType from "../TypeChecker/ArrayType";
 
+const RootType : string = "request";
+
 export default class Validator implements IValidator {
 	private readonly schema : IValidationSchema;
 
@@ -33,24 +35,12 @@ export default class Validator implements IValidator {
 		this.pathBuilder = new PathBuilder();
 		this.errorHandler = new ErrorHandler(this.pathBuilder);
 
-		this.handleRootTypes("body", request.getBody());
-		this.handleRootTypes("cookies", request.getCookies());
-		this.handleRootTypes("headers", request.getHeaders());
-		this.handleRootTypes("params", request.getParams());
-		this.handleRootTypes("query", request.getQuery());
-		return new ValidationResult(this.errorHandler);
-	}
-
-	private handleRootTypes(typeName : string, mapping : IRequestMapping | null) : void {
-		this.pathBuilder.addPathComponent(new PropertyPathComponent(typeName));
-		if (this.schema.hasType(typeName)) {
-			if (mapping === null) {
-				this.errorHandler.addRootError(typeName);
-			} else {
-				this.handleType(typeName, mapping);
-			}
+		if (!this.schema.hasType(RootType)) {
+			this.errorHandler.addRootError(RootType);
 		}
-		this.pathBuilder.popComponent();
+		this.handleType(RootType, request.getRequest());
+
+		return new ValidationResult(this.errorHandler);
 	}
 
 	private handleType(typeName : string, mapping : IRequestMapping) : void {

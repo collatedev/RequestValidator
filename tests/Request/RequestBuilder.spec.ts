@@ -4,36 +4,37 @@ import IRequestMapping from "../../src/Request/IRequestMapping";
 import RequestBuilder from "../../src/Request/RequestBuilder";
 import RequestMapping from "../../src/Request/RequestMapping";
 
-const EmptyMapping : IRequestMapping | null = null;
-const TestMapping : IRequestMapping | null = new RequestMapping({
+const TestJSON : any = {
     foo: 1
-});
+};
 
 test('creates an empty request', () => {
     const builder : IRequestBuilder = new RequestBuilder();
 
-    const request : IRequest = builder.build();
+	const request : IRequest = builder.build();
+	
+	const expectedRequest : IRequestMapping = new RequestMapping({});
 
-    expect(request.getBody()).toEqual(EmptyMapping);
-    expect(request.getCookies()).toEqual(EmptyMapping);
-    expect(request.getHeaders()).toEqual(EmptyMapping);
-    expect(request.getParams()).toEqual(EmptyMapping);
-    expect(request.getQuery()).toEqual(EmptyMapping);
+    expect(request.getRequest()).toEqual(expectedRequest);
 });
 
 test('creates a full request', () => {
     const builder : IRequestBuilder = new RequestBuilder();
 
-    const request : IRequest = builder.setBody(TestMapping)
-                                        .setCookies(TestMapping)
-                                        .setHeaders(TestMapping)
-                                        .setParams(TestMapping)
-                                        .setQuery(TestMapping)
-                                        .build();
+    const request : IRequest = builder.setBody(TestJSON)
+                                        .setCookies(TestJSON)
+                                        .setHeaders(TestJSON)
+                                        .setParams(TestJSON)
+                                        .setQuery(TestJSON)
+										.build();
+										
+	const expectedRequest : IRequestMapping = new RequestMapping({
+		body: TestJSON,
+		cookies: TestJSON,
+		headers: TestJSON,
+		params: TestJSON,
+		query: TestJSON
+	});
 
-    expect(request.getBody()).toEqual(TestMapping);
-    expect(request.getCookies()).toEqual(TestMapping);
-    expect(request.getHeaders()).toEqual(TestMapping);
-    expect(request.getParams()).toEqual(TestMapping);
-    expect(request.getQuery()).toEqual(TestMapping);
+    expect(request.getRequest()).toEqual(expectedRequest);
 });

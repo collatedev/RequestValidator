@@ -39,11 +39,14 @@ function testRequest(
     params : IRequestMapping, 
     query : IRequestMapping
 ) : void {
-    const request : IRequest = new Request(body, cookies, headers, params, query);
+	const request : IRequest = new Request(body, cookies, headers, params, query);
+	const mapping : IRequestMapping = new RequestMapping({
+		body,
+		cookies,
+		headers,
+		params,
+		query
+	});
 
-    expect(request.getBody()).toEqual(body);
-    expect(request.getCookies()).toEqual(cookies);
-    expect(request.getHeaders()).toEqual(headers);
-    expect(request.getParams()).toEqual(params);
-    expect(request.getQuery()).toEqual(query);
+    expect(request.getRequest()).toEqual(mapping);
 }

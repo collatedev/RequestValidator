@@ -1,11 +1,10 @@
-import IRequestMapping from "./IRequestMapping";
 import IRequest from "./IRequest";
 
 export default interface IRequestBuilder {
-    setBody(body : IRequestMapping | null) : IRequestBuilder;
-    setCookies(cookies : IRequestMapping | null) : IRequestBuilder;
-    setHeaders(headers : IRequestMapping | null) : IRequestBuilder;
-    setParams(params : IRequestMapping | null) : IRequestBuilder;
-    setQuery(query : IRequestMapping | null) : IRequestBuilder;
+    setBody(body : any) : IRequestBuilder;
+    setCookies(cookies : any) : IRequestBuilder;
+    setHeaders(headers : any) : IRequestBuilder;
+    setParams(params : any) : IRequestBuilder;
+    setQuery(query : any) : IRequestBuilder;
     build() : IRequest;
 }

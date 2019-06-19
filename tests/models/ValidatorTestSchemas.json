@@ -2,22 +2,18 @@
     "schemas": [
         {
             "types": {
-                "body": {
-                }
+				"request": {
+				}
             }
         },
         {
             "types": {
-                "body": {
-                    "foo": {
-                        "type": "number",
-                        "required": true
-                    }
-                }
-            }
-        },
-        {
-            "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "foo": {
                         "type": "number",
@@ -28,6 +24,28 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
+                "body": {
+                    "foo": {
+                        "type": "number",
+                        "required": true
+                    }
+                }
+            }
+        },
+        {
+            "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "foo": {
                         "type": "number",
@@ -38,86 +56,12 @@
         },
         {
             "types": {
-                "cookies": {
-                    "foo": {
-                        "type": "number",
-                        "required": true
-                    }
-                }
-            }
-        },
-        {
-            "types": {
-                "cookies": {
-                    "foo": {
-                        "type": "number",
-                        "required": false
-                    }
-                }
-            }
-        },
-        {
-            "types": {
-                "headers": {
-                    "foo": {
-                        "type": "number",
-                        "required": true
-                    }
-                }
-            }
-        },
-        {
-            "types": {
-                "headers": {
-                    "foo": {
-                        "type": "number",
-                        "required": false
-                    }
-                }
-            }
-        },
-        {
-            "types": {
-                "params": {
-                    "foo": {
-                        "type": "number",
-                        "required": true
-                    }
-                }
-            }
-        },
-        {
-            "types": {
-                "params": {
-                    "foo": {
-                        "type": "number",
-                        "required": false
-                    }
-                }
-            }
-        },
-        {
-            "types": {
-                "query": {
-                    "foo": {
-                        "type": "number",
-                        "required": true
-                    }
-                }
-            }
-        },
-        {
-            "types": {
-                "query": {
-                    "foo": {
-                        "type": "number",
-                        "required": false
-                    }
-                }
-            }
-        },
-        {
-            "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "bar": {
                         "type": "string",
@@ -128,6 +72,12 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "bar": {
                         "type": "boolean",
@@ -138,6 +88,12 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "bar": {
                         "type": "enum",
@@ -149,6 +105,12 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "bar": {
                         "type": "array[string]",
@@ -159,6 +121,12 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "foo": {
                         "type": "bar",
@@ -175,6 +143,12 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "bar": {
                         "type": "array[array[string]]",
@@ -185,6 +159,12 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "bar": {
                         "type": "array[array[enum]]",
@@ -196,6 +176,12 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "bar": {
                         "type": "array[array[foo]]",
@@ -212,6 +198,12 @@
         },
         {
             "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
                 "body": {
                     "bar": {
                         "type": "array[array[foo]]",
@@ -231,6 +223,32 @@
                     }
                 }
             }
-        }
+		},
+		{
+            "types": {
+				"request": {
+					"body": {
+						"type": "body",
+						"required": true
+					}
+				},
+				"body": {
+					"foo": {
+						"type": "number",
+						"required": true
+					}
+				}
+            }
+		},
+		{
+			"types": {
+				"request": {
+					"body": {
+						"type": "number",
+						"required": true
+					}
+				}
+			}
+		}
     ]
 }
