@@ -100,15 +100,8 @@ export default class Validator implements IValidator {
 			} else {
 				this.checkTypesOfArrayElements(type.arrayStructure(), value, fieldName, type.configuration());
 			}
-		} else if (this.isEnum(type.getType())) {
-			if (!this.isTypeOf('string', value)) {
-				this.errorHandler.addTypeError(fieldName, type.getType());
-			} else {
-				const enumValues : string[] = type.configuration().values as string[];
-				if (!enumValues.includes(value)) {
-					this.errorHandler.addEnumValueError(fieldName, enumValues);
-				}
-			}
+		} else if (this.isEnum(type.getType()) && !this.isTypeOf('string', value)) {
+			this.errorHandler.addTypeError(fieldName, type.getType());
 		} else if (this.isUserDefinedType(type.getType())) {
 			if (!this.isTypeOf('object', value)) {
 				this.errorHandler.addTypeError(fieldName, type.getType());
