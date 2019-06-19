@@ -13,7 +13,9 @@ import IPathBuilder from "../PathBuilder/IPathBuilder";
 import PathBuilder from "../PathBuilder/PathBuilder";
 import IErrorHandler from "./IErrorHandler";
 import ErrorHandler from "./ErrorHandler";
-import ParseArrayElementType from "./ParseArrayElementType";
+import IType from "../TypeChecker/IType";
+import Type from "../TypeChecker/Type";
+import ArrayType from "../TypeChecker/ArrayType";
 
 export default class Validator implements IValidator {
 	private readonly schema : IValidationSchema;
@@ -83,46 +85,38 @@ export default class Validator implements IValidator {
 				this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
 				const fieldConfiguration : IFieldConfiguration = type.getConfiguration(fieldName);
 				const value : any = mapping.value(fieldName);
-				const fieldType : string = fieldConfiguration.type;
 
-				this.typeCheck(
-					fieldType, value, fieldName, fieldConfiguration, 
-					ParseArrayElementType.parse(fieldType), fieldType
-				);
+				this.typeCheck(fieldName, value, new Type(fieldConfiguration));
 
 				this.pathBuilder.popComponent();
 			}
 		}
 	}
 
-	private typeCheck(
-		fieldType : string, value : any, fieldName : string, 
-		fieldConfiguration : IFieldConfiguration, types : string[],
-		nestedType : string
-	) : void {
-		if (this.isArray(fieldType)) {
+	private typeCheck(fieldName : string, value : any, type : IType) : void {
+		if (this.isArray(type.getType())) {
 			if (!Array.isArray(value)) {
-				this.errorHandler.addTypeError(fieldName, fieldType);
+				this.errorHandler.addTypeError(fieldName, type.getType());
 			} else {
-				this.checkTypesOfArrayElements(types, value, fieldName, fieldConfiguration);
+				this.checkTypesOfArrayElements(type.arrayStructure(), value, fieldName, type.configuration());
 			}
-		} else if (this.isEnum(fieldType)) {
+		} else if (this.isEnum(type.getType())) {
 			if (!this.isTypeOf('string', value)) {
-				this.errorHandler.addTypeError(fieldName, fieldType);
+				this.errorHandler.addTypeError(fieldName, type.getType());
 			} else {
-				const enumValues : string[] = fieldConfiguration.values as string[];
+				const enumValues : string[] = type.configuration().values as string[];
 				if (!enumValues.includes(value)) {
 					this.errorHandler.addEnumValueError(fieldName, enumValues);
 				}
 			}
-		} else if (this.isUserDefinedType(fieldType)) {
+		} else if (this.isUserDefinedType(type.getType())) {
 			if (!this.isTypeOf('object', value)) {
-				this.errorHandler.addTypeError(fieldName, fieldType);
+				this.errorHandler.addTypeError(fieldName, type.getType());
 			} else {
-				this.handleType(nestedType, new RequestMapping(value));
+				this.handleType(type.getType(), new RequestMapping(value));
 			}
-		} else if (this.isPrimative(fieldType) && !this.isTypeOf(fieldType, value)) {
-			this.errorHandler.addTypeError(fieldName, fieldType);
+		} else if (this.isPrimative(type.getType()) && !this.isTypeOf(type.getType(), value)) {
+			this.errorHandler.addTypeError(fieldName, type.getType());
 		}
 	}
 
@@ -135,10 +129,10 @@ export default class Validator implements IValidator {
 	) : void {
 		for (let i : number = 0; i < values.length; i++) {
 			this.pathBuilder.addPathComponent(new IndexPathComponent(i));
-			const type : string = types[0];
+			const type : ArrayType = new ArrayType(fieldConfiguration, types);
 			const removedType : string = types.shift() as string;
 
-			this.typeCheck(type, values[i], fieldName, fieldConfiguration, types, type);
+			this.typeCheck(fieldName, values[i], type);
 			
 			types.unshift(removedType);
 			this.pathBuilder.popComponent();

@@ -1,14 +1,15 @@
 import IType from "./IType";
 import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
-import ParseArrayElementType from "../Validator/ParseArrayElementType";
 
-export default class Type implements IType {
+export default class ArrayType implements IType {
     private _configuration : IFieldConfiguration;
     private _arrayStructure : string[];
+    private _nestedType : string;
 
-    constructor(configuration : IFieldConfiguration) {
+    constructor(configuration : IFieldConfiguration, arrayStructure : string[]) {
         this._configuration = configuration;
-        this._arrayStructure = ParseArrayElementType.parse(this._configuration.type);
+        this._arrayStructure = arrayStructure;
+        this._nestedType = arrayStructure[0];
     }
 
     public arrayStructure() : string[] {
@@ -16,7 +17,7 @@ export default class Type implements IType {
     }
 
     public getType() : string {
-        return this._configuration.type;
+        return this._nestedType;
     }
 
     public configuration() : IFieldConfiguration {
