@@ -27,7 +27,11 @@ export default class TypeConfiguration implements ITypeConfiguration {
             keys.push(key);
         }
         return keys;
-    }    
+    }
+    
+    public hasField(field : string) : boolean {
+        return this.fields.has(field);   
+    }
     
     public getConfiguration(field: string): IFieldConfiguration {
         if (!this.fields.has(field)) {

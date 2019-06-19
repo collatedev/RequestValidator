@@ -1,45 +1,43 @@
 import IRequestBuilder from "./IRequestBuilder";
-import IRequestMapping from "./IRequestMapping";
 import IRequest from "./IRequest";
 import Request from "./Request";
-import RequestMapping from "./RequestMapping";
 
 export default class RequestBuilder implements IRequestBuilder {
-    private body : IRequestMapping;
-    private cookies : IRequestMapping;
-    private headers : IRequestMapping;
-    private params : IRequestMapping;
-    private query : IRequestMapping;
+    private body : any;
+    private cookies : any;
+    private headers : any;
+    private params : any;
+    private query : any;
 
     constructor() {
-        this.body = new RequestMapping({});
-        this.cookies = new RequestMapping({});
-        this.headers = new RequestMapping({});
-        this.params = new RequestMapping({});
-        this.query = new RequestMapping({});
+        this.body = null;
+        this.cookies = null;
+        this.headers = null;
+        this.params = null;
+        this.query = null;
     }
 
-    public setBody(body: IRequestMapping): IRequestBuilder {
+    public setBody(body: any): IRequestBuilder {
         this.body = body;
         return this;
     }    
     
-    public setCookies(cookies: IRequestMapping): IRequestBuilder {
+    public setCookies(cookies: any): IRequestBuilder {
         this.cookies = cookies;
         return this;
     }
 
-    public setHeaders(headers: IRequestMapping): IRequestBuilder {
+    public setHeaders(headers: any): IRequestBuilder {
         this.headers = headers;
         return this;
     }
 
-    public setParams(params: IRequestMapping): IRequestBuilder {
+    public setParams(params: any): IRequestBuilder {
         this.params = params;
         return this;
     }
 
-    public setQuery(query: IRequestMapping): IRequestBuilder {
+    public setQuery(query: any): IRequestBuilder {
         this.query = query;
         return this;
     }

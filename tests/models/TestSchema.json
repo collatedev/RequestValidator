@@ -33,6 +33,10 @@
             "foo": {
                 "required": true,
                 "type": "bar"
+            },
+            "qux": {
+                "required": true,
+                "type": "array[string]"
             }
         },
         "bar": {

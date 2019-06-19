@@ -26,6 +26,20 @@ test('Fails to create a validation schema due to null "types"', () => {
     expect(createValidationSchema({ types: null })).toThrow(IllegalSchemaError);
 });
 
+test('Should throw an exception due to getting a type that does not exist', () => {
+    const json : any = {
+        types: {
+
+        }
+    };
+
+    const schema : IValidationSchema = new ValidationSchema(json);
+
+    expect(() : void => {
+        schema.getTypeConfiguration("foo");
+    }).toThrow(IllegalSchemaError);
+});
+
 test('Creates a validation schema', () => {
     const json : any = {
         types: {
@@ -99,9 +113,129 @@ test('Fails to create a validation schema due to undefined type', () => {
     expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
 });
 
+test('Fails to create a validation schema due to illegal array definition', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array"
+                }
+            }
+        }
+    };
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
+test('Fails to create a validation schema due to illegal array definition', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array[]"
+                }
+            }
+        }
+    };
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
+test('Fails to create a validation schema due to illegal array definition', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array[[a]"
+                }
+            }
+        }
+    };
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
+test('Fails to create a validation schema due to illegal array definition', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array[a]]"
+                }
+            }
+        }
+    };
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
+test('Fails to create a validation schema due to illegal array definition', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array[[a]]"
+                }
+            }
+        }
+    };
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
+test('Fails to create a validation schema due to illegal array definition', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array[array[string]a]"
+                }
+            }
+        }
+    };
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
+test('Fails to create a validation schema due to illegal array definition', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array[array[array[string]a]"
+                }
+            }
+        }
+    };
+    expect(createValidationSchema(json)).toThrow(IllegalSchemaError);
+});
+
+test('Creates validation schema with nested array', () => {
+    const json : any = {
+        types: {
+            body: {
+                foo: {
+                    required: true,
+                    type: "array[array[string]]"
+                }
+            }
+        }
+    };
+    
+    const schema : IValidationSchema = new ValidationSchema(json);
+    const bodyType : ITypeConfiguration = schema.getTypeConfiguration("body");
+    const fieldType : IFieldConfiguration = bodyType.getConfiguration("foo");
+
+    expect(fieldType.type).toEqual("array[array[string]]");
+    expect(fieldType.required).toBeTruthy();
+});
+
 test('Should create a schema from the TestSchema json file', () => {
     const schema : IValidationSchema = new ValidationSchema(TestSchema);
     const MaxLeaseSeconds : number = 864000;
+    const BodySize : number = 7;
+    const SecretLength : number = 16;
 
     const bodyType : ITypeConfiguration = schema.getTypeConfiguration("body");
     const hubModeField : IFieldConfiguration = bodyType.getConfiguration("hub.mode");
@@ -110,8 +244,19 @@ test('Should create a schema from the TestSchema json file', () => {
     const hubTopicField : IFieldConfiguration = bodyType.getConfiguration("hub.topic");
     const hubSecretField : IFieldConfiguration = bodyType.getConfiguration("hub.secret");
     const fooField : IFieldConfiguration = bodyType.getConfiguration("foo");
+    const quxField : IFieldConfiguration = bodyType.getConfiguration("qux");
+
     const barType : ITypeConfiguration = schema.getTypeConfiguration("bar");
     const bazField : IFieldConfiguration = barType.getConfiguration("baz");
+
+    expect(bodyType.getFields()).toHaveLength(BodySize);
+    expect(bodyType.hasField("hub.mode")).toBeTruthy();
+    expect(bodyType.hasField("hub.lease_seconds")).toBeTruthy();
+    expect(bodyType.hasField("hub.callback")).toBeTruthy();
+    expect(bodyType.hasField("hub.topic")).toBeTruthy();
+    expect(bodyType.hasField("hub.secret")).toBeTruthy();
+    expect(bodyType.hasField("foo")).toBeTruthy();
+    expect(bodyType.hasField("qux")).toBeTruthy();
 
     expect(hubModeField.type).toEqual("enum");
     expect(hubModeField.values).toEqual([
@@ -130,10 +275,16 @@ test('Should create a schema from the TestSchema json file', () => {
     expect(hubTopicField.isURL).toBeTruthy();
     expect(hubTopicField.startsWith).toEqual("https://api.twitch.tv/helix/");
     expect(hubSecretField.type).toEqual("string");
-    expect(hubSecretField.length).toEqual(16);
+    expect(hubSecretField.length).toEqual(SecretLength);
     expect(hubSecretField.required).toBeTruthy();
     expect(fooField.type).toEqual("bar");
     expect(fooField.required).toBeTruthy();
+    expect(quxField.type).toEqual("array[string]");
+    expect(quxField.required).toBeTruthy();
+
+    expect(barType.getFields()).toHaveLength(1);
+    expect(barType.hasField("baz")).toBeTruthy();
+
     expect(bazField.type).toEqual("number");
     expect(bazField.required).toBeFalsy();
 });

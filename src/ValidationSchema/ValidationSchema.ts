@@ -5,8 +5,8 @@ import TypeConfiguration from "./TypeConfiguration";
 import IFieldConfiguration from "./IFieldConfiguration";
 
 const ValidPrimativeTypes : string[] = [
-    "array", "string", "number", "boolean", "enum"
-]
+    "string", "number", "boolean", "enum"
+];
 
 export default class ValidationSchema implements IValidationSchema {
     private types : Map<string, ITypeConfiguration>;
@@ -39,11 +39,45 @@ export default class ValidationSchema implements IValidationSchema {
             const typeConfiguration : ITypeConfiguration = this.getTypeConfiguration(type);
             for (const field of typeConfiguration.getFields()) {
                 const fieldConfiguration : IFieldConfiguration = typeConfiguration.getConfiguration(field);
-                if (!this.hasType(fieldConfiguration.type) && !ValidPrimativeTypes.includes(fieldConfiguration.type)) {
+                if (this.isUndefinedType(fieldConfiguration.type)) {
                     throw new IllegalSchemaError(`Undefined type: ${fieldConfiguration.type}`);
                 }
             }
         }
+    }
+
+    private isUndefinedType(type : string) : boolean {
+        return !this.hasType(type) && !ValidPrimativeTypes.includes(type) && !this.isArray(type);
+    }
+
+    private isArray(type : string) : boolean {
+        if (!type.startsWith("array[") || !type.endsWith("]")) {
+            return false;
+        }
+
+        let numberOfNestedArrays : number = 0;
+        while (type.includes("array[")) {
+            type = type.replace("array[", "");
+            numberOfNestedArrays++;
+        }
+
+        const closingBrackets : string = type.substring(type.indexOf("]"), type.length);
+        type = type.substring(0, type.indexOf("]"));
+
+        if (type.length === 0 || type.includes("[")) {
+            return false;
+        }
+
+        if (closingBrackets.length !== numberOfNestedArrays) {
+            return false;
+        }
+        
+        for (let i : number = 0; i < numberOfNestedArrays; i++) {
+            if (closingBrackets.charAt(i) !== ']') {
+                return false;
+            }
+        }
+        return true;
     }
 
     public getTypeConfiguration(type: string): ITypeConfiguration {

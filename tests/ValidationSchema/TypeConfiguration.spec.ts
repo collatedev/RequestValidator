@@ -11,6 +11,14 @@ test('Throws an error creating a type configuration due to illegal json', () => 
     expect(createType(1)).toThrow(IllegalSchemaError);
 });
 
+test('Should throw an error due to getting a field that does not exist on the type', () => {
+    const type : ITypeConfiguration = new TypeConfiguration({});
+
+    expect(() : void => {
+        type.getConfiguration("foo");
+    }).toThrow(IllegalSchemaError);
+});
+
 test('Creates an empty type', () => {
     const type : ITypeConfiguration = new TypeConfiguration({});
 
@@ -29,6 +37,7 @@ test('Creates a type with a field', () => {
     const fooField : IFieldConfiguration = type.getConfiguration("foo");
 
     expect(type.getFields()).toHaveLength(1);
+    expect(type.hasField("foo")).toBeTruthy();
     expect(fooField).not.toBeNull();
     expect(fooField.required).toBeTruthy();
     expect(fooField.type).toEqual("string");
