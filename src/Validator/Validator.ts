@@ -11,11 +11,12 @@ import PropertyPathComponent from "../PathBuilder/PropertyPathComponent";
 import IndexPathComponent from "../PathBuilder/IndexPathComponent";
 import IPathBuilder from "../PathBuilder/IPathBuilder";
 import PathBuilder from "../PathBuilder/PathBuilder";
-import IErrorHandler from "./IErrorHandler";
-import ErrorHandler from "./ErrorHandler";
+import IErrorHandler from "../ErrorHandler/IErrorHandler";
+import ValidatorErrorHandler from "../ErrorHandler/ValidatorErrorHandler";
 import IType from "../TypeChecker/IType";
 import Type from "../TypeChecker/Type";
 import ArrayType from "../TypeChecker/ArrayType";
+import ErrorType from "../ErrorHandler/ErrorType";
 
 const RootType : string = "request";
 
@@ -28,27 +29,27 @@ export default class Validator implements IValidator {
 	constructor(schema : IValidationSchema) {
 		this.schema = schema;
 		this.pathBuilder = new PathBuilder();
-		this.errorHandler = new ErrorHandler(this.pathBuilder);
+		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
 	}
 
 	public validate(request : IRequest) : IValidationResult {
 		this.pathBuilder = new PathBuilder();
-		this.errorHandler = new ErrorHandler(this.pathBuilder);
+		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
 
-		if (!this.schema.hasType(RootType)) {
-			this.errorHandler.addRootError(RootType);
-		}
 		this.handleType(RootType, request.getRequest());
 
 		return new ValidationResult(this.errorHandler);
 	}
 
 	private handleType(typeName : string, mapping : IRequestMapping) : void {
-		const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
-		this.checkForMissingProperties(mapping, typeConfiguration);
-		this.checkForExtraProperties(mapping, typeConfiguration);
-		this.checkForIncorrectTypes(mapping, typeConfiguration);
-		// sanitize inputs
+		if (this.schema.hasType(typeName)) {
+			const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
+			this.checkForMissingProperties(mapping, typeConfiguration);
+			this.checkForExtraProperties(mapping, typeConfiguration);
+			this.checkForIncorrectTypes(mapping, typeConfiguration);
+		} else {
+			this.errorHandler.handleError([typeName], ErrorType.UnknownType);
+		}
 	}
 
 	private checkForMissingProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
@@ -56,7 +57,7 @@ export default class Validator implements IValidator {
 			const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
 			// Adds an error if and only if the mapping is missing a field and that the missing field is required
 			if (!mapping.has(field) && fieldConfiguration.required) {
-				this.errorHandler.addMisingPropertyError(field);
+				this.errorHandler.handleError([field], ErrorType.MissingField);
 			}
 		}   
 	}
@@ -64,7 +65,7 @@ export default class Validator implements IValidator {
 	private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
 		for (const field of mapping.keys()) {
 			if (!type.hasField(field)) {
-				this.errorHandler.addUnexpectedPropertyError(field);
+				this.errorHandler.handleError([field], ErrorType.UnexpectedField);
 			}
 		}
 	}
@@ -73,35 +74,28 @@ export default class Validator implements IValidator {
 		for (const fieldName of type.getFields()) {
 			if (type.hasField(fieldName) && mapping.has(fieldName)) {
 				this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
-				this.typeCheck(
-					fieldName,
-					mapping.value(fieldName), 
-					new Type(type.getConfiguration(fieldName))
-				);
+				this.typeCheck(fieldName, mapping.value(fieldName), new Type(type.getConfiguration(fieldName)));
 				this.pathBuilder.popComponent();
 			}
 		}
 	}
 
+	// Refactor type check to its own class?
 	private typeCheck(fieldName : string, value : any, type : IType) : void {
 		if (this.isArray(type.getType())) {
-			this.validateArray(fieldName, value, type);
+			this.typeCheckArray(fieldName, value, type);
 		} else if (this.isEnum(type.getType()) && !this.isTypeOf('string', value)) {
-			this.errorHandler.addTypeError(fieldName, type.getType());
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
 		} else if (this.isUserDefinedType(type.getType())) {
-			this.validateUserDefinedType(fieldName, value, type);
+			this.typeCheckUserDefinedType(fieldName, value, type);
 		} else if (this.isPrimative(type.getType()) && !this.isTypeOf(type.getType(), value)) {
-			this.errorHandler.addTypeError(fieldName, type.getType());
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
 		}
 	}
 
-	private isArray(fieldType : string) : boolean {
-		return fieldType.startsWith("array");
-	}
-
-	private validateArray(fieldName : string, value : any, type : IType) : void {
+	private typeCheckArray(fieldName : string, value : any, type : IType) : void {
 		if (!Array.isArray(value)) {
-			this.errorHandler.addTypeError(fieldName, type.getType());
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
 		} else {
 			this.checkTypesOfArrayElements(fieldName, value, type);
 		}
@@ -117,6 +111,20 @@ export default class Validator implements IValidator {
 			this.pathBuilder.popComponent();
 		}
 	}
+
+	private typeCheckUserDefinedType(fieldName : string, value : any, type : IType) : void {
+		if (!this.isTypeOf('object', value)) {
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
+		} else {
+			this.handleType(type.getType(), new RequestMapping(value));
+		}
+	}
+
+	// Probably need to refactor the type check methods to a seperate static class so that
+	// type checking and sanitizing can use it
+	private isArray(fieldType : string) : boolean {
+		return fieldType.startsWith("array");
+	}
 	
 	private isEnum(fieldType : string) : boolean {
 		return fieldType === "enum";
@@ -128,14 +136,6 @@ export default class Validator implements IValidator {
 
 	private isUserDefinedType(fieldType : string) : boolean {
 		return this.schema.hasType(fieldType);
-	}
-
-	private validateUserDefinedType(fieldName : string, value : any, type : IType) : void {
-		if (!this.isTypeOf('object', value)) {
-			this.errorHandler.addTypeError(fieldName, type.getType());
-		} else {
-			this.handleType(type.getType(), new RequestMapping(value));
-		}
 	}
 
 	private isPrimative(fieldType : string) : boolean {

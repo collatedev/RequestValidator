@@ -1,6 +1,6 @@
 import IValidationResult from "./IValidationResult";
 import IValidationError from "./IValidationError";
-import IErrorHandler from "../Validator/IErrorHandler";
+import IErrorHandler from "../ErrorHandler/IErrorHandler";
 
 export default class ValidationResult implements IValidationResult {
     private readonly _isValid : boolean;

@@ -17,6 +17,25 @@ test('Validates empty body', () => {
     assertValidResult(validator.validate(request));
 });
 
+test('Validates request with schema', () => {
+    const schemaIndex : number = 15;
+    const validator : IValidator = getValidator(schemaIndex);
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder.build();
+
+    assertResultHasError(validator.validate(request), "", "Unknown type 'request'");
+});
+
+
+test('Validates empty body', () => {
+    const schemaIndex : number = 0;
+    const validator : IValidator = getValidator(schemaIndex);
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder.build();
+
+    assertValidResult(validator.validate(request));
+});
+
 test('Validates a body that is a number', () => {
     const schemaIndex : number = 14;
     const validator : IValidator = getValidator(schemaIndex);
