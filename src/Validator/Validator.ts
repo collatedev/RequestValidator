@@ -17,6 +17,7 @@ import IType from "../TypeChecker/IType";
 import Type from "../TypeChecker/Type";
 import ArrayType from "../TypeChecker/ArrayType";
 import ErrorType from "../ErrorHandler/ErrorType";
+import TypeChecker from "../TypeChecker/TypeChecker";
 
 const RootType : string = "request";
 
@@ -80,17 +81,16 @@ export default class Validator implements IValidator {
 		}
 	}
 
-	// Refactor type check to its own class?
 	private typeCheck(fieldName : string, value : any, type : IType) : void {
-		if (this.isArray(type.getType())) {
+		if (TypeChecker.isPrimative(type.getType()) && !TypeChecker.isTypeOf(type.getType(), value)) {
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
+		} else if (TypeChecker.isEnum(type.getType()) && !TypeChecker.isTypeOf('string', value)) {
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
+		} else if (TypeChecker.isArray(type.getType())) {
 			this.typeCheckArray(fieldName, value, type);
-		} else if (this.isEnum(type.getType()) && !this.isTypeOf('string', value)) {
-			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
-		} else if (this.isUserDefinedType(type.getType())) {
+		} else if (this.schema.hasType(type.getType())) {
 			this.typeCheckUserDefinedType(fieldName, value, type);
-		} else if (this.isPrimative(type.getType()) && !this.isTypeOf(type.getType(), value)) {
-			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
-		}
+		} 
 	}
 
 	private typeCheckArray(fieldName : string, value : any, type : IType) : void {
@@ -113,32 +113,10 @@ export default class Validator implements IValidator {
 	}
 
 	private typeCheckUserDefinedType(fieldName : string, value : any, type : IType) : void {
-		if (!this.isTypeOf('object', value)) {
+		if (!TypeChecker.isTypeOf('object', value)) {
 			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
 		} else {
 			this.handleType(type.getType(), new RequestMapping(value));
 		}
-	}
-
-	// Probably need to refactor the type check methods to a seperate static class so that
-	// type checking and sanitizing can use it
-	private isArray(fieldType : string) : boolean {
-		return fieldType.startsWith("array");
-	}
-	
-	private isEnum(fieldType : string) : boolean {
-		return fieldType === "enum";
-	}
-
-	private isTypeOf(type : string, value : any) : boolean {
-		return typeof value === type;
-	}
-
-	private isUserDefinedType(fieldType : string) : boolean {
-		return this.schema.hasType(fieldType);
-	}
-
-	private isPrimative(fieldType : string) : boolean {
-		return fieldType === 'string' || fieldType === 'boolean' || fieldType === 'number';
 	}
 }

@@ -4,7 +4,7 @@ import IllegalSchemaError from "./IllegalSchemaError";
 import TypeConfiguration from "./TypeConfiguration";
 import IFieldConfiguration from "./IFieldConfiguration";
 
-const ValidPrimativeTypes : string[] = [
+const TypeNameKeywords : string[] = [
     "string", "number", "boolean", "enum"
 ];
 
@@ -47,7 +47,7 @@ export default class ValidationSchema implements IValidationSchema {
     }
 
     private isUndefinedType(type : string) : boolean {
-        return !this.hasType(type) && !ValidPrimativeTypes.includes(type) && !this.isArray(type);
+        return !this.hasType(type) && !TypeNameKeywords.includes(type) && !this.isArray(type);
     }
 
     private isArray(type : string) : boolean {
