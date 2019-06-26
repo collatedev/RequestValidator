@@ -1,21 +1,22 @@
 import ISanitizer from "./ISanitizer";
-import IValidationError from "../ValidationResult/IValidationError";
-import IValidationSchema from "../ValidationSchema/IValidationSchema";
 import IRequestMapping from "../Request/IRequestMapping";
 import ITypeConfiguration from "../ValidationSchema/ITypeConfiguration";
+import IValidationResult from "../ValidationResult/IValidationResult";
+import ValidationResult from "../ValidationResult/ValidationResult";
+import IErrorHandler from "../ErrorHandler/IErrorHandler";
+import IPathBuilder from "../PathBuilder/IPathBuilder";
+import ValidatorErrorHandler from "../ErrorHandler/ValidatorErrorHandler";
 
 export default class Santizer implements ISanitizer {
-    private readonly schema : IValidationSchema;
+    private result : IValidationResult;
+    private errorHandler : IErrorHandler;
 
-    constructor(schema : IValidationSchema) {
-        this.schema = schema;
+    constructor(pathBuilder : IPathBuilder) {
+        this.errorHandler = new ValidatorErrorHandler(pathBuilder);
+        this.result = new ValidationResult(this.errorHandler);
     }
 
-    public sanitize(mapping : IRequestMapping, type : ITypeConfiguration) : void {
-        throw new Error("Method not implemented");
-    }
-
-    public getErrors() : IValidationError[] {
-        throw new Error("Method not implemented");
+    public sanitize(mapping : IRequestMapping, type : ITypeConfiguration) : IValidationResult {
+        return this.result;
     }
 }

@@ -18,6 +18,8 @@ import Type from "../TypeChecker/Type";
 import ArrayType from "../TypeChecker/ArrayType";
 import ErrorType from "../ErrorHandler/ErrorType";
 import TypeChecker from "../TypeChecker/TypeChecker";
+import ISanitizer from "../Sanitizer/ISanitizer";
+import Santizer from "../Sanitizer/Sanitizer";
 
 const RootType : string = "request";
 
@@ -26,20 +28,26 @@ export default class Validator implements IValidator {
 
 	private errorHandler : IErrorHandler;
 	private pathBuilder : IPathBuilder;
+	private sanitizer : ISanitizer;
+	private result : IValidationResult;
 
 	constructor(schema : IValidationSchema) {
 		this.schema = schema;
 		this.pathBuilder = new PathBuilder();
+		this.sanitizer = new Santizer(this.pathBuilder);
 		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
+		this.result = new ValidationResult(this.errorHandler);
 	}
 
 	public validate(request : IRequest) : IValidationResult {
 		this.pathBuilder = new PathBuilder();
+		this.sanitizer = new Santizer(this.pathBuilder);
 		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
+		this.result = new ValidationResult(this.errorHandler);
 
 		this.handleType(RootType, request.getRequest());
 
-		return new ValidationResult(this.errorHandler);
+		return this.result;
 	}
 
 	private handleType(typeName : string, mapping : IRequestMapping) : void {
@@ -48,6 +56,7 @@ export default class Validator implements IValidator {
 			this.checkForMissingProperties(mapping, typeConfiguration);
 			this.checkForExtraProperties(mapping, typeConfiguration);
 			this.checkForIncorrectTypes(mapping, typeConfiguration);
+			this.sanitizer.sanitize(mapping, typeConfiguration);
 		} else {
 			this.errorHandler.handleError([typeName], ErrorType.UnknownType);
 		}

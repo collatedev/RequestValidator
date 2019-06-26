@@ -3,19 +3,17 @@ import IValidationError from "./IValidationError";
 import IErrorHandler from "../ErrorHandler/IErrorHandler";
 
 export default class ValidationResult implements IValidationResult {
-    private readonly _isValid : boolean;
-    private readonly _errors : IValidationError[];
+    private readonly errorHandler : IErrorHandler;
 
     constructor(errorHandler : IErrorHandler) {
-        this._isValid = !errorHandler.hasErrors();
-        this._errors = errorHandler.getErrors();
+        this.errorHandler = errorHandler;
     }
 
     public isValid(): boolean {
-        return this._isValid;
+        return !this.errorHandler.hasErrors();
     }   
     
     public errors(): IValidationError[] {
-        return this._errors;
+        return this.errorHandler.getErrors();
     }
 }
