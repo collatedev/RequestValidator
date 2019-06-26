@@ -87,7 +87,9 @@ export default class FieldConfiguration implements IFieldConfiguration {
     private getValues(field : any) : string[] | undefined {
         if (field.hasOwnProperty("values")) {
             if (this.type !== "enum" && !this.isArrayOfEnums()) {
-                throw new IllegalSchemaError('The key "values" can only be used when the type is \'enum\'');
+                throw new IllegalSchemaError(
+                    'The key "values" can only be used when the type is \'enum\''
+                );
             }
             if (!Array.isArray(field.values)) {
                 throw new IllegalSchemaError('The key "values" must be an array');

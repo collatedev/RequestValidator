@@ -47,6 +47,9 @@ export default class Santizer implements ISanitizer {
                 if (fieldConfiguration.type === "enum") {
                     this.sanitizeEnum(value, fieldConfiguration);
                 }
+                if (fieldConfiguration.type.startsWith("array")) {
+                    this.sanitizeArray(field, value, fieldConfiguration);
+                }
             }
         }
 
@@ -114,5 +117,11 @@ export default class Santizer implements ISanitizer {
 
     private isIllegalEnumValue(value : any, configuration : IFieldConfiguration) : boolean {
         return configuration.values !== undefined && !configuration.values.includes(value);
+    }
+
+    private sanitizeArray(field : string, value : any, configuration : IFieldConfiguration) : void {
+        if (this.isIllegalLength(value, configuration)) {
+            this.sanitizeIllegalLength(field, value, configuration);
+        }
     }
 }

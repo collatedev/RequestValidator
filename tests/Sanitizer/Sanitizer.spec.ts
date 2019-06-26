@@ -173,6 +173,38 @@ test("Sanitizes an enum with with an known enum value", () => {
     assertValidResult(sanitizer.sanitize(mapping, type));
 });
 
+test("Sanitizes an array with an incorrect length", () => {
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const mapping : IRequestMapping = new RequestMapping({
+        foo: ["foo"]
+    });
+    const type : ITypeConfiguration = new TypeConfiguration({
+        foo: {
+            type: "array[string]",
+            required: true,
+            length: 0
+        }
+    });
+
+    assertResultHasError(sanitizer.sanitize(mapping, type), "", "Length of 'foo' is 1 when it should be 0");
+});
+
+test("Sanitizes an array with a correct length", () => {
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const mapping : IRequestMapping = new RequestMapping({
+        foo: []
+    });
+    const type : ITypeConfiguration = new TypeConfiguration({
+        foo: {
+            type: "array[string]",
+            required: true,
+            length: 0
+        }
+    });
+
+    assertValidResult(sanitizer.sanitize(mapping, type));
+});
+
 function assertValidResult(result : IValidationResult) : void {
     expect(result.isValid()).toBeTruthy();
     expect(result.errors()).toHaveLength(0);

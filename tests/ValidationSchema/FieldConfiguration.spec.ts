@@ -114,7 +114,7 @@ test('It should create a field configuration with a range parameter', () => {
     expect(configuration.range[1]).toEqual(1);
 });
 
-test('It should fail to create a field configuration becuase values can only be used when the type is an enum', () => {
+test('It should fail to create a field configuration because values can only be used when the type is an enum', () => {
     expect(createField({
         type: "string",
         required: true,
