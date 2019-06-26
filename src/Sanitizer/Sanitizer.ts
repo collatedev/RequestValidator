@@ -41,7 +41,9 @@ export default class Santizer implements ISanitizer {
                 if (fieldConfiguration.type === "string") {
                     this.sanitizeString(field, value, fieldConfiguration);
                 }
-                
+                if (fieldConfiguration.type === "number") {
+                    this.sanitizeNumber(field, value, fieldConfiguration);
+                }
             }
         }
 
@@ -77,5 +79,21 @@ export default class Santizer implements ISanitizer {
 
     private isIllegalURL(value : any, configuration : IFieldConfiguration) : boolean {
         return configuration.isURL !== undefined && !urlRegex.test(value);
+    }
+
+    private sanitizeNumber(field : string, value : any, configuration : IFieldConfiguration) : void {
+        if (this.isOutOfRange(value, configuration)) {
+            // this joins the array as a string of the form "x, y". We know range is not undefined due to
+            // the isOutOfRangeMethod
+            const rangeString : string = (configuration.range as number[]).join(", ");
+            this.errorHandler.handleError(
+                [value, rangeString], 
+                ErrorType.OutOfRangeError
+            );
+        }
+    }
+
+    private isOutOfRange(value : any, configuration : IFieldConfiguration) : boolean {
+        return configuration.range !== undefined && (configuration.range[0] > value || configuration.range[1] < value);
     }
 }

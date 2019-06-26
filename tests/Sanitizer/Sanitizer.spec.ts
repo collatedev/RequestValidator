@@ -104,6 +104,39 @@ test("Sanitizes a string that is a url", () => {
     assertValidResult(sanitizer.sanitize(mapping, type));
 });
 
+test("Sanitizes a number with outside of the range", () => {
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const value : number = 2;
+    const mapping : IRequestMapping = new RequestMapping({
+        foo: value
+    });
+    const type : ITypeConfiguration = new TypeConfiguration({
+        foo: {
+            type: "number",
+            required: true,
+            range: [0, 1]
+        }
+    });
+
+    assertResultHasError(sanitizer.sanitize(mapping, type), "", "Value '2' is outside of the range [0, 1]");
+});
+
+test("Sanitizes a number within the range", () => {
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const mapping : IRequestMapping = new RequestMapping({
+        foo: 1
+    });
+    const type : ITypeConfiguration = new TypeConfiguration({
+        foo: {
+            type: "number",
+            required: true,
+            range: [0, 1]
+        }
+    });
+
+    assertValidResult(sanitizer.sanitize(mapping, type));
+});
+
 function assertValidResult(result : IValidationResult) : void {
     expect(result.isValid()).toBeTruthy();
     expect(result.errors()).toHaveLength(0);
