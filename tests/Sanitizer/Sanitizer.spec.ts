@@ -137,6 +137,42 @@ test("Sanitizes a number within the range", () => {
     assertValidResult(sanitizer.sanitize(mapping, type));
 });
 
+test("Sanitizes an enum with with an unknown enum value", () => {
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const mapping : IRequestMapping = new RequestMapping({
+        foo: "A"
+    });
+    const type : ITypeConfiguration = new TypeConfiguration({
+        foo: {
+            type: "enum",
+            required: true,
+            values: ["foo", "bar"]
+        }
+    });
+
+    assertResultHasError(
+        sanitizer.sanitize(mapping, type),
+        "", 
+        "Illegal enum value 'A', acceptable values are 'foo, bar'"
+    );
+});
+
+test("Sanitizes an enum with with an known enum value", () => {
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const mapping : IRequestMapping = new RequestMapping({
+        foo: "A"
+    });
+    const type : ITypeConfiguration = new TypeConfiguration({
+        foo: {
+            type: "enum",
+            required: true,
+            values: ["A", "B"]
+        }
+    });
+
+    assertValidResult(sanitizer.sanitize(mapping, type));
+});
+
 function assertValidResult(result : IValidationResult) : void {
     expect(result.isValid()).toBeTruthy();
     expect(result.errors()).toHaveLength(0);

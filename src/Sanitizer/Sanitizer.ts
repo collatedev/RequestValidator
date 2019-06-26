@@ -42,7 +42,10 @@ export default class Santizer implements ISanitizer {
                     this.sanitizeString(field, value, fieldConfiguration);
                 }
                 if (fieldConfiguration.type === "number") {
-                    this.sanitizeNumber(field, value, fieldConfiguration);
+                    this.sanitizeNumber(value, fieldConfiguration);
+                }
+                if (fieldConfiguration.type === "enum") {
+                    this.sanitizeEnum(value, fieldConfiguration);
                 }
             }
         }
@@ -81,7 +84,7 @@ export default class Santizer implements ISanitizer {
         return configuration.isURL !== undefined && !urlRegex.test(value);
     }
 
-    private sanitizeNumber(field : string, value : any, configuration : IFieldConfiguration) : void {
+    private sanitizeNumber(value : any, configuration : IFieldConfiguration) : void {
         if (this.isOutOfRange(value, configuration)) {
             // this joins the array as a string of the form "x, y". We know range is not undefined due to
             // the isOutOfRangeMethod
@@ -95,5 +98,21 @@ export default class Santizer implements ISanitizer {
 
     private isOutOfRange(value : any, configuration : IFieldConfiguration) : boolean {
         return configuration.range !== undefined && (configuration.range[0] > value || configuration.range[1] < value);
+    }
+
+    private sanitizeEnum(value : any, configuration : IFieldConfiguration) : void {
+        if (this.isIllegalEnumValue(value, configuration)) {
+            // this joins the array as a string of the form "EnumA, EnumB". We know values is not undefined due to
+            // the isIllegalEnumValue method
+            const enumString : string = (configuration.values as string[]).join(", ");
+            this.errorHandler.handleError(
+                [value, enumString], 
+                ErrorType.IllegalEnumValue
+            );
+        }
+    }
+
+    private isIllegalEnumValue(value : any, configuration : IFieldConfiguration) : boolean {
+        return configuration.values !== undefined && !configuration.values.includes(value);
     }
 }
