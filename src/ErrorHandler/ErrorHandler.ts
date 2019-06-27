@@ -32,4 +32,10 @@ export default abstract class ErrorHandler implements IErrorHandler {
     public getErrors(): IValidationError[] {
         return this.errors;
     }
+
+    public join(otherHandler : IErrorHandler) : void {
+        for (const error of otherHandler.getErrors()) {
+            this.errors.push(error);
+        }
+    }
 }

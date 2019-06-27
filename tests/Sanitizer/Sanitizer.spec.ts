@@ -1,157 +1,120 @@
 import Santizer from "../../src/Sanitizer/Sanitizer";
 import PathBuilder from "../../src/PathBuilder/PathBuilder";
-import IRequestMapping from "../../src/Request/IRequestMapping";
-import RequestMapping from "../../src/Request/RequestMapping";
-import ITypeConfiguration from "../../src/ValidationSchema/ITypeConfiguration";
-import TypeConfiguration from "../../src/ValidationSchema/TypeConfiguration";
 import IValidationResult from "../../src/ValidationResult/IValidationResult";
 import ISanitizer from "../../src/Sanitizer/ISanitizer";
+import FieldConfiguration from "../../src/ValidationSchema/FieldConfiguration";
+import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration";
 
 test("Sanitizes a string with valid length", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: "A"
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "string",
-            required: true,
-            length: 1
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "string",
+        required: true,
+        length: 1
     });
 
-    assertValidResult(sanitizer.sanitize(mapping, type));
+    assertValidResult(sanitizer.sanitize("foo", "A", configuration));
 });
 
 test("Sanitizes a string with invalid length", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: "A"
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "string",
-            required: true,
-            length: 0
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "string",
+        required: true,
+        length: 0
     });
 
-    assertResultHasError(sanitizer.sanitize(mapping, type), "", "Length of 'foo' is 1 when it should be 0");
+    assertResultHasError(sanitizer.sanitize("foo", "A", configuration), "", "Length of 'foo' is 1 when it should be 0");
 });
 
 test("Sanitizes a string that does not start with foo", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: "A"
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "string",
-            required: true,
-            startsWith: "foo"
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "string",
+        required: true,
+        startsWith: "foo"
     });
 
-    assertResultHasError(sanitizer.sanitize(mapping, type), "", "Value 'A' does not start with 'foo'");
+    assertResultHasError(sanitizer.sanitize("foo", "A", configuration), "", "Value 'A' does not start with 'foo'");
 });
 
 test("Sanitizes a string that does start with foo", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: "foo"
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "string",
-            required: true,
-            startsWith: "foo"
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "string",
+        required: true,
+        startsWith: "foo"
     });
 
-    assertValidResult(sanitizer.sanitize(mapping, type));
+    assertValidResult(sanitizer.sanitize("foo", "foo", configuration));
 });
 
 test("Sanitizes a string that is not a url", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: "A"
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "string",
-            required: true,
-            isURL: true
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "string",
+        required: true,
+        isURL: true
     });
 
-    assertResultHasError(sanitizer.sanitize(mapping, type), "", "Value 'A' is not a valid URL");
+    assertResultHasError(sanitizer.sanitize("foo", "A", configuration), "", "Value 'A' is not a valid URL");
 });
 
 test("Sanitizes a string that is a url", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: "http://res.cloudinary.com/hrscywv4p/image/upload/c_fill,g_faces:" +
-                "center,h_128,w_128/yflwk7vffgwyyenftkr7.png"
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "string",
-            required: true,
-            isURL: true
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "string",
+        required: true,
+        isURL: true
     });
 
-    assertValidResult(sanitizer.sanitize(mapping, type));
+    assertValidResult(
+        sanitizer.sanitize(
+            "foo", 
+            "http://res.cloudinary.com/hrscywv4p/image/upload/c_fill," +
+            "g_faces:center,h_128,w_128/yflwk7vffgwyyenftkr7.png", 
+            configuration
+        )
+    );
 });
 
 test("Sanitizes a number with outside of the range", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
     const value : number = 2;
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: value
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "number",
-            required: true,
-            range: [0, 1]
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "number",
+        required: true,
+        range: [0, 1]
     });
 
-    assertResultHasError(sanitizer.sanitize(mapping, type), "", "Value '2' is outside of the range [0, 1]");
+    assertResultHasError(
+        sanitizer.sanitize("foo", value, configuration), 
+        "", 
+        "Value '2' is outside of the range [0, 1]"
+    );
 });
 
 test("Sanitizes a number within the range", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: 1
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "number",
-            required: true,
-            range: [0, 1]
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "number",
+        required: true,
+        range: [0, 1]
     });
 
-    assertValidResult(sanitizer.sanitize(mapping, type));
+    assertValidResult(sanitizer.sanitize("foo", 1, configuration));
 });
 
 test("Sanitizes an enum with with an unknown enum value", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: "A"
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "enum",
-            required: true,
-            values: ["foo", "bar"]
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "enum",
+        required: true,
+        values: ["foo", "bar"]
     });
 
     assertResultHasError(
-        sanitizer.sanitize(mapping, type),
+        sanitizer.sanitize("foo", "A", configuration),
         "", 
         "Illegal enum value 'A', acceptable values are 'foo, bar'"
     );
@@ -159,50 +122,39 @@ test("Sanitizes an enum with with an unknown enum value", () => {
 
 test("Sanitizes an enum with with an known enum value", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: "A"
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "enum",
-            required: true,
-            values: ["A", "B"]
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "enum",
+        required: true,
+        values: ["A", "B"]
     });
 
-    assertValidResult(sanitizer.sanitize(mapping, type));
+    assertValidResult(sanitizer.sanitize("foo", "A", configuration));
 });
 
 test("Sanitizes an array with an incorrect length", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: ["foo"]
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "array[string]",
-            required: true,
-            length: 0
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "array[string]",
+        required: true,
+        length: 0
     });
 
-    assertResultHasError(sanitizer.sanitize(mapping, type), "", "Length of 'foo' is 1 when it should be 0");
+    assertResultHasError(
+        sanitizer.sanitize("foo", ["foo"], configuration), 
+        "", 
+        "Length of 'foo' is 1 when it should be 0"
+    );
 });
 
 test("Sanitizes an array with a correct length", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
-    const mapping : IRequestMapping = new RequestMapping({
-        foo: []
-    });
-    const type : ITypeConfiguration = new TypeConfiguration({
-        foo: {
-            type: "array[string]",
-            required: true,
-            length: 0
-        }
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "array[string]",
+        required: true,
+        length: 0
     });
 
-    assertValidResult(sanitizer.sanitize(mapping, type));
+    assertValidResult(sanitizer.sanitize("foo", [], configuration));
 });
 
 function assertValidResult(result : IValidationResult) : void {

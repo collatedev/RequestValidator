@@ -1,7 +1,6 @@
-import IRequestMapping from "../Request/IRequestMapping";
-import ITypeConfiguration from "../ValidationSchema/ITypeConfiguration";
 import IValidationResult from "../ValidationResult/IValidationResult";
+import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
 
 export default interface ISanitizer {
-    sanitize(mapping : IRequestMapping, type : ITypeConfiguration) : IValidationResult;
+    sanitize(fieldName : string, value : any, configuration : IFieldConfiguration) : IValidationResult;
 }

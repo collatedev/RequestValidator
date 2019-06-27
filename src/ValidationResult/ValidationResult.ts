@@ -16,4 +16,8 @@ export default class ValidationResult implements IValidationResult {
     public errors(): IValidationError[] {
         return this.errorHandler.getErrors();
     }
+
+    public join(validationResult : ValidationResult) : void {
+        this.errorHandler.join(validationResult.errorHandler);
+    }
 }

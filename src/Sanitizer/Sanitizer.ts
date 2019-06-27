@@ -1,6 +1,4 @@
 import ISanitizer from "./ISanitizer";
-import IRequestMapping from "../Request/IRequestMapping";
-import ITypeConfiguration from "../ValidationSchema/ITypeConfiguration";
 import IValidationResult from "../ValidationResult/IValidationResult";
 import ValidationResult from "../ValidationResult/ValidationResult";
 import IErrorHandler from "../ErrorHandler/IErrorHandler";
@@ -29,28 +27,21 @@ export default class Santizer implements ISanitizer {
         this.result = new ValidationResult(this.errorHandler);
     }
 
-    public sanitize(mapping : IRequestMapping, type : ITypeConfiguration) : IValidationResult {
+    public sanitize(fieldName : string, value : any, configuration : IFieldConfiguration) : IValidationResult {
         this.errorHandler = new SanitizerErrorHandler(this.pathBuilder);
         this.result = new ValidationResult(this.errorHandler);
 
-        for (const field of mapping.keys()) {
-            if (type.hasField(field)) {
-                const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
-                const value : any = mapping.value(field);
-
-                if (fieldConfiguration.type === "string") {
-                    this.sanitizeString(field, value, fieldConfiguration);
-                }
-                if (fieldConfiguration.type === "number") {
-                    this.sanitizeNumber(value, fieldConfiguration);
-                }
-                if (fieldConfiguration.type === "enum") {
-                    this.sanitizeEnum(value, fieldConfiguration);
-                }
-                if (fieldConfiguration.type.startsWith("array")) {
-                    this.sanitizeArray(field, value, fieldConfiguration);
-                }
-            }
+        if (configuration.type === "string") {
+            this.sanitizeString(fieldName, value, configuration);
+        }
+        if (configuration.type === "number") {
+            this.sanitizeNumber(value, configuration);
+        }
+        if (configuration.type === "enum") {
+            this.sanitizeEnum(value, configuration);
+        }
+        if (configuration.type.startsWith("array")) {
+            this.sanitizeArray(fieldName, value, configuration);
         }
 
         return this.result;

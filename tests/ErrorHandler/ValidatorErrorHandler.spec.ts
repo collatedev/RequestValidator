@@ -90,6 +90,22 @@ test("Adds a type error to the error handler at an index", () => {
     expect(errorHandler.hasErrors()).toBeTruthy();
 });
 
+test("Joins two validation errors together", () => {
+    const errorHandlerA : IErrorHandler = new ValidatorErrorHandler(new PathBuilder());
+    const errorHandlerB : IErrorHandler = new ValidatorErrorHandler(new PathBuilder());
+
+    errorHandlerB.handleError(["bar", "string"], ErrorType.IncorrectType);
+
+    errorHandlerA.join(errorHandlerB);
+
+    const errors : IValidationError[] = errorHandlerA.getErrors();
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0].location).toEqual("");
+    expect(errors[0].message).toEqual("Property 'bar' should be type 'string'");
+    expect(errorHandlerA.hasErrors()).toBeTruthy();
+})
+
 test("Throws an expection when handling an unkown error type", () => {
     const pathBuilder : IPathBuilder = new PathBuilder();
     const errorHandler : IErrorHandler = new ValidatorErrorHandler(pathBuilder);

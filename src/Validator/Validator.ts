@@ -55,8 +55,7 @@ export default class Validator implements IValidator {
 			const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
 			this.checkForMissingProperties(mapping, typeConfiguration);
 			this.checkForExtraProperties(mapping, typeConfiguration);
-			this.checkForIncorrectTypes(mapping, typeConfiguration);
-			this.sanitizer.sanitize(mapping, typeConfiguration);
+			this.validateMapping(mapping, typeConfiguration);
 		} else {
 			this.errorHandler.handleError([typeName], ErrorType.UnknownType);
 		}
@@ -80,11 +79,15 @@ export default class Validator implements IValidator {
 		}
 	}
 
-	private checkForIncorrectTypes(mapping : IRequestMapping, type : ITypeConfiguration) : void {
+	private validateMapping(mapping : IRequestMapping, type : ITypeConfiguration) : void {
 		for (const fieldName of type.getFields()) {
 			if (type.hasField(fieldName) && mapping.has(fieldName)) {
+				const configuration : IFieldConfiguration = type.getConfiguration(fieldName);
+				const value : any = mapping.value(fieldName);
+
 				this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
-				this.typeCheck(fieldName, mapping.value(fieldName), new Type(type.getConfiguration(fieldName)));
+				this.typeCheck(fieldName, value, new Type(configuration));
+				this.result.join(this.sanitizer.sanitize(fieldName, value, configuration));
 				this.pathBuilder.popComponent();
 			}
 		}

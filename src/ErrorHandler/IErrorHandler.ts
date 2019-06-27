@@ -5,4 +5,5 @@ export default interface IErrorHandler {
     handleError(values: any[], type : ErrorType) : void;
     hasErrors() : boolean;
     getErrors() : IValidationError[];
+    join(otherHandler : IErrorHandler) : void;
 }
