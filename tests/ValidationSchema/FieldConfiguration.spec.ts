@@ -273,21 +273,39 @@ test('It should create a field configuration with length key for array type', ()
     const json : any = {
         type: "array[string]",
         required: false,
-        length: 1
+        arrayLengths: [1]
     };
 
     const configuration : IFieldConfiguration = new FieldConfiguration(json);
 
-    if (!configuration.length) {
+    if (!configuration.arrayLengths) {
         throw new Error("Length missing from configuration");
     }
 
     expect(configuration.required).toBeFalsy();
     expect(configuration.type).toEqual("array[string]");
-    expect(configuration.length).toEqual(1);
+    expect(configuration.arrayLengths).toEqual([1]);
 });
 
-test('It should fail to create a field configuration becuase the type is enum and its missing the "values" key', () => {
+test('It should create a field configuration with isURL key for array of string type', () => {
+    const json : any = {
+        type: "array[string]",
+        required: false,
+        isURL: true
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    if (!configuration.isURL) {
+        throw new Error("Length missing from configuration");
+    }
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("array[string]");
+    expect(configuration.isURL).toEqual(true);
+});
+
+test('It should fail to create a field configuration because the type is enum and its missing the "values" key', () => {
     expect(createField({
         type: "enum",
         required: true,
@@ -310,6 +328,24 @@ test('It should create a field configuration as the array is of type enum', () =
     expect(configuration.required).toBeTruthy();
     expect(configuration.type).toEqual("array[enum]");
     expect(configuration.values).toEqual(["A"]);
+});
+
+test('It should create a field configuration with arrayLengths key describing the array structure', () => {
+    const json : any = {
+        type: "array[string]",
+        required: false,
+        arrayLengths: [ 1 ]
+    };
+
+    const configuration : IFieldConfiguration = new FieldConfiguration(json);
+
+    if (!configuration.arrayLengths) {
+        throw new Error("Array lengths missing from configuration");
+    }
+
+    expect(configuration.required).toBeFalsy();
+    expect(configuration.type).toEqual("array[string]");
+    expect(configuration.arrayLengths).toEqual([1]);
 });
 
 function createField(json : any) : () => IFieldConfiguration {

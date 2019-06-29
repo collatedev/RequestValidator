@@ -17,7 +17,7 @@ import IType from "../TypeChecker/IType";
 import Type from "../TypeChecker/Type";
 import ArrayType from "../TypeChecker/ArrayType";
 import ErrorType from "../ErrorHandler/ErrorType";
-import TypeChecker from "../TypeChecker/TypeChecker";
+import IsType from "../TypeChecker/IsType";
 import ISanitizer from "../Sanitizer/ISanitizer";
 import Santizer from "../Sanitizer/Sanitizer";
 
@@ -79,26 +79,29 @@ export default class Validator implements IValidator {
 		}
 	}
 
-	private validateMapping(mapping : IRequestMapping, type : ITypeConfiguration) : void {
-		for (const fieldName of type.getFields()) {
-			if (type.hasField(fieldName) && mapping.has(fieldName)) {
-				const configuration : IFieldConfiguration = type.getConfiguration(fieldName);
+	private validateMapping(mapping : IRequestMapping, typeConfiguration : ITypeConfiguration) : void {
+		for (const fieldName of typeConfiguration.getFields()) {
+			if (typeConfiguration.hasField(fieldName) && mapping.has(fieldName)) {
+				const configuration : IFieldConfiguration = typeConfiguration.getConfiguration(fieldName);
 				const value : any = mapping.value(fieldName);
+				const typeDefinition : IType = new Type(configuration);
 
 				this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
-				this.typeCheck(fieldName, value, new Type(configuration));
-				this.result.join(this.sanitizer.sanitize(fieldName, value, configuration));
+				this.typeCheck(fieldName, value, typeDefinition);
+				this.result.join(this.sanitizer.sanitize(fieldName, value, new Type(configuration)));
 				this.pathBuilder.popComponent();
 			}
 		}
 	}
 
+	// Refactor type check to its own class because it is both type checking and recursing over the entire structure
+	// type check should type check and the validator should recurse over the structure
 	private typeCheck(fieldName : string, value : any, type : IType) : void {
-		if (TypeChecker.isPrimative(type.getType()) && !TypeChecker.isTypeOf(type.getType(), value)) {
+		if (IsType.isPrimative(type.getType()) && !IsType.isTypeOf(type.getType(), value)) {
 			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
-		} else if (TypeChecker.isEnum(type.getType()) && !TypeChecker.isTypeOf('string', value)) {
+		} else if (IsType.isEnum(type.getType()) && !IsType.isTypeOf('string', value)) {
 			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
-		} else if (TypeChecker.isArray(type.getType())) {
+		} else if (IsType.isArray(type.getType())) {
 			this.typeCheckArray(fieldName, value, type);
 		} else if (this.schema.hasType(type.getType())) {
 			this.typeCheckUserDefinedType(fieldName, value, type);
@@ -116,16 +119,18 @@ export default class Validator implements IValidator {
 	private checkTypesOfArrayElements(fieldName : string, values : any[], type : IType) : void {
 		for (let i : number = 0; i < values.length; i++) {
 			this.pathBuilder.addPathComponent(new IndexPathComponent(i));
+
 			const arrayType : ArrayType = new ArrayType(type.configuration(), type.arrayStructure());
 			const removedType : string = type.arrayStructure().shift() as string;
 			this.typeCheck(fieldName, values[i], arrayType);
 			type.arrayStructure().unshift(removedType);
+			
 			this.pathBuilder.popComponent();
 		}
 	}
 
 	private typeCheckUserDefinedType(fieldName : string, value : any, type : IType) : void {
-		if (!TypeChecker.isTypeOf('object', value)) {
+		if (!IsType.isTypeOf('object', value)) {
 			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
 		} else {
 			this.handleType(type.getType(), new RequestMapping(value));

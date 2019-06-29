@@ -6,4 +6,5 @@ export default interface IFieldConfiguration {
     isURL?: boolean;
     startsWith?: string;
     length?: number;
+    arrayLengths?: number[];
 }

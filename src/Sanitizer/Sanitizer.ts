@@ -6,6 +6,9 @@ import IPathBuilder from "../PathBuilder/IPathBuilder";
 import SanitizerErrorHandler from "../ErrorHandler/SanitizerErrorHandler";
 import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
 import ErrorType from "../ErrorHandler/ErrorType";
+import IndexPathComponent from "../PathBuilder/IndexPathComponent";
+import IType from "../TypeChecker/IType";
+import ArrayType from "../TypeChecker/ArrayType";
 
 const urlRegexPattern : string = 
 '^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]' +
@@ -27,62 +30,64 @@ export default class Santizer implements ISanitizer {
         this.result = new ValidationResult(this.errorHandler);
     }
 
-    public sanitize(fieldName : string, value : any, configuration : IFieldConfiguration) : IValidationResult {
+    public sanitize(fieldName : string, value : any, type : IType) : IValidationResult {
         this.errorHandler = new SanitizerErrorHandler(this.pathBuilder);
         this.result = new ValidationResult(this.errorHandler);
 
-        if (configuration.type === "string") {
-            this.sanitizeString(fieldName, value, configuration);
-        }
-        if (configuration.type === "number") {
-            this.sanitizeNumber(value, configuration);
-        }
-        if (configuration.type === "enum") {
-            this.sanitizeEnum(value, configuration);
-        }
-        if (configuration.type.startsWith("array")) {
-            this.sanitizeArray(fieldName, value, configuration);
-        }
+        this.sanitizeValue(fieldName, value, type);
 
         return this.result;
     }
 
-    private sanitizeString(field: string, value : any, configuration : IFieldConfiguration) : void {
-        if (this.isIllegalLength(value, configuration)) {
-            this.sanitizeIllegalLength(field, value, configuration);
+    private sanitizeValue(fieldName : string, value : any, type : IType) : void {
+        if (type.getType() === "string") {
+            this.sanitizeString(fieldName, value, type);
         }
-        if (this.doesNotStartWith(value, configuration)) {
-            this.errorHandler.handleError([value, configuration.startsWith], ErrorType.DoesNotStartWithError);
+        if (type.getType() === "number") {
+            this.sanitizeNumber(value, type);
         }
-        if (this.isIllegalURL(value, configuration)) {
+        if (type.getType() === "enum") {
+            this.sanitizeEnum(value, type);
+        }
+        if (type.getType().startsWith("array")) {
+            this.sanitizeArray(fieldName, value, type);
+        }
+    }
+
+    private sanitizeString(field: string, value : any, type : IType) : void {
+        if (this.isIllegalLength(value, type)) {
+            this.errorHandler.handleError(
+                [field, value.length, type.configuration().length], 
+                ErrorType.IllegalLengthError
+            );
+        }
+        if (this.doesNotStartWith(value, type)) {
+            this.errorHandler.handleError([value, type.configuration().startsWith], ErrorType.DoesNotStartWithError);
+        }
+        if (this.isIllegalURL(value, type)) {
             this.errorHandler.handleError([value], ErrorType.IllegalURLError);
         }
     }
 
-    private isIllegalLength(value : any, configuration : IFieldConfiguration) : boolean {
+    private isIllegalLength(value : any, type : IType) : boolean {
+        const configuration : IFieldConfiguration = type.configuration();
         return configuration.length !== undefined && value.length !== configuration.length;
     }
 
-    private sanitizeIllegalLength(field : string , value : any, configuration : IFieldConfiguration) : void {
-        this.errorHandler.handleError(
-            [field, value.length, configuration.length], 
-            ErrorType.IllegalLengthError
-        );
-    }
-
-    private doesNotStartWith(value : any, configuration : IFieldConfiguration) : boolean {
+    private doesNotStartWith(value : any, type : IType) : boolean {
+        const configuration : IFieldConfiguration = type.configuration();
         return configuration.startsWith !== undefined && !value.startsWith(configuration.startsWith);
     }
 
-    private isIllegalURL(value : any, configuration : IFieldConfiguration) : boolean {
-        return configuration.isURL !== undefined && !urlRegex.test(value);
+    private isIllegalURL(value : any, type : IType) : boolean {
+        return type.configuration().isURL !== undefined && !urlRegex.test(value);
     }
 
-    private sanitizeNumber(value : any, configuration : IFieldConfiguration) : void {
-        if (this.isOutOfRange(value, configuration)) {
+    private sanitizeNumber(value : any, type : IType) : void {
+        if (this.isOutOfRange(value, type)) {
             // this joins the array as a string of the form "x, y". We know range is not undefined due to
             // the isOutOfRangeMethod
-            const rangeString : string = (configuration.range as number[]).join(", ");
+            const rangeString : string = (type.configuration().range as number[]).join(", ");
             this.errorHandler.handleError(
                 [value, rangeString], 
                 ErrorType.OutOfRangeError
@@ -90,15 +95,17 @@ export default class Santizer implements ISanitizer {
         }
     }
 
-    private isOutOfRange(value : any, configuration : IFieldConfiguration) : boolean {
-        return configuration.range !== undefined && (configuration.range[0] > value || configuration.range[1] < value);
+    private isOutOfRange(value : any, type : IType) : boolean {
+        const configuration : IFieldConfiguration = type.configuration();
+        return configuration.range !== undefined && 
+            (configuration.range[0] > value || configuration.range[1] < value);
     }
 
-    private sanitizeEnum(value : any, configuration : IFieldConfiguration) : void {
-        if (this.isIllegalEnumValue(value, configuration)) {
+    private sanitizeEnum(value : any, type : IType) : void {
+        if (this.isIllegalEnumValue(value, type)) {
             // this joins the array as a string of the form "EnumA, EnumB". We know values is not undefined due to
             // the isIllegalEnumValue method
-            const enumString : string = (configuration.values as string[]).join(", ");
+            const enumString : string = (type.configuration().values as string[]).join(", ");
             this.errorHandler.handleError(
                 [value, enumString], 
                 ErrorType.IllegalEnumValue
@@ -106,13 +113,33 @@ export default class Santizer implements ISanitizer {
         }
     }
 
-    private isIllegalEnumValue(value : any, configuration : IFieldConfiguration) : boolean {
+    private isIllegalEnumValue(value : any, type : IType) : boolean {
+        const configuration : IFieldConfiguration = type.configuration();
         return configuration.values !== undefined && !configuration.values.includes(value);
     }
 
-    private sanitizeArray(field : string, value : any, configuration : IFieldConfiguration) : void {
-        if (this.isIllegalLength(value, configuration)) {
-            this.sanitizeIllegalLength(field, value, configuration);
+    private sanitizeArray(field : string, value : any, type : IType) : void {
+        if (this.hasIllegalArrayLengths(value, type)) {
+            // send error
+        } else {
+            for (let i : number = 0; i < value.length; i++) {
+                this.pathBuilder.addPathComponent(new IndexPathComponent(i));
+
+                const arrayType : ArrayType = new ArrayType(type.configuration(), type.arrayStructure());
+                const removedType : string = type.arrayStructure().shift() as string;
+                this.sanitizeValue(field, value[i], arrayType);
+                type.arrayStructure().unshift(removedType);
+
+                this.pathBuilder.popComponent();
+            }
         }
+    }
+
+    private hasIllegalArrayLengths(value : any, type : IType) : boolean {
+        const configuration : IFieldConfiguration = type.configuration();
+        if (configuration.arrayLengths === undefined) {
+            return false;
+        }
+        return true;
     }
 }

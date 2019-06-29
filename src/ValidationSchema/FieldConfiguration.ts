@@ -3,7 +3,7 @@ import IllegalSchemaError from "./IllegalSchemaError";
 
 const RangeLength : number = 2;
 const ValidKeys : string[] = [
-    "required", "type", "values", "range", "isURL", "startsWith", "length"
+    "required", "type", "values", "range", "isURL", "startsWith", "length", "arrayLengths"
 ];
 
 export default class FieldConfiguration implements IFieldConfiguration {
@@ -14,6 +14,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
     public readonly isURL? : boolean | undefined;
     public readonly startsWith? : string | undefined;
     public readonly length? : number | undefined;
+    public readonly arrayLengths? : number[] | undefined;
 
     constructor(field : any) {
         this.validateField(field);
@@ -27,6 +28,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
         this.isURL = this.getIsURL(field);
         this.startsWith = this.getStartsWith(field);
         this.length = this.getLength(field);
+        this.arrayLengths = this.getArrayLengths(field);
 
         if (this.type === "enum" && !this.values) {
             throw new IllegalSchemaError('The type "enum" requires a "values" key in its field definition');
@@ -86,7 +88,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
 
     private getValues(field : any) : string[] | undefined {
         if (field.hasOwnProperty("values")) {
-            if (this.type !== "enum" && !this.isArrayOfEnums()) {
+            if (this.type !== "enum" && !this.isArrayOf("enum")) {
                 throw new IllegalSchemaError(
                     'The key "values" can only be used when the type is \'enum\''
                 );
@@ -107,16 +109,12 @@ export default class FieldConfiguration implements IFieldConfiguration {
         return undefined;
     }
 
-    private isArrayOfEnums() : boolean {
-        return this.type.startsWith("array") && this.type.includes("enum");
-    }
-
     private getIsURL(field : any) : boolean | undefined {
         if (field.hasOwnProperty("isURL")) {
             if (typeof field.isURL !== "boolean") {
                 throw new IllegalSchemaError('The key "isURL" must be a boolean');
             }
-            if (this.type !== "string") {
+            if (this.type !== "string" && !this.isArrayOf("string")) {
                 throw new IllegalSchemaError('The key "isURL" can only be used when the type is \'string\'');
             }
             return field.isURL as boolean;
@@ -142,13 +140,32 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (typeof field.length !== 'number') {
                 throw new IllegalSchemaError('The key "length" must be a number');
             }
-            if (this.type !== 'string' && !this.type.startsWith('array')) {
+            if (this.type !== 'string') {
                 throw new IllegalSchemaError(
-                    'The key "length" can only be used when the type is \'string\' or \'array\''
+                    'The key "length" can only be used when the type is \'string\''
                 );
             }
             return field.length as number;
         }
         return undefined;
+    }
+
+    private getArrayLengths(field : any) : number[] | undefined {
+        if (field.hasOwnProperty("arrayLengths")) {
+            if (!Array.isArray(field.arrayLengths)) {
+                throw new IllegalSchemaError('The key "arrayLengths" must be an array');
+            }
+            if (!this.type.startsWith('array')) {
+                throw new IllegalSchemaError(
+                    'The key "length" can only be used when the type is \'array\''
+                );
+            }
+            return field.arrayLengths as number[];
+        }
+        return undefined;
+    }
+
+    private isArrayOf(baseType : string) : boolean {
+        return this.type.startsWith("array") && this.type.includes(baseType);
     }
 }

@@ -4,6 +4,7 @@ import IValidationResult from "../../src/ValidationResult/IValidationResult";
 import ISanitizer from "../../src/Sanitizer/ISanitizer";
 import FieldConfiguration from "../../src/ValidationSchema/FieldConfiguration";
 import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration";
+import Type from "../../src/TypeChecker/Type";
 
 test("Sanitizes a string with valid length", () => {
     const sanitizer : ISanitizer = new Santizer(new PathBuilder());
@@ -13,7 +14,7 @@ test("Sanitizes a string with valid length", () => {
         length: 1
     });
 
-    assertValidResult(sanitizer.sanitize("foo", "A", configuration));
+    assertValidResult(sanitizer.sanitize("foo", "A", new Type(configuration)));
 });
 
 test("Sanitizes a string with invalid length", () => {
@@ -24,7 +25,9 @@ test("Sanitizes a string with invalid length", () => {
         length: 0
     });
 
-    assertResultHasError(sanitizer.sanitize("foo", "A", configuration), "", "Length of 'foo' is 1 when it should be 0");
+    assertResultHasError(
+        sanitizer.sanitize("foo", "A", new Type(configuration)), "", "Length of 'foo' is 1 when it should be 0"
+    );
 });
 
 test("Sanitizes a string that does not start with foo", () => {
@@ -35,7 +38,9 @@ test("Sanitizes a string that does not start with foo", () => {
         startsWith: "foo"
     });
 
-    assertResultHasError(sanitizer.sanitize("foo", "A", configuration), "", "Value 'A' does not start with 'foo'");
+    assertResultHasError(
+        sanitizer.sanitize("foo", "A", new Type(configuration)), "", "Value 'A' does not start with 'foo'"
+    );
 });
 
 test("Sanitizes a string that does start with foo", () => {
@@ -46,7 +51,7 @@ test("Sanitizes a string that does start with foo", () => {
         startsWith: "foo"
     });
 
-    assertValidResult(sanitizer.sanitize("foo", "foo", configuration));
+    assertValidResult(sanitizer.sanitize("foo", "foo", new Type(configuration)));
 });
 
 test("Sanitizes a string that is not a url", () => {
@@ -57,7 +62,7 @@ test("Sanitizes a string that is not a url", () => {
         isURL: true
     });
 
-    assertResultHasError(sanitizer.sanitize("foo", "A", configuration), "", "Value 'A' is not a valid URL");
+    assertResultHasError(sanitizer.sanitize("foo", "A", new Type(configuration)), "", "Value 'A' is not a valid URL");
 });
 
 test("Sanitizes a string that is a url", () => {
@@ -73,7 +78,7 @@ test("Sanitizes a string that is a url", () => {
             "foo", 
             "http://res.cloudinary.com/hrscywv4p/image/upload/c_fill," +
             "g_faces:center,h_128,w_128/yflwk7vffgwyyenftkr7.png", 
-            configuration
+            new Type(configuration)
         )
     );
 });
@@ -88,7 +93,7 @@ test("Sanitizes a number with outside of the range", () => {
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", value, configuration), 
+        sanitizer.sanitize("foo", value, new Type(configuration)), 
         "", 
         "Value '2' is outside of the range [0, 1]"
     );
@@ -102,7 +107,7 @@ test("Sanitizes a number within the range", () => {
         range: [0, 1]
     });
 
-    assertValidResult(sanitizer.sanitize("foo", 1, configuration));
+    assertValidResult(sanitizer.sanitize("foo", 1, new Type(configuration)));
 });
 
 test("Sanitizes an enum with with an unknown enum value", () => {
@@ -114,7 +119,7 @@ test("Sanitizes an enum with with an unknown enum value", () => {
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", "A", configuration),
+        sanitizer.sanitize("foo", "A", new Type(configuration)),
         "", 
         "Illegal enum value 'A', acceptable values are 'foo, bar'"
     );
@@ -128,7 +133,7 @@ test("Sanitizes an enum with with an known enum value", () => {
         values: ["A", "B"]
     });
 
-    assertValidResult(sanitizer.sanitize("foo", "A", configuration));
+    assertValidResult(sanitizer.sanitize("foo", "A", new Type(configuration)));
 });
 
 test("Sanitizes an array with an incorrect length", () => {
@@ -136,11 +141,11 @@ test("Sanitizes an array with an incorrect length", () => {
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "array[string]",
         required: true,
-        length: 0
+        arrayLengths: [0]
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", ["foo"], configuration), 
+        sanitizer.sanitize("foo", ["foo"], new Type(configuration)), 
         "", 
         "Length of 'foo' is 1 when it should be 0"
     );
@@ -151,10 +156,25 @@ test("Sanitizes an array with a correct length", () => {
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "array[string]",
         required: true,
-        length: 0
+        arrayLengths: [0]
     });
 
-    assertValidResult(sanitizer.sanitize("foo", [], configuration));
+    assertValidResult(sanitizer.sanitize("foo", [], new Type(configuration)));
+});
+
+test("Sanitizes an array with a string that is not a url", () => {
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "array[string]",
+        required: true,
+        isURL: true
+    });
+
+    assertResultHasError(
+        sanitizer.sanitize("foo", ["http://foo.com", "bar"], new Type(configuration)),
+        "[1]",
+        "Value 'bar' is not a valid URL"
+    );
 });
 
 function assertValidResult(result : IValidationResult) : void {

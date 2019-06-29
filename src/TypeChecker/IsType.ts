@@ -1,4 +1,4 @@
-export default class TypeChecker {
+export default class IsType {
     public static readonly RootType : string = "request";
 
     private static readonly PrimativeTypes : string[] = ["string", "boolean", "number"];
