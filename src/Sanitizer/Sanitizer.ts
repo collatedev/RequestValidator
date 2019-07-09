@@ -139,7 +139,28 @@ export default class Santizer implements ISanitizer {
         const configuration : IFieldConfiguration = type.configuration();
         if (configuration.arrayLengths === undefined) {
             return false;
-        }
-        return true;
+		}
+		if (value.length !== configuration.arrayLengths[0]) {
+			return true;
+		}
+
+		const valueCopy : any[] = new Array(value);
+		const arrayStack : any[] = valueCopy.pop();
+		let depth : number = 1;
+		while (arrayStack.length > 0) {
+			const array : any[] = arrayStack.pop();
+			if (Array.isArray(array)) {
+				if (array.length !== configuration.arrayLengths[depth]) {
+					return true;
+				}
+				for (const nestedValue of array) {
+					if (Array.isArray(nestedValue)) {
+						arrayStack.push(nestedValue);
+					}
+				}
+				depth++;
+			}
+		}
+        return false;
     }
 }
