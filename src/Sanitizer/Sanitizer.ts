@@ -11,15 +11,7 @@ import IType from "../TypeChecker/IType";
 import INestedArray from "../NestedArray/INestedArray";
 import NestedArray from "../NestedArray/NestedArray";
 import ArrayType from "../TypeChecker/ArrayType";
-
-const urlRegexPattern : string = 
-'^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]' +
-'\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\' +
-'d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00' +
-'a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localho' +
-'st)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$';
-
-const urlRegex : RegExp = new RegExp(urlRegexPattern, 'i');
+import URLChecker from "./URLChecker";
 
 export default class Santizer implements ISanitizer {
     private result : IValidationResult;
@@ -66,7 +58,7 @@ export default class Santizer implements ISanitizer {
         if (this.doesNotStartWith(value, type)) {
             this.errorHandler.handleError([value, type.configuration().startsWith], ErrorType.DoesNotStartWithError);
         }
-        if (this.isIllegalURL(value, type)) {
+        if (URLChecker.isURL(value, type)) {
             this.errorHandler.handleError([value], ErrorType.IllegalURLError);
         }
     }
@@ -79,10 +71,6 @@ export default class Santizer implements ISanitizer {
     private doesNotStartWith(value : any, type : IType) : boolean {
         const configuration : IFieldConfiguration = type.configuration();
         return configuration.startsWith !== undefined && !value.startsWith(configuration.startsWith);
-    }
-
-    private isIllegalURL(value : any, type : IType) : boolean {
-        return type.configuration().isURL !== undefined && !urlRegex.test(value);
     }
 
     private sanitizeNumber(value : any, type : IType) : void {
