@@ -5,6 +5,7 @@ import ITypeConfiguration from "../../src/ValidationSchema/ITypeConfiguration";
 import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration";
 
 import TestSchema from '../models/TestSchema.json';
+import TypeConfiguration from "../../src/ValidationSchema/TypeConfiguration";
 
 test('Fails to create a validation schema due to null json', () => {
     expect(createValidationSchema(null)).toThrow(IllegalSchemaError);
@@ -24,6 +25,44 @@ test('Fails to create a validation schema due to illegal type of "types"', () =>
 
 test('Fails to create a validation schema due to null "types"', () => {
     expect(createValidationSchema({ types: null })).toThrow(IllegalSchemaError);
+});
+
+test('Fails to get a type definition due to undefined type', () => {
+    const json : any = {
+        types: {
+            
+        }
+    };
+
+    const validationSchema : IValidationSchema = new ValidationSchema(json);
+
+    expect(() => {
+        validationSchema.getTypeConfiguration("foo");
+    }).toThrow(IllegalSchemaError);
+});
+
+test('Gets a simple type definition', () => {
+    const json : any = {
+        types: {
+            foo: {
+                bar: {
+                    required: true,
+                    type: "number"
+                }
+            }
+        }
+    };
+
+    const validationSchema : IValidationSchema = new ValidationSchema(json);
+
+    expect(validationSchema.hasType("foo"));
+    expect(validationSchema.getTypes()).toEqual(["foo"]);
+    expect(validationSchema.getTypeConfiguration("foo")).toEqual(new TypeConfiguration({
+        bar: {
+            required: true,
+            type: "number"
+        }
+    }));
 });
 
 test('Should throw an exception due to getting a type that does not exist', () => {

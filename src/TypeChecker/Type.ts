@@ -1,6 +1,6 @@
 import IType from "./IType";
 import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
-import ParseArrayElementType from "../Validator/ParseArrayElementType";
+import ParseArrayElementType from "./ParseArrayElementType";
 
 export default class Type implements IType {
     private _configuration : IFieldConfiguration;

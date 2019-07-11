@@ -11,11 +11,15 @@ import PropertyPathComponent from "../PathBuilder/PropertyPathComponent";
 import IndexPathComponent from "../PathBuilder/IndexPathComponent";
 import IPathBuilder from "../PathBuilder/IPathBuilder";
 import PathBuilder from "../PathBuilder/PathBuilder";
-import IErrorHandler from "./IErrorHandler";
-import ErrorHandler from "./ErrorHandler";
+import IErrorHandler from "../ErrorHandler/IErrorHandler";
+import ValidatorErrorHandler from "../ErrorHandler/ValidatorErrorHandler";
 import IType from "../TypeChecker/IType";
 import Type from "../TypeChecker/Type";
 import ArrayType from "../TypeChecker/ArrayType";
+import ErrorType from "../ErrorHandler/ErrorType";
+import IsType from "../TypeChecker/IsType";
+import ISanitizer from "../Sanitizer/ISanitizer";
+import Santizer from "../Sanitizer/Sanitizer";
 
 const RootType : string = "request";
 
@@ -24,31 +28,37 @@ export default class Validator implements IValidator {
 
 	private errorHandler : IErrorHandler;
 	private pathBuilder : IPathBuilder;
+	private sanitizer : ISanitizer;
+	private result : IValidationResult;
 
 	constructor(schema : IValidationSchema) {
 		this.schema = schema;
 		this.pathBuilder = new PathBuilder();
-		this.errorHandler = new ErrorHandler(this.pathBuilder);
+		this.sanitizer = new Santizer(this.pathBuilder);
+		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
+		this.result = new ValidationResult(this.errorHandler);
 	}
 
 	public validate(request : IRequest) : IValidationResult {
 		this.pathBuilder = new PathBuilder();
-		this.errorHandler = new ErrorHandler(this.pathBuilder);
+		this.sanitizer = new Santizer(this.pathBuilder);
+		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
+		this.result = new ValidationResult(this.errorHandler);
 
-		if (!this.schema.hasType(RootType)) {
-			this.errorHandler.addRootError(RootType);
-		}
 		this.handleType(RootType, request.getRequest());
 
-		return new ValidationResult(this.errorHandler);
+		return this.result;
 	}
 
 	private handleType(typeName : string, mapping : IRequestMapping) : void {
-		const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
-		this.checkForMissingProperties(mapping, typeConfiguration);
-		this.checkForExtraProperties(mapping, typeConfiguration);
-		this.checkForIncorrectTypes(mapping, typeConfiguration);
-		// sanitize inputs
+		if (this.schema.hasType(typeName)) {
+			const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
+			this.checkForMissingProperties(mapping, typeConfiguration);
+			this.checkForExtraProperties(mapping, typeConfiguration);
+			this.validateMapping(mapping, typeConfiguration);
+		} else {
+			this.errorHandler.handleError([typeName], ErrorType.UnknownType);
+		}
 	}
 
 	private checkForMissingProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
@@ -56,7 +66,7 @@ export default class Validator implements IValidator {
 			const fieldConfiguration : IFieldConfiguration = type.getConfiguration(field);
 			// Adds an error if and only if the mapping is missing a field and that the missing field is required
 			if (!mapping.has(field) && fieldConfiguration.required) {
-				this.errorHandler.addMisingPropertyError(field);
+				this.errorHandler.handleError([field], ErrorType.MissingField);
 			}
 		}   
 	}
@@ -64,44 +74,43 @@ export default class Validator implements IValidator {
 	private checkForExtraProperties(mapping : IRequestMapping, type : ITypeConfiguration) : void {
 		for (const field of mapping.keys()) {
 			if (!type.hasField(field)) {
-				this.errorHandler.addUnexpectedPropertyError(field);
+				this.errorHandler.handleError([field], ErrorType.UnexpectedField);
 			}
 		}
 	}
 
-	private checkForIncorrectTypes(mapping : IRequestMapping, type : ITypeConfiguration) : void {
-		for (const fieldName of type.getFields()) {
-			if (type.hasField(fieldName) && mapping.has(fieldName)) {
+	private validateMapping(mapping : IRequestMapping, typeConfiguration : ITypeConfiguration) : void {
+		for (const fieldName of typeConfiguration.getFields()) {
+			if (typeConfiguration.hasField(fieldName) && mapping.has(fieldName)) {
+				const configuration : IFieldConfiguration = typeConfiguration.getConfiguration(fieldName);
+				const value : any = mapping.value(fieldName);
+				const typeDefinition : IType = new Type(configuration);
+
 				this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
-				this.typeCheck(
-					fieldName,
-					mapping.value(fieldName), 
-					new Type(type.getConfiguration(fieldName))
-				);
+				this.typeCheck(fieldName, value, typeDefinition);
+				this.result.join(this.sanitizer.sanitize(fieldName, value, new Type(configuration)));
 				this.pathBuilder.popComponent();
 			}
 		}
 	}
 
+	// Refactor type check to its own class because it is both type checking and recursing over the entire structure
+	// type check should type check and the validator should recurse over the structure
 	private typeCheck(fieldName : string, value : any, type : IType) : void {
-		if (this.isArray(type.getType())) {
-			this.validateArray(fieldName, value, type);
-		} else if (this.isEnum(type.getType()) && !this.isTypeOf('string', value)) {
-			this.errorHandler.addTypeError(fieldName, type.getType());
-		} else if (this.isUserDefinedType(type.getType())) {
-			this.validateUserDefinedType(fieldName, value, type);
-		} else if (this.isPrimative(type.getType()) && !this.isTypeOf(type.getType(), value)) {
-			this.errorHandler.addTypeError(fieldName, type.getType());
-		}
+		if (IsType.isPrimative(type.getType()) && !IsType.isTypeOf(type.getType(), value)) {
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
+		} else if (IsType.isEnum(type.getType()) && !IsType.isTypeOf('string', value)) {
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
+		} else if (IsType.isArray(type.getType())) {
+			this.typeCheckArray(fieldName, value, type);
+		} else if (this.schema.hasType(type.getType())) {
+			this.typeCheckUserDefinedType(fieldName, value, type);
+		} 
 	}
 
-	private isArray(fieldType : string) : boolean {
-		return fieldType.startsWith("array");
-	}
-
-	private validateArray(fieldName : string, value : any, type : IType) : void {
+	private typeCheckArray(fieldName : string, value : any, type : IType) : void {
 		if (!Array.isArray(value)) {
-			this.errorHandler.addTypeError(fieldName, type.getType());
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
 		} else {
 			this.checkTypesOfArrayElements(fieldName, value, type);
 		}
@@ -110,35 +119,21 @@ export default class Validator implements IValidator {
 	private checkTypesOfArrayElements(fieldName : string, values : any[], type : IType) : void {
 		for (let i : number = 0; i < values.length; i++) {
 			this.pathBuilder.addPathComponent(new IndexPathComponent(i));
+
 			const arrayType : ArrayType = new ArrayType(type.configuration(), type.arrayStructure());
 			const removedType : string = type.arrayStructure().shift() as string;
 			this.typeCheck(fieldName, values[i], arrayType);
 			type.arrayStructure().unshift(removedType);
+			
 			this.pathBuilder.popComponent();
 		}
 	}
-	
-	private isEnum(fieldType : string) : boolean {
-		return fieldType === "enum";
-	}
 
-	private isTypeOf(type : string, value : any) : boolean {
-		return typeof value === type;
-	}
-
-	private isUserDefinedType(fieldType : string) : boolean {
-		return this.schema.hasType(fieldType);
-	}
-
-	private validateUserDefinedType(fieldName : string, value : any, type : IType) : void {
-		if (!this.isTypeOf('object', value)) {
-			this.errorHandler.addTypeError(fieldName, type.getType());
+	private typeCheckUserDefinedType(fieldName : string, value : any, type : IType) : void {
+		if (!IsType.isTypeOf('object', value)) {
+			this.errorHandler.handleError([fieldName, type.getType()], ErrorType.IncorrectType);
 		} else {
 			this.handleType(type.getType(), new RequestMapping(value));
 		}
-	}
-
-	private isPrimative(fieldType : string) : boolean {
-		return fieldType === 'string' || fieldType === 'boolean' || fieldType === 'number';
 	}
 }
