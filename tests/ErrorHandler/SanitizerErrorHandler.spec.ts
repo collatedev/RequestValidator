@@ -64,6 +64,18 @@ test("Handles an illegal length error", () => {
     }]);
 });
 
+test("Handles an illegal array length error", () => {
+    const errorHandler : IErrorHandler = new SanitizerErrorHandler(new PathBuilder());
+
+    errorHandler.handleError(["foo", 0, 1], ErrorType.IllegalArrayLength);
+
+    expect(errorHandler.hasErrors()).toBeTruthy();
+    expect(errorHandler.getErrors()).toEqual([{
+        message: "Array length of 'foo' is 0 when it should be 1",
+        location: ""
+    }]);
+});
+
 test("Handles a unknown error", () => {
     const errorHandler : IErrorHandler = new SanitizerErrorHandler(new PathBuilder());
 

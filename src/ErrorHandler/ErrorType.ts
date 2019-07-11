@@ -9,6 +9,7 @@ enum ErrorType {
     IllegalURLError,
     DoesNotStartWithError,
     IllegalLengthError,
+    IllegalArrayLength,
 }
 
 export default ErrorType;

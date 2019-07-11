@@ -147,7 +147,27 @@ test("Sanitizes an array with an incorrect length", () => {
     assertResultHasError(
         sanitizer.sanitize("foo", ["foo"], new Type(configuration)), 
         "", 
-        "Length of 'foo' is 1 when it should be 0"
+        "Array length of 'foo' is 1 when it should be 0"
+    );
+});
+
+test("Sanitizes a nested array with an incorrect length", () => {
+    const nestedLength : number = 6;
+    const baseLength : number = 2;
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "array[array[array[string]]]",
+        required: true,
+        arrayLengths: [baseLength, nestedLength, 1]
+    });
+
+    assertResultHasError(
+        sanitizer.sanitize("foo", [
+            [["0"],["1"],["2"],["3"],["4"], ["5"]],
+            [["0"],["1"],["2"],["3"],["4"], []],
+        ], new Type(configuration)), 
+        "", 
+        "Array length of 'foo[1][5]' is 0 when it should be 1"
     );
 });
 

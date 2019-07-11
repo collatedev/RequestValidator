@@ -27,6 +27,13 @@ export default class SanitizerErrorHandler extends ErrorHandler {
                     `Length of '${values[0]}' is ${values[1]} when it should be ${values[expectedLengthIndex]}`
                 );
                 break;
+            case ErrorType.IllegalArrayLength:
+                const expectedArrayLengthIndex : number = 2;
+                this.addError(
+                    `Array length of '${values[0]}' is ${values[1]}` +
+                    ` when it should be ${values[expectedArrayLengthIndex]}`
+                );
+                break;
             default:
                 throw new TypeError(`Unknown error type ${type}`);
         }
