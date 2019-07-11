@@ -10,9 +10,7 @@ import IndexPathComponent from "../PathBuilder/IndexPathComponent";
 import IType from "../TypeChecker/IType";
 import INestedArray from "../NestedArray/INestedArray";
 import NestedArray from "../NestedArray/NestedArray";
-import FieldConfiguration from "../ValidationSchema/FieldConfiguration";
-import Type from "../TypeChecker/Type";
-import ParseArrayElementType from "../TypeChecker/ParseArrayElementType";
+import ArrayType from "../TypeChecker/ArrayType";
 
 const urlRegexPattern : string = 
 '^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]' +
@@ -123,18 +121,15 @@ export default class Santizer implements ISanitizer {
     }
 
     private sanitizeArray(fieldName: string, value : any, type : IType) : void {
-        const arrayLengths : number[] | undefined = type.configuration().arrayLengths;
         const nestedArrayStack : INestedArray[] = [new NestedArray(value, 0, fieldName)];
-        
-		while (!this.isEmpty(nestedArrayStack)) {
+        const arrayLengths : number[] | undefined = type.configuration().arrayLengths;
+
+		while (nestedArrayStack.length > 0) {
             const nestedArray : INestedArray = nestedArrayStack.pop() as INestedArray;
             const array : any[] = nestedArray.value();
 
             if (arrayLengths) {
-                const expectedLength : number = arrayLengths[nestedArray.depth()];
-                if (!this.isExpectedLength(array.length, expectedLength)) {
-                    this.handleIllegalLengthError(nestedArray.path(), array.length, expectedLength);
-                }
+                this.checkLengthOfArray(arrayLengths, nestedArray);
             }
 
             this.enqueNestedArrays(array, nestedArrayStack, nestedArray);
@@ -142,19 +137,14 @@ export default class Santizer implements ISanitizer {
 		}
     }
 
-    private handleIllegalLengthError(path : string, actualLength : number, expectedLength : number) : void {
-        this.errorHandler.handleError(
-            [path, actualLength, expectedLength],
-            ErrorType.IllegalArrayLength
-        );
-    }
-
-    private isEmpty(nestedArrayStack : INestedArray[]) : boolean {
-        return nestedArrayStack.length === 0;
-    }
-
-    private isExpectedLength(actualLength : number, expectedLength : number) : boolean {
-        return expectedLength === actualLength;
+    private checkLengthOfArray(arrayLengths : number[], nestedArray : INestedArray) : void {
+        const expectedLength : number = arrayLengths[nestedArray.depth()];
+        if (nestedArray.value().length !== expectedLength) {
+            this.errorHandler.handleError(
+                [nestedArray.path(), nestedArray.value().length, expectedLength],
+                ErrorType.IllegalArrayLength
+            );
+        }
     }
 
     private enqueNestedArrays(array : any[], nestedArrayStack : INestedArray[], nestedArray : INestedArray) : void {
@@ -186,34 +176,8 @@ export default class Santizer implements ISanitizer {
 
     private sanitizeArrayElement(fieldName : string, element : any, index : number, type : IType) : void {
         this.pathBuilder.addPathComponent(new IndexPathComponent(index));
-        const elementType : IType = this.getElementType(type);
+        const elementType : IType = ArrayType.getElementType(type);
         this.sanitizeValue(fieldName, element, elementType);
         this.pathBuilder.popComponent();
-    }
-
-    private getElementType(arrayType : IType) : IType {
-        const configuration : IFieldConfiguration = arrayType.configuration();
-        // gets the element type of the array
-        const elementType : string = ParseArrayElementType.parse(configuration.type).pop() as string;
-        const fieldJSON : any = {
-            type : elementType,
-            required : true
-        };
-        if (configuration.isURL) {
-            fieldJSON.isURL = configuration.isURL;
-        }
-        if (configuration.length) {
-            fieldJSON.length = configuration.length;
-        }
-        if (configuration.range) {
-            fieldJSON.range = configuration.range;
-        }
-        if (configuration.startsWith) {
-            fieldJSON.startsWith = configuration.startsWith;
-        }
-        if (configuration.values) {
-            fieldJSON.values = configuration.values;
-        }
-        return new Type(new FieldConfiguration(fieldJSON));
     }
 }
