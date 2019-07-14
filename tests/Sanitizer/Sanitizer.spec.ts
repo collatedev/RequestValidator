@@ -4,21 +4,29 @@ import IValidationResult from "../../src/ValidationResult/IValidationResult";
 import ISanitizer from "../../src/Sanitizer/ISanitizer";
 import FieldConfiguration from "../../src/ValidationSchema/FieldConfiguration";
 import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration";
-import Type from "../../src/TypeChecker/Type";
+import IValidationSchema from "../../src/ValidationSchema/IValidationSchema";
+import ValidationSchema from "../../src/ValidationSchema/ValidationSchema";
+
+const EmptyValidationSchema : IValidationSchema = new ValidationSchema({
+    types: {
+        
+    }
+});
 
 test("Sanitizes a string with valid length", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
+    
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "string",
         required: true,
         length: 1
     });
 
-    assertValidResult(sanitizer.sanitize("foo", "A", new Type(configuration)));
+    assertValidResult(sanitizer.sanitize("foo", "A", configuration));
 });
 
 test("Sanitizes a string with invalid length", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "string",
         required: true,
@@ -26,12 +34,12 @@ test("Sanitizes a string with invalid length", () => {
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", "A", new Type(configuration)), "", "Length of 'foo' is 1 when it should be 0"
+        sanitizer.sanitize("foo", "A", configuration), "", "Length of 'foo' is 1 when it should be 0"
     );
 });
 
 test("Sanitizes a string that does not start with foo", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "string",
         required: true,
@@ -39,34 +47,34 @@ test("Sanitizes a string that does not start with foo", () => {
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", "A", new Type(configuration)), "", "Value 'A' does not start with 'foo'"
+        sanitizer.sanitize("foo", "A", configuration), "", "Value 'A' does not start with 'foo'"
     );
 });
 
 test("Sanitizes a string that does start with foo", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "string",
         required: true,
         startsWith: "foo"
     });
 
-    assertValidResult(sanitizer.sanitize("foo", "foo", new Type(configuration)));
+    assertValidResult(sanitizer.sanitize("foo", "foo", configuration));
 });
 
 test("Sanitizes a string that is not a url", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "string",
         required: true,
         isURL: true
     });
 
-    assertResultHasError(sanitizer.sanitize("foo", "A", new Type(configuration)), "", "Value 'A' is not a valid URL");
+    assertResultHasError(sanitizer.sanitize("foo", "A", configuration), "", "Value 'A' is not a valid URL");
 });
 
 test("Sanitizes a string that is a url", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "string",
         required: true,
@@ -78,13 +86,13 @@ test("Sanitizes a string that is a url", () => {
             "foo", 
             "http://res.cloudinary.com/hrscywv4p/image/upload/c_fill," +
             "g_faces:center,h_128,w_128/yflwk7vffgwyyenftkr7.png", 
-            new Type(configuration)
+            configuration
         )
     );
 });
 
 test("Sanitizes a number with outside of the range", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const value : number = 2;
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "number",
@@ -93,25 +101,25 @@ test("Sanitizes a number with outside of the range", () => {
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", value, new Type(configuration)), 
+        sanitizer.sanitize("foo", value, configuration), 
         "", 
         "Value '2' is outside of the range [0, 1]"
     );
 });
 
 test("Sanitizes a number within the range", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "number",
         required: true,
         range: [0, 1]
     });
 
-    assertValidResult(sanitizer.sanitize("foo", 1, new Type(configuration)));
+    assertValidResult(sanitizer.sanitize("foo", 1, configuration));
 });
 
 test("Sanitizes an enum with with an unknown enum value", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "enum",
         required: true,
@@ -119,25 +127,25 @@ test("Sanitizes an enum with with an unknown enum value", () => {
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", "A", new Type(configuration)),
+        sanitizer.sanitize("foo", "A", configuration),
         "", 
         "Illegal enum value 'A', acceptable values are 'foo, bar'"
     );
 });
 
 test("Sanitizes an enum with with an known enum value", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "enum",
         required: true,
         values: ["A", "B"]
     });
 
-    assertValidResult(sanitizer.sanitize("foo", "A", new Type(configuration)));
+    assertValidResult(sanitizer.sanitize("foo", "A", configuration));
 });
 
 test("Sanitizes an array with an incorrect length", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "array[string]",
         required: true,
@@ -145,7 +153,7 @@ test("Sanitizes an array with an incorrect length", () => {
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", ["foo"], new Type(configuration)), 
+        sanitizer.sanitize("foo", ["foo"], configuration), 
         "", 
         "Array length of 'foo' is 1 when it should be 0"
     );
@@ -154,7 +162,7 @@ test("Sanitizes an array with an incorrect length", () => {
 test("Sanitizes a nested array with an incorrect length", () => {
     const nestedLength : number = 6;
     const baseLength : number = 2;
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "array[array[array[string]]]",
         required: true,
@@ -165,25 +173,54 @@ test("Sanitizes a nested array with an incorrect length", () => {
         sanitizer.sanitize("foo", [
             [["0"],["1"],["2"],["3"],["4"], ["5"]],
             [["0"],["1"],["2"],["3"],["4"], []],
-        ], new Type(configuration)), 
-        "", 
+        ], configuration), 
+        "[1][5]", 
         "Array length of 'foo[1][5]' is 0 when it should be 1"
     );
 });
 
+test("Sanitizes a nested array with an incorrect nested object", () => {
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), new ValidationSchema({
+        types: {
+            Foo: {
+                bar: {
+                    type: "string",
+                    required: true,
+                    startsWith: "qux"
+                }
+            }
+        }
+    }));
+    const configuration : IFieldConfiguration = new FieldConfiguration({
+        type: "array[array[Foo]]",
+        required: true,
+    });
+
+    assertResultHasError(
+        sanitizer.sanitize("foo", [[
+            {
+                bar: "baz",
+            }
+        ]], configuration), 
+        "[0][0].bar", 
+        "Value 'baz' does not start with 'qux'"
+    );
+});
+
+
 test("Sanitizes an array with a correct length", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "array[string]",
         required: true,
         arrayLengths: [0]
     });
 
-    assertValidResult(sanitizer.sanitize("foo", [], new Type(configuration)));
+    assertValidResult(sanitizer.sanitize("foo", [], configuration));
 });
 
 test("Sanitizes an array with a string that is not a url", () => {
-    const sanitizer : ISanitizer = new Santizer(new PathBuilder());
+    const sanitizer : ISanitizer = new Santizer(new PathBuilder(), EmptyValidationSchema);
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "array[string]",
         required: true,
@@ -191,7 +228,7 @@ test("Sanitizes an array with a string that is not a url", () => {
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", ["http://foo.com", "bar"], new Type(configuration)),
+        sanitizer.sanitize("foo", ["http://foo.com", "bar"], configuration),
         "[1]",
         "Value 'bar' is not a valid URL"
     );

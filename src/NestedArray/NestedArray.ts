@@ -1,11 +1,13 @@
 import INestedArray from './INestedArray';
+import IPathBuilder from '../PathBuilder/IPathBuilder';
+import PathBuilder from '../PathBuilder/PathBuilder';
 
 export default class NestedArray implements INestedArray {
     private readonly _value : any[];
     private readonly _depth : number;
-    private readonly _path : string;
+    private readonly _path : IPathBuilder;
 
-    constructor(value : any, depth : number, path : string) {
+    constructor(value : any, depth : number, pathBuilder: IPathBuilder) {
         if (value === null) {
             throw new Error("Array value must not be null");
         }
@@ -15,17 +17,9 @@ export default class NestedArray implements INestedArray {
         if (depth < 0) {
             throw new Error("Depth can not be less than 0");
         }
-        this._value = this.copyArray(value);
+        this._value = Object.assign([], value);
         this._depth = depth;
-        this._path = path;
-    }
-
-    private copyArray(toCopy : any[]) : any[] {
-        const newArray : any[] = new Array();
-        for (const element of toCopy) {
-            newArray.push(element);
-        }
-        return newArray;
+        this._path = new PathBuilder(pathBuilder);
     }
 
     public value() : any[] {
@@ -36,7 +30,7 @@ export default class NestedArray implements INestedArray {
         return this._depth;
     }
 
-    public path() : string {
+    public path() : IPathBuilder {
         return this._path;
     }
 }

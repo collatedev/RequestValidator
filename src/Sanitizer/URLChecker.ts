@@ -1,4 +1,4 @@
-import IType from "../TypeChecker/IType";
+import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
 
 const urlRegexPattern : string = 
 '^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]' +
@@ -10,7 +10,7 @@ const urlRegexPattern : string =
 const urlRegex : RegExp = new RegExp(urlRegexPattern, 'i');
 
 export default class URLChecker {
-    public static isURL(value : any, type : IType) : boolean {
-        return type.configuration().isURL !== undefined && !urlRegex.test(value);
+    public static isURL(value : any, configuration : IFieldConfiguration) : boolean {
+        return configuration.isURL !== undefined && !urlRegex.test(value);
     }
 }

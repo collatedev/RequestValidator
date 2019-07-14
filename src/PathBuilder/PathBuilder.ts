@@ -5,8 +5,12 @@ import IndexPathComponent from "./IndexPathComponent";
 export default class PathBuilder implements IPathBuilder {
     private pathComponents : IPathComponent[];
 
-    constructor() {
-        this.pathComponents = [];
+    constructor(pathBuilder? : IPathBuilder) {
+        if (pathBuilder) {
+            this.pathComponents = pathBuilder.getComponents();
+        } else {
+            this.pathComponents = [];
+        }
     }
 
     public getPath() : string {
@@ -29,8 +33,23 @@ export default class PathBuilder implements IPathBuilder {
         return currentIndex;
     }
 
+    public getCurrentIndexComponents() : IPathComponent[] {
+        const currentIndexComponents : IPathComponent[] = [];
+        let i : number = this.pathComponents.length - 1;
+        while (this.pathComponents[i] instanceof IndexPathComponent) {
+            currentIndexComponents.unshift(this.pathComponents[i--]);
+        }
+        return currentIndexComponents;
+    }
+
     public addPathComponent(component : IPathComponent) : void {
         this.pathComponents.push(component);
+    }
+
+    public addPathComponents(components : IPathComponent[]) : void {
+        for (const component of components) {
+            this.pathComponents.push(component);
+        }
     }
 
     public popComponent() : IPathComponent {
@@ -39,5 +58,18 @@ export default class PathBuilder implements IPathBuilder {
             throw new RangeError("Can not pop a component from an empty stack");
         }
         return poppedComponent;
+    }
+
+    public popComponents(n : number) : IPathComponent[] {
+        const poppedComponents : IPathComponent[] = [];
+        while (n > 0) {
+            poppedComponents.push(this.popComponent());
+            n--;
+        }
+        return poppedComponents;
+    }
+
+    public getComponents() : IPathComponent[] {
+        return Object.assign([], this.pathComponents);
     }
 }

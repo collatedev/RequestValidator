@@ -20,6 +20,15 @@ test("Gets a component path", () => {
     expect(pathBuilder.getCurrentIndex()).toEqual("");
 });
 
+test("Gets path components of the current index", () => {
+    const pathBuilder : IPathBuilder = new PathBuilder();
+
+    pathBuilder.addPathComponent(new IndexPathComponent(0));
+
+    expect(pathBuilder.getCurrentIndex()).toEqual("[0]");
+    expect(pathBuilder.getCurrentIndexComponents()).toEqual([new IndexPathComponent(0)]);
+});
+
 test("Gets an index path", () => {
     const pathBuilder : IPathBuilder = new PathBuilder();
 
@@ -72,6 +81,71 @@ test("Gets a path where a component has been removed", () => {
     expect(pathBuilder.getPath()).toEqual("foo[1]");
     expect(pathBuilder.getCurrentIndex()).toEqual("[1]");
     expect(poppedComponent.toString()).toEqual(".bar");
+});
+
+test("Copies a path builder", () => {
+    const pathBuilder : IPathBuilder = new PathBuilder();
+
+    pathBuilder.addPathComponent(new PropertyPathComponent("foo"));
+
+    const copiedPathBuilder : IPathBuilder = new PathBuilder(pathBuilder);
+
+    copiedPathBuilder.addPathComponent(new IndexPathComponent(1));
+
+    expect(copiedPathBuilder.getPath()).toEqual("foo[1]");
+    expect(copiedPathBuilder.getCurrentIndex()).toEqual("[1]");
+});
+
+test("Gets components of a path builder", () => {
+    const pathBuilder : IPathBuilder = new PathBuilder();
+
+    pathBuilder.addPathComponent(new PropertyPathComponent("foo"));
+
+    expect(pathBuilder.getComponents()).toEqual([new PropertyPathComponent("foo")]);
+});
+
+test("Adds components to a path builder", () => {
+    const pathBuilder : IPathBuilder = new PathBuilder();
+
+    pathBuilder.addPathComponents([
+        new PropertyPathComponent("foo"),
+        new PropertyPathComponent("bar")
+    ]);
+
+    expect(pathBuilder.getPath()).toEqual("foo.bar");
+});
+
+test("Pops components from a path builder", () => {
+    const pathBuilder : IPathBuilder = new PathBuilder();
+    const components : IPathComponent[] = [
+        new PropertyPathComponent("foo"),
+        new PropertyPathComponent("bar")
+    ];
+
+    pathBuilder.addPathComponents(components);
+
+    const poppedComponents : IPathComponent[] = pathBuilder.popComponents(components.length);
+
+    expect(pathBuilder.getPath()).toEqual("");
+    expect(poppedComponents.length).toEqual(components.length);
+    expect(poppedComponents).toEqual([
+        components[1],
+        components[0]
+    ]);
+});
+
+test("Pops illegal amount of components from a path builder", () => {
+    const pathBuilder : IPathBuilder = new PathBuilder();
+    const components : IPathComponent[] = [
+        new PropertyPathComponent("foo"),
+        new PropertyPathComponent("bar")
+    ];
+
+    pathBuilder.addPathComponents(components);
+
+    expect(() => {
+        pathBuilder.popComponents(components.length + 1);
+    }).toThrow(new Error("Can not pop a component from an empty stack"));
 });
 
 test("Throws an error when a component is popped from an empty component", () => {

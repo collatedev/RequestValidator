@@ -1,6 +1,6 @@
 import IValidationResult from "../ValidationResult/IValidationResult";
-import IType from "../TypeChecker/IType";
+import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
 
 export default interface ISanitizer {
-    sanitize(fieldName : string, value : any, type : IType) : IValidationResult;
+    sanitize(fieldName : string, value : any, configuration : IFieldConfiguration) : IValidationResult;
 }

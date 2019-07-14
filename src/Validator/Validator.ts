@@ -34,14 +34,14 @@ export default class Validator implements IValidator {
 	constructor(schema : IValidationSchema) {
 		this.schema = schema;
 		this.pathBuilder = new PathBuilder();
-		this.sanitizer = new Santizer(this.pathBuilder);
+		this.sanitizer = new Santizer(this.pathBuilder, this.schema);
 		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
 		this.result = new ValidationResult(this.errorHandler);
 	}
 
 	public validate(request : IRequest) : IValidationResult {
 		this.pathBuilder = new PathBuilder();
-		this.sanitizer = new Santizer(this.pathBuilder);
+		this.sanitizer = new Santizer(this.pathBuilder, this.schema);
 		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
 		this.result = new ValidationResult(this.errorHandler);
 
@@ -88,7 +88,7 @@ export default class Validator implements IValidator {
 
 				this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
 				this.typeCheck(fieldName, value, typeDefinition);
-				this.result.join(this.sanitizer.sanitize(fieldName, value, new Type(configuration)));
+				this.result.join(this.sanitizer.sanitize(fieldName, value, configuration));
 				this.pathBuilder.popComponent();
 			}
 		}
