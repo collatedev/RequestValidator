@@ -188,7 +188,6 @@ test('Validates a request with incorrect boolean type', () => {
 test('Validates a request with incorrect enum type', () => {
     const schemaIndex : number = 6;
     const validator : IValidator = getValidator(schemaIndex);
-    const errorCount : number = 2;
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -199,18 +198,18 @@ test('Validates a request with incorrect enum type', () => {
 
     const result : IValidationResult = validator.validate(request);
 
-    expect(result.isValid()).toBeFalsy();
-    expect(result.errors()).toHaveLength(errorCount);
+    const numberOfErrors : number = 2;
+    expect(result.errors().length).toEqual(numberOfErrors);
     assertResultHasErrorAtIndex(
         result,
         "body.bar", 
-        "Property 'bar' should be type 'enum'", 
+        "Property 'bar' should be type 'enum'",
         0
     );
     assertResultHasErrorAtIndex(
         result,
         "body.bar", 
-        "Illegal enum value '1', acceptable values are 'A, B'", 
+        "Illegal enum value '1', acceptable values are 'A, B'",
         1
     );
 });
@@ -496,18 +495,14 @@ function assertValidResult(result : IValidationResult) : void {
 }
 
 function assertResultHasError(result : IValidationResult, location: string, message : string) : void {
-    expect(result.isValid()).toBeFalsy();
     expect(result.errors()).toHaveLength(1);
-    expect(result.errors()[0].location).toEqual(location);
-    expect(result.errors()[0].message).toEqual(message);
+    assertResultHasErrorAtIndex(result, location, message, 0);
 }
 
 function assertResultHasErrorAtIndex(
-    result : IValidationResult, 
-    location: string, 
-    message : string, 
-    index : number
+    result : IValidationResult, location: string, message : string, index : number
 ) : void {
+    expect(result.isValid()).toBeFalsy();
     expect(result.errors()[index].location).toEqual(location);
     expect(result.errors()[index].message).toEqual(message);
 }

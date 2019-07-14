@@ -1,7 +1,7 @@
-import IType from "../../src/TypeChecker/IType";
+import IType from "../../src/Types/IType";
 import FieldConfiguration from "../../src/ValidationSchema/FieldConfiguration";
 import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration";
-import ArrayType from "../../src/TypeChecker/ArrayType";
+import ArrayType from "../../src/Types/ArrayType";
 
 test("Creates a type for an array object", () => {
     const configuration : IFieldConfiguration = new FieldConfiguration({

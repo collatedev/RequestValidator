@@ -1,5 +1,5 @@
-import IType from "../../src/TypeChecker/IType";
-import Type from "../../src/TypeChecker/Type";
+import IType from "../../src/Types/IType";
+import Type from "../../src/Types/Type";
 import FieldConfiguration from "../../src/ValidationSchema/FieldConfiguration";
 import IFieldConfiguration from "../../src/ValidationSchema/IFieldConfiguration";
 

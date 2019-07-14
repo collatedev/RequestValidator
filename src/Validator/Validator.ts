@@ -13,11 +13,11 @@ import IPathBuilder from "../PathBuilder/IPathBuilder";
 import PathBuilder from "../PathBuilder/PathBuilder";
 import IErrorHandler from "../ErrorHandler/IErrorHandler";
 import ValidatorErrorHandler from "../ErrorHandler/ValidatorErrorHandler";
-import IType from "../TypeChecker/IType";
-import Type from "../TypeChecker/Type";
-import ArrayType from "../TypeChecker/ArrayType";
+import IType from "../Types/IType";
+import Type from "../Types/Type";
+import ArrayType from "../Types/ArrayType";
 import ErrorType from "../ErrorHandler/ErrorType";
-import IsType from "../TypeChecker/IsType";
+import IsType from "../Types/IsType";
 import ISanitizer from "../Sanitizer/ISanitizer";
 import Santizer from "../Sanitizer/Sanitizer";
 
