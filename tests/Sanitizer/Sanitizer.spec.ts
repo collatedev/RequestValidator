@@ -149,13 +149,13 @@ test("Sanitizes an array with an incorrect length", () => {
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "array[string]",
         required: true,
-        arrayLengths: [0]
+        arrayLengths: [1]
     });
 
     assertResultHasError(
-        sanitizer.sanitize("foo", ["foo"], configuration), 
+        sanitizer.sanitize("foo", ["foo", "bar"], configuration), 
         "", 
-        "Array length of 'foo' is 1 when it should be 0"
+        "Array length of 'foo' is 2 when it should be 1"
     );
 });
 
@@ -213,10 +213,10 @@ test("Sanitizes an array with a correct length", () => {
     const configuration : IFieldConfiguration = new FieldConfiguration({
         type: "array[string]",
         required: true,
-        arrayLengths: [0]
+        arrayLengths: [1]
     });
 
-    assertValidResult(sanitizer.sanitize("foo", [], configuration));
+    assertValidResult(sanitizer.sanitize("foo", ["bar"], configuration));
 });
 
 test("Sanitizes an array with a string that is not a url", () => {

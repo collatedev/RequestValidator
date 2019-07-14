@@ -62,9 +62,19 @@ test('It should create a field configuration', () => {
     expect(configuration.type).toEqual("boolean");
 });
 
-test('It should fail to create a field configuration due to inncorrect type of "range" key in json', () => {
+test('It should fail to create a field configuration due to the type not being a number', () => {
     expect(createField({
         type: "string",
+        required: true,
+        range: 1
+    })).toThrow(
+        new IllegalSchemaError('The key "range" can only be used when the type is \'number\' or an array of \'number\'')
+    );
+});
+
+test('It should fail to create a field configuration due to inncorrect type of "range" key in json', () => {
+    expect(createField({
+        type: "number",
         required: true,
         range: 1
     })).toThrow(IllegalSchemaError);
@@ -72,7 +82,7 @@ test('It should fail to create a field configuration due to inncorrect type of "
 
 test('It should fail to create a field configuration due to inncorrect length of range array', () => {
     expect(createField({
-        type: "string",
+        type: "number",
         required: true,
         range: []
     })).toThrow(IllegalSchemaError);
@@ -80,23 +90,31 @@ test('It should fail to create a field configuration due to inncorrect length of
 
 test('It should fail to create a field configuration due to inncorrect type of the first index', () => {
     expect(createField({
-        type: "string",
+        type: "number",
         required: true,
         range: ["1", 1]
-    })).toThrow(IllegalSchemaError);
+    })).toThrow(new IllegalSchemaError('The values in the "range" array must be numbers'));
 });
 
 test('It should fail to create a field configuration due to inncorrect type of the second index', () => {
     expect(createField({
-        type: "string",
+        type: "number",
         required: true,
         range: [1, "1"]
-    })).toThrow(IllegalSchemaError);
+    })).toThrow(new IllegalSchemaError('The values in the "range" array must be numbers'));
+});
+
+test('It should fail to create a field configuration due to both arguments being numbers', () => {
+    expect(createField({
+        type: "number",
+        required: true,
+        range: ["1", "1"]
+    })).toThrow(new IllegalSchemaError('The values in the "range" array must be numbers'));
 });
 
 test('It should create a field configuration with a range parameter', () => {
     const json : any = {
-        type: "boolean",
+        type: "number",
         required: false,
         range: [0, 1]
     };
@@ -108,7 +126,7 @@ test('It should create a field configuration with a range parameter', () => {
     }
 
     expect(configuration.required).toBeFalsy();
-    expect(configuration.type).toEqual("boolean");
+    expect(configuration.type).toEqual("number");
     expect(configuration.range).toHaveLength(RangeLength);
     expect(configuration.range[0]).toEqual(0);
     expect(configuration.range[1]).toEqual(1);
@@ -346,6 +364,46 @@ test('It should create a field configuration with arrayLengths key describing th
     expect(configuration.required).toBeFalsy();
     expect(configuration.type).toEqual("array[string]");
     expect(configuration.arrayLengths).toEqual([1]);
+});
+
+test('It should fail to create a field configuration due to arrayLengths not being an array', () => {
+    expect(createField({
+        type: "array[number]",
+        required: true,
+        arrayLengths: 1
+    })).toThrow(new IllegalSchemaError('The key "arrayLengths" must be an array'));
+});
+
+test('It should fail to create a field configuration due to the type not being an array', () => {
+    expect(createField({
+        type: "number",
+        required: true,
+        arrayLengths: [1]
+    })).toThrow(new IllegalSchemaError('The key "arrayLength" can only be used when the type is \'array\''));
+});
+
+test('It should fail to create a field configuration due to the type not being an array', () => {
+    expect(createField({
+        type: "array[number]",
+        required: true,
+        arrayLengths: []
+    })).toThrow(new IllegalSchemaError('The key "arrayLengths" must have at least one element in the array'));
+});
+
+test('It should fail to create a field configuration due to the elements not being numbers', () => {
+    expect(createField({
+        type: "array[number]",
+        required: true,
+        arrayLengths: ["1"]
+    })).toThrow(new IllegalSchemaError('The values of the key "arrayLengths" must be numbers'));
+});
+
+test('It should fail to create a field configuration due to the elements not being greater than 0', () => {
+    expect(createField({
+        type: "array[number]",
+        required: true,
+        arrayLengths: [0]
+    })).toThrow(new IllegalSchemaError('The values of the key "arrayLengths" must be greater than 0'));
 });
 
 function createField(json : any) : () => IFieldConfiguration {

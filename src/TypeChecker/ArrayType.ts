@@ -33,19 +33,19 @@ export default class ArrayType implements IType {
             type : elementType,
             required : true
         };
-        if (configuration.isURL) {
+        if (configuration.isURL !== undefined) {
             fieldJSON.isURL = configuration.isURL;
         }
-        if (configuration.length) {
+        if (configuration.length !== undefined) {
             fieldJSON.length = configuration.length;
         }
-        if (configuration.range) {
+        if (configuration.range !== undefined) {
             fieldJSON.range = configuration.range;
         }
-        if (configuration.startsWith) {
+        if (configuration.startsWith !== undefined) {
             fieldJSON.startsWith = configuration.startsWith;
         }
-        if (configuration.values) {
+        if (configuration.values !== undefined) {
             fieldJSON.values = configuration.values;
         }
         return new FieldConfiguration(fieldJSON);

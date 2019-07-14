@@ -72,6 +72,11 @@ export default class FieldConfiguration implements IFieldConfiguration {
 
     private getRange(field : any) : number[] | undefined {
         if (field.hasOwnProperty("range")) {
+            if (this.type !== "number" && !this.isArrayOf("number")) {
+                throw new IllegalSchemaError(
+                    'The key "range" can only be used when the type is \'number\' or an array of \'number\''
+                );
+            }
             if (!Array.isArray(field.range)) {
                 throw new IllegalSchemaError('The key "range" must be an array');
             }
@@ -127,7 +132,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (typeof field.startsWith !== 'string') {
                 throw new IllegalSchemaError('The key "startsWith" must be a string');
             }
-            if (this.type !== 'string') {
+            if (this.type !== 'string' && !this.isArrayOf("string")) {
                 throw new IllegalSchemaError('The key "startsWith" can only be used when the type is \'string\'');
             }
             return field.startsWith as string;
@@ -140,7 +145,7 @@ export default class FieldConfiguration implements IFieldConfiguration {
             if (typeof field.length !== 'number') {
                 throw new IllegalSchemaError('The key "length" must be a number');
             }
-            if (this.type !== 'string') {
+            if (this.type !== 'string' && !this.isArrayOf("string")) {
                 throw new IllegalSchemaError(
                     'The key "length" can only be used when the type is \'string\''
                 );
@@ -157,8 +162,19 @@ export default class FieldConfiguration implements IFieldConfiguration {
             }
             if (!this.type.startsWith('array')) {
                 throw new IllegalSchemaError(
-                    'The key "length" can only be used when the type is \'array\''
+                    'The key "arrayLength" can only be used when the type is \'array\''
                 );
+            }
+            if (field.arrayLengths.length === 0) {
+                throw new IllegalSchemaError('The key "arrayLengths" must have at least one element in the array');
+            }
+            for (const element of field.arrayLengths) {
+                if (typeof element !== "number") {
+                    throw new IllegalSchemaError('The values of the key "arrayLengths" must be numbers');
+                }
+                if (element < 1) {
+                    throw new IllegalSchemaError('The values of the key "arrayLengths" must be greater than 0');
+                }
             }
             return field.arrayLengths as number[];
         }
