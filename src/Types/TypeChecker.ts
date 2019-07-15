@@ -99,11 +99,7 @@ export default class TypeChecker implements ITypeChecker {
                 this.pathBuilder.addPathComponent(new IndexPathComponent(i));
 
                 if (this.schema.hasType(elementConfiguration.type)) {
-                    if (IsType.isNestedObject(element)) {
-                        this.typeCheckNestedObjectElement(element, elementConfiguration);
-                    } else {
-                        this.errorHandler.handleError([fieldName, elementConfiguration.type], ErrorType.IncorrectType);
-                    }                    
+                    this.typeCheckNestedObjectElement(fieldName, element, elementConfiguration);                    
                 } else {
                     this.typeCheckValue(fieldName, element, elementConfiguration);
                 }
@@ -113,13 +109,17 @@ export default class TypeChecker implements ITypeChecker {
         }
     }
 
-    private typeCheckNestedObjectElement(value : any, configuration : IFieldConfiguration) : void {
+    private typeCheckNestedObjectElement(fieldName : string, value : any, configuration : IFieldConfiguration) : void {
         const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(configuration.type);
-        for (const nestedField of Object.keys(value)) {
-            const fieldConfiguration : IFieldConfiguration = typeConfiguration.getConfiguration(nestedField);
-            this.pathBuilder.addPathComponent(new PropertyPathComponent(nestedField));
-            this.typeCheckValue(nestedField, value[nestedField], fieldConfiguration);
-            this.pathBuilder.popComponent();
+        if (IsType.isNestedObject(value)) {
+            for (const nestedField of Object.keys(value)) {
+                const fieldConfiguration : IFieldConfiguration = typeConfiguration.getConfiguration(nestedField);
+                this.pathBuilder.addPathComponent(new PropertyPathComponent(nestedField));
+                this.typeCheckValue(nestedField, value[nestedField], fieldConfiguration);
+                this.pathBuilder.popComponent();
+            }
+        } else {
+            this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
         }
     }
 }
