@@ -1,6 +1,6 @@
-import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
 import IValidationResult from "../ValidationResult/IValidationResult";
+import ITypeConfiguration from "../ValidationSchema/ITypeConfiguration";
 
 export default interface ITypeChecker {
-    typeCheck(fieldName : string, value : any, configuration : IFieldConfiguration) : IValidationResult;
+    typeCheck(value : any, configuration : ITypeConfiguration) : IValidationResult;
 }

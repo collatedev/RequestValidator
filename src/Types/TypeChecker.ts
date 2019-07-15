@@ -3,7 +3,6 @@ import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
 import IValidationResult from "../ValidationResult/IValidationResult";
 import IValidationSchema from "../ValidationSchema/IValidationSchema";
 import IPathBuilder from "../PathBuilder/IPathBuilder";
-import PathBuilder from "../PathBuilder/PathBuilder";
 import IsType from "./IsType";
 import ValidationResult from "../ValidationResult/ValidationResult";
 import ValidatorErrorHandler from "../ErrorHandler/ValidatorErrorHandler";
@@ -15,6 +14,7 @@ import ITypeConfiguration from "../ValidationSchema/ITypeConfiguration";
 import INestedArray from "../NestedArray/INestedArray";
 import IPathComponent from "../PathBuilder/IPathComponent";
 import NestedArray from "../NestedArray/NestedArray";
+import ParseArrayElementType from "./ParseArrayElementType";
 
 export default class TypeChecker implements ITypeChecker {
     private readonly schema : IValidationSchema;
@@ -25,21 +25,33 @@ export default class TypeChecker implements ITypeChecker {
 
     constructor(pathBuilder : IPathBuilder, schema : IValidationSchema) {
         this.schema = schema;
-        this.pathBuilder = new PathBuilder();
+        this.pathBuilder = pathBuilder;
         this.errorHandler = new ValidatorErrorHandler(pathBuilder);
         this.validationResult = new ValidationResult(this.errorHandler);
     }
 
-    public typeCheck(fieldName : string, value : any, configuration : IFieldConfiguration) : IValidationResult {
+    public typeCheck(value : any, configuration : ITypeConfiguration) : IValidationResult {
         this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
         this.validationResult = new ValidationResult(this.errorHandler);
 
-        this.typeCheckValue(fieldName, value, configuration);
+        this.typeCheckType(value, configuration);
 
         return this.validationResult;
     }
 
-    public typeCheckValue(fieldName : string, value : any, configuration : IFieldConfiguration) : void {
+    private typeCheckType(value : any, configuration : ITypeConfiguration) : void {
+        for (const field of configuration.getFields()) {
+            const fieldConfiguration : IFieldConfiguration =  configuration.getConfiguration(field);
+            
+            if (Object.keys(value).includes(field)) {
+                this.pathBuilder.addPathComponent(new PropertyPathComponent(field));
+                this.typeCheckField(field, value[field], fieldConfiguration);
+                this.pathBuilder.popComponent();
+            }
+        }
+    }
+
+    private typeCheckField(fieldName : string, value : any, configuration : IFieldConfiguration) : void {
         if (IsType.isAnyType(configuration.type)) {
             return;
         } else if (IsType.isPrimative(configuration.type) && !IsType.isTypeOf(configuration.type, value)) {
@@ -48,9 +60,18 @@ export default class TypeChecker implements ITypeChecker {
             this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
         }  else if (IsType.isArray(configuration.type)) {
             this.typeCheckArray(fieldName, value, configuration);
-        } else if (this.schema.hasType(configuration.type) && !IsType.isNestedObject(value)) {
-            this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
+        } else if (this.schema.hasType(configuration.type)) {
+            this.typeCheckNestedObject(fieldName, value, configuration);
         } else if (this.isUnknownType(configuration.type)) {
+            this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
+        }
+    }
+
+    private typeCheckNestedObject(fieldName : string, value : any, configuration : IFieldConfiguration) : void {
+        const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(configuration.type);
+        if (IsType.isNestedObject(value)) {
+            this.typeCheckType(value, typeConfiguration);
+        } else {
             this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
         }
     }
@@ -68,12 +89,13 @@ export default class TypeChecker implements ITypeChecker {
             this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
         } else {
             const nestedArrayStack : INestedArray[] = [new NestedArray(value, 0, this.pathBuilder)];
+
             while (nestedArrayStack.length > 0) {
                 const nestedArray : INestedArray = nestedArrayStack.pop() as INestedArray;
                 const array : any[] = nestedArray.value();
                 const arrayPath : IPathComponent[] = nestedArray.path().getCurrentIndexComponents();
                 this.pathBuilder.addPathComponents(arrayPath);
-    
+
                 this.enqueNestedArrays(array, nestedArrayStack, nestedArray);
                 this.typeCheckArrayElement(fieldName, nestedArray, configuration);
 
@@ -103,17 +125,26 @@ export default class TypeChecker implements ITypeChecker {
         fieldName : string, nestedArray : INestedArray, arrayConfiguration : IFieldConfiguration
     ) : void {
         const elementConfiguration : IFieldConfiguration = ArrayType.getElementType(arrayConfiguration);
+        const arrayStructure : string[] = ParseArrayElementType.parse(arrayConfiguration.type);
+        // add an array to the structure because the parser makes the assumption that
+        // the first array should be removed. Adding this array allows us to use the
+        // structure of the array to check whether or not the type of the nested array
+        // is correct by indexing the structure through the depth of the nested array
+        arrayStructure.unshift("array"); 
+
         const array : any[] = nestedArray.value();
+
         for (let i : number = 0; i < array.length; i++) {
-            const element : any = array[i];
-            
+            const element : any = array[i];    
             if (!Array.isArray(element)) {
                 this.pathBuilder.addPathComponent(new IndexPathComponent(i));
 
-                if (this.schema.hasType(elementConfiguration.type)) {
-                    this.typeCheckNestedObjectElement(fieldName, element, elementConfiguration);                    
+                if (this.isExpectedTypeAtDepth(arrayStructure, nestedArray, element)) {
+                    this.errorHandler.handleError([fieldName, "array"], ErrorType.IncorrectType);
+                } else if (this.schema.hasType(elementConfiguration.type)) {
+                    this.typeCheckNestedObject(fieldName, element, elementConfiguration);                    
                 } else {
-                    this.typeCheckValue(fieldName, element, elementConfiguration);
+                    this.typeCheckField(fieldName, element, elementConfiguration);
                 }
 
                 this.pathBuilder.popComponent();
@@ -121,17 +152,11 @@ export default class TypeChecker implements ITypeChecker {
         }
     }
 
-    private typeCheckNestedObjectElement(fieldName : string, value : any, configuration : IFieldConfiguration) : void {
-        const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(configuration.type);
-        if (IsType.isNestedObject(value)) {
-            for (const nestedField of Object.keys(value)) {
-                const fieldConfiguration : IFieldConfiguration = typeConfiguration.getConfiguration(nestedField);
-                this.pathBuilder.addPathComponent(new PropertyPathComponent(nestedField));
-                this.typeCheckValue(nestedField, value[nestedField], fieldConfiguration);
-                this.pathBuilder.popComponent();
-            }
+    private isExpectedTypeAtDepth(arrayStructure : string[], nestedArray : INestedArray, element : any) : boolean {
+        if (nestedArray.depth() + 1 >= arrayStructure.length) {
+            return false;
         } else {
-            this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
-        }
+            return arrayStructure[nestedArray.depth() + 1] === "array" && !Array.isArray(element);
+        }   
     }
 }

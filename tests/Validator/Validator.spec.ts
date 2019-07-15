@@ -45,6 +45,15 @@ test('Validates a body that is a number', () => {
     assertValidResult(validator.validate(request));
 });
 
+test('Validates a body that is a wrong type', () => {
+    const schemaIndex : number = 14;
+    const validator : IValidator = getValidator(schemaIndex);
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder.setBody(true).build();
+
+    assertResultHasError(validator.validate(request), "body", "Property 'body' should be type 'number'");
+});
+
 
 test('Validates a request with incorrect custom type', () => {
     const schemaIndex : number = 8;
@@ -495,6 +504,7 @@ function assertValidResult(result : IValidationResult) : void {
 }
 
 function assertResultHasError(result : IValidationResult, location: string, message : string) : void {
+    expect(result.isValid()).toBeFalsy();
     expect(result.errors()).toHaveLength(1);
     assertResultHasErrorAtIndex(result, location, message, 0);
 }

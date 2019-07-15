@@ -32,6 +32,18 @@ test('Creates a request with query', () => {
     testRequest(EmptyMapping, EmptyMapping, EmptyMapping, EmptyMapping, TestMapping);
 });
 
+test('Creates a request as json', () => {
+    const request : IRequest = new Request({}, {}, {}, {}, {});
+
+    expect(request.toJson()).toEqual({
+        body: {},
+        cookies: {},
+        headers : {},
+        params: {},
+        query: {},
+    });
+});
+
 function testRequest(
     body : IRequestMapping, 
     cookies : IRequestMapping,
