@@ -40,7 +40,9 @@ export default class TypeChecker implements ITypeChecker {
     }
 
     public typeCheckValue(fieldName : string, value : any, configuration : IFieldConfiguration) : void {
-        if (IsType.isPrimative(configuration.type) && !IsType.isTypeOf(configuration.type, value)) {
+        if (IsType.isAnyType(configuration.type)) {
+            return;
+        } else if (IsType.isPrimative(configuration.type) && !IsType.isTypeOf(configuration.type, value)) {
             this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
         } else if (IsType.isEnum(configuration.type) && !IsType.isTypeOf("string", value)) {
             this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
@@ -48,7 +50,17 @@ export default class TypeChecker implements ITypeChecker {
             this.typeCheckArray(fieldName, value, configuration);
         } else if (this.schema.hasType(configuration.type) && !IsType.isNestedObject(value)) {
             this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
-        } 
+        } else if (this.isUnknownType(configuration.type)) {
+            this.errorHandler.handleError([fieldName, configuration.type], ErrorType.IncorrectType);
+        }
+    }
+
+    private isUnknownType(type : string) : boolean {
+        return !IsType.isPrimative(type) &&
+                    !IsType.isEnum(type) &&
+                    !IsType.isArray(type) &&
+                    !IsType.isAnyType(type) && 
+                    !this.schema.hasType(type);
     }
 
     private typeCheckArray(fieldName : string, value : any, configuration : IFieldConfiguration) : void {

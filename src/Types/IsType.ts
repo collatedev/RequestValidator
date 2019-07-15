@@ -22,4 +22,8 @@ export default class IsType {
 	public static isNestedObject(value : any) : boolean {
 		return typeof value === 'object' && !Array.isArray(value);
 	}
+
+	public static isAnyType(type : string) : boolean {
+		return type === "any";
+	}
 }

@@ -23,3 +23,7 @@ test("Is nested object", () => {
 test("Is not nested object", () => {
     expect(IsType.isNestedObject([])).toBeFalsy();
 });
+
+test("Is any type", () => {
+    expect(IsType.isAnyType("any")).toBeTruthy();
+});

@@ -357,6 +357,34 @@ test("That the nested arrays do not have correct element types", () => {
     expectInvalidResult(validationResult, "[1][1]", "Property 'foo[1][1]' should be type 'string'");
 });
 
+test("That the value is any type", () => {
+    const typeChecker : ITypeChecker = new TypeChecker(new PathBuilder(), EmptySchema);
+
+    const validationResult : IValidationResult = typeChecker.typeCheck("foo", [
+        ["1", "1"],
+        ["1", 0]
+    ], new FieldConfiguration({
+        type: "any",
+        required: true,
+    }));
+
+    expectValidResult(validationResult);
+});
+
+test("That the value is an array of any typed elements", () => {
+    const typeChecker : ITypeChecker = new TypeChecker(new PathBuilder(), EmptySchema);
+
+    const validationResult : IValidationResult = typeChecker.typeCheck("foo", [
+        ["1", "1"],
+        ["1", 0]
+    ], new FieldConfiguration({
+        type: "array[any]",
+        required: true,
+    }));
+
+    expectValidResult(validationResult);
+});
+
 function expectValidResult(validationResult : IValidationResult) : void {
     expect(validationResult.isValid()).toBeTruthy();
     expect(validationResult.errors().length).toEqual(0);
