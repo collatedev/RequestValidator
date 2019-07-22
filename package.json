@@ -1,35 +1,43 @@
 {
-	"name": "request-validator",
-	"version": "1.0.0",
-	"description": "A request validator",
-	"main": "./dist/index.js",
-	"scripts": {
-		"build": "tsc -p ./tsconfig.prod.json",
-		"test": "jest",
-		"coverage": "jest --coverage"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/collatedev/request-validator.git"
-	},
-	"author": "Evan Coulson",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/collatedev/request-validator/issues"
-	},
-	"homepage": "https://github.com/collatedev/request-validator#readme",
-	"devDependencies": {
-		"@types/jest": "^24.0.14",
-		"@types/node": "^11.9.5",
-		"jest": "^24.8.0",
-		"ts-jest": "^24.0.2",
-		"ts-node": "^8.0.2",
-		"typescript": "^3.5.1"
-	},
-	"dependencies": {
-		"tslint": "^5.13.0",
-		"tslint-config-prettier": "^1.18.0",
-		"tslint-config-standard": "^8.0.1"
-	},
-	"types": "./dist/index.d.ts"
+  "name": "@collate/request-validator",
+  "version": "1.0.0",
+  "description": "A request validator",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p ./tsconfig.prod.json",
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/collatedev/request-validator.git"
+  },
+  "author": "Evan Coulson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/collatedev/request-validator/issues"
+  },
+  "homepage": "https://github.com/collatedev/request-validator#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.14",
+    "@types/node": "^11.9.5",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.5.1"
+  },
+  "dependencies": {
+    "tslint": "^5.13.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-config-standard": "^8.0.1"
+  },
+  "types": "./dist/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "keywords": [
+    "request",
+    "validation"
+  ]
 }

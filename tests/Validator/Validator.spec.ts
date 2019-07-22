@@ -9,54 +9,54 @@ import ValidatorTestSchemas from '../models/ValidatorTestSchemas.json';
 
 test('Validates empty body', () => {
     const schemaIndex : number = 0;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder.build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates request with schema', () => {
     const schemaIndex : number = 15;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder.build();
 
-    assertResultHasError(validator.validate(request), "", "Unknown type 'request'");
+    assertResultHasError(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), "", "Unknown type 'request'");
 });
 
 
 test('Validates empty body', () => {
     const schemaIndex : number = 0;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder.build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a body that is a number', () => {
     const schemaIndex : number = 14;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder.setBody(1).build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a body that is a wrong type', () => {
     const schemaIndex : number = 14;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder.setBody(true).build();
 
-    assertResultHasError(validator.validate(request), "body", "Property 'body' should be type 'number'");
+    assertResultHasError(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), "body", "Property 'body' should be type 'number'");
 });
 
 
 test('Validates a request with incorrect custom type', () => {
     const schemaIndex : number = 8;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -65,12 +65,16 @@ test('Validates a request with incorrect custom type', () => {
                                 })
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body.foo", "Property 'foo' should be type 'bar'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body.foo", 
+        "Property 'foo' should be type 'bar'"
+    );
 });
 
 test('Validates a request with incorrect nested custom type', () => {
     const schemaIndex : number = 8;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -81,12 +85,16 @@ test('Validates a request with incorrect nested custom type', () => {
                                 })
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body.foo.baz", "Property 'baz' should be type 'number'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body.foo.baz", 
+        "Property 'baz' should be type 'number'"
+    );
 });
 
 test('Validates a request with correct nested custom type', () => {
     const schemaIndex : number = 8;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -97,48 +105,52 @@ test('Validates a request with correct nested custom type', () => {
                                 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a request body', () => {
     const schemaIndex : number = 1;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
 
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
                                 .setBody({ foo : 1 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a request body with a missing property', () => {
     const schemaIndex : number = 2;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
                                 .setBody({})
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Missing property 'foo'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body", 
+        "Missing property 'foo'"
+    );
 });
 
 test('Validates a request body with an optional property', () => {
     const schemaIndex : number = 3;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
                                 .setBody({})
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a request body with extra properties', () => {
     const schemaIndex : number = 13;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -148,12 +160,16 @@ test('Validates a request body with extra properties', () => {
                                 })
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body", "Unexpected property 'bar'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body", 
+        "Unexpected property 'bar'"
+    );
 });
 
 test('Validates a request with incorrect number type', () => {
     const schemaIndex : number = 1;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -162,12 +178,16 @@ test('Validates a request with incorrect number type', () => {
                                 })
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body.foo", "Property 'foo' should be type 'number'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body.foo", 
+        "Property 'foo' should be type 'number'"
+    );
 });
 
 test('Validates a request with incorrect string type', () => {
     const schemaIndex : number = 4;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -176,12 +196,16 @@ test('Validates a request with incorrect string type', () => {
                                 })
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body.bar", "Property 'bar' should be type 'string'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body.bar", 
+        "Property 'bar' should be type 'string'"
+    );
 });
 
 test('Validates a request with incorrect boolean type', () => {
     const schemaIndex : number = 5;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -190,12 +214,16 @@ test('Validates a request with incorrect boolean type', () => {
                                 })
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body.bar", "Property 'bar' should be type 'boolean'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body.bar", 
+        "Property 'bar' should be type 'boolean'"
+    );
 });
 
 test('Validates a request with incorrect enum type', () => {
     const schemaIndex : number = 6;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -204,7 +232,7 @@ test('Validates a request with incorrect enum type', () => {
                                 })
                                 .build();
 
-    const result : IValidationResult = validator.validate(request);
+    const result : IValidationResult = validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]);
 
     const numberOfErrors : number = 2;
     expect(result.errors().length).toEqual(numberOfErrors);
@@ -224,7 +252,7 @@ test('Validates a request with incorrect enum type', () => {
 
 test('Validates a request with correct enum type', () => {
     const schemaIndex : number = 6;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -233,12 +261,12 @@ test('Validates a request with correct enum type', () => {
                                 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a request with incorrect array type', () => {
     const schemaIndex : number = 7;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -247,12 +275,16 @@ test('Validates a request with incorrect array type', () => {
                                 })
                                 .build();
 
-    assertResultHasError(validator.validate(request), "body.bar", "Property 'bar' should be type 'array[string]'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body.bar", 
+        "Property 'bar' should be type 'array[string]'"
+    );
 });
 
 test('Validates a request with an empty array', () => {
     const schemaIndex : number = 7;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -261,12 +293,14 @@ test('Validates a request with an empty array', () => {
                                 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+    );
 });
 
 test('Validates a request with an array that has incorrect element types', () => {
     const schemaIndex : number = 7;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -276,7 +310,7 @@ test('Validates a request with an array that has incorrect element types', () =>
                                 .build();
 
     assertResultHasError(
-        validator.validate(request), 
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
         "body.bar[0]", 
         "Property 'bar[0]' should be type 'string'"
     );
@@ -284,7 +318,7 @@ test('Validates a request with an array that has incorrect element types', () =>
 
 test('Validates a request with a nested array that has an incorrect structure', () => {
     const schemaIndex : number = 9;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -294,7 +328,7 @@ test('Validates a request with a nested array that has an incorrect structure', 
                                 .build();
 
     assertResultHasError(
-        validator.validate(request), 
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
         "body.bar[0]", 
         "Property 'bar[0]' should be type 'array'"
     );
@@ -302,7 +336,7 @@ test('Validates a request with a nested array that has an incorrect structure', 
 
 test('Validates a request with an array that has nested arrays', () => {
     const schemaIndex : number = 9;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -312,7 +346,7 @@ test('Validates a request with an array that has nested arrays', () => {
                                 .build();
 
     assertResultHasError(
-        validator.validate(request), 
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
         "body.bar[0][0]", 
         "Property 'bar[0][0]' should be type 'string'"
     );
@@ -320,7 +354,7 @@ test('Validates a request with an array that has nested arrays', () => {
 
 test('Validates a request with an array that has nested arrays', () => {
     const schemaIndex : number = 9;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -329,12 +363,12 @@ test('Validates a request with an array that has nested arrays', () => {
                                 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a request with an array that has nested arrays of enums', () => {
     const schemaIndex : number = 10;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -343,12 +377,12 @@ test('Validates a request with an array that has nested arrays of enums', () => 
                                 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a request with nested arrays expecting a nested type', () => {
     const schemaIndex : number = 11;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -358,7 +392,7 @@ test('Validates a request with nested arrays expecting a nested type', () => {
                                 .build();
 
     assertResultHasError(
-        validator.validate(request), 
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
         "body.bar[0][0]", 
         "Property 'bar[0][0]' should be type 'foo'"
     );
@@ -366,7 +400,7 @@ test('Validates a request with nested arrays expecting a nested type', () => {
 
 test('Validates a request with with nested arrays and finds an error on the baz property', () => {
     const schemaIndex : number = 11;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -378,7 +412,7 @@ test('Validates a request with with nested arrays and finds an error on the baz 
                                 .build();
 
     assertResultHasError(
-        validator.validate(request), 
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
         "body.bar[0][0].baz", 
         "Property 'baz' should be type 'number'"
     );
@@ -386,7 +420,7 @@ test('Validates a request with with nested arrays and finds an error on the baz 
 
 test('Validates a request with with nested arrays of nested types', () => {
     const schemaIndex : number = 11;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -397,12 +431,12 @@ test('Validates a request with with nested arrays of nested types', () => {
                                 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a request with with nested arrays and finds an error on the quux property', () => {
     const schemaIndex : number = 12;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -414,7 +448,7 @@ test('Validates a request with with nested arrays and finds an error on the quux
                                 .build();
 
     assertResultHasError(
-        validator.validate(request), 
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
         "body.bar[0][0].baz", 
         "Property 'baz' should be type 'qux'"
     );
@@ -422,7 +456,7 @@ test('Validates a request with with nested arrays and finds an error on the quux
 
 test('Validates a request with with nested arrays and finds an error on the quux property', () => {
     const schemaIndex : number = 12;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -436,7 +470,7 @@ test('Validates a request with with nested arrays and finds an error on the quux
                                 .build();
 
     assertResultHasError(
-        validator.validate(request), 
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
         "body.bar[0][0].baz.quux", 
         "Property 'quux' should be type 'number'"
     );
@@ -444,7 +478,7 @@ test('Validates a request with with nested arrays and finds an error on the quux
 
 test('Validates a request with with nested arrays of nested types', () => {
     const schemaIndex : number = 12;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -457,13 +491,13 @@ test('Validates a request with with nested arrays of nested types', () => {
                                 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 
 test('Validates a request with an array that has a correct array', () => {
     const schemaIndex : number = 7;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -472,12 +506,12 @@ test('Validates a request with an array that has a correct array', () => {
                                 })
                                 .build();
 
-    assertValidResult(validator.validate(request));
+    assertValidResult(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]));
 });
 
 test('Validates a request with an incorrect enum value', () => {
     const schemaIndex : number = 6;
-    const validator : IValidator = getValidator(schemaIndex);
+    const validator : IValidator = new Validator();
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -487,15 +521,11 @@ test('Validates a request with an incorrect enum value', () => {
                                 .build();
 
     assertResultHasError(
-        validator.validate(request), 
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
         "body.bar", 
         "Illegal enum value 'C', acceptable values are 'A, B'"
     );
 });
-
-function getValidator(schemaIndex : number) : IValidator {
-    return new Validator(ValidatorTestSchemas.schemas[schemaIndex]);
-}
 
 function assertValidResult(result : IValidationResult) : void {
     expect(result.isValid()).toBeTruthy();
