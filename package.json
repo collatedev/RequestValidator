@@ -30,5 +30,6 @@
 		"tslint": "^5.13.0",
 		"tslint-config-prettier": "^1.18.0",
 		"tslint-config-standard": "^8.0.1"
-	}
+	},
+	"types": "./dist/index.d.ts"
 }

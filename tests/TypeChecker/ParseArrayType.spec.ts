@@ -1,4 +1,4 @@
-import ParseArrayElementType from "../../src/TypeChecker/ParseArrayElementType";
+import ParseArrayElementType from "../../src/Types/ParseArrayElementType";
 
 test("Returns empty array when parsing non-array type", () => {
     expect(ParseArrayElementType.parse("foo")).toHaveLength(0);

@@ -1,7 +1,6 @@
 import IValidator from '../../src/Validator/IValidator';
 import IValidationResult from '../../src/ValidationResult/IValidationResult';
 import Validator from '../../src/Validator/Validator';
-import ValidationSchema from '../../src/ValidationSchema/ValidationSchema';
 import IRequestBuilder from '../../src/Request/IRequestBuilder';
 import RequestBuilder from '../../src/Request/RequestBuilder';
 import IRequest from '../../src/Request/IRequest';
@@ -43,6 +42,15 @@ test('Validates a body that is a number', () => {
     const request : IRequest = requestBuilder.setBody(1).build();
 
     assertValidResult(validator.validate(request));
+});
+
+test('Validates a body that is a wrong type', () => {
+    const schemaIndex : number = 14;
+    const validator : IValidator = getValidator(schemaIndex);
+    const requestBuilder : IRequestBuilder = new RequestBuilder();
+    const request : IRequest = requestBuilder.setBody(true).build();
+
+    assertResultHasError(validator.validate(request), "body", "Property 'body' should be type 'number'");
 });
 
 
@@ -188,7 +196,6 @@ test('Validates a request with incorrect boolean type', () => {
 test('Validates a request with incorrect enum type', () => {
     const schemaIndex : number = 6;
     const validator : IValidator = getValidator(schemaIndex);
-    const errorCount : number = 2;
     
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder
@@ -199,18 +206,18 @@ test('Validates a request with incorrect enum type', () => {
 
     const result : IValidationResult = validator.validate(request);
 
-    expect(result.isValid()).toBeFalsy();
-    expect(result.errors()).toHaveLength(errorCount);
+    const numberOfErrors : number = 2;
+    expect(result.errors().length).toEqual(numberOfErrors);
     assertResultHasErrorAtIndex(
         result,
         "body.bar", 
-        "Property 'bar' should be type 'enum'", 
+        "Property 'bar' should be type 'enum'",
         0
     );
     assertResultHasErrorAtIndex(
         result,
         "body.bar", 
-        "Illegal enum value '1', acceptable values are 'A, B'", 
+        "Illegal enum value '1', acceptable values are 'A, B'",
         1
     );
 });
@@ -487,7 +494,7 @@ test('Validates a request with an incorrect enum value', () => {
 });
 
 function getValidator(schemaIndex : number) : IValidator {
-    return new Validator(new ValidationSchema(ValidatorTestSchemas.schemas[schemaIndex]));
+    return new Validator(ValidatorTestSchemas.schemas[schemaIndex]);
 }
 
 function assertValidResult(result : IValidationResult) : void {
@@ -498,16 +505,13 @@ function assertValidResult(result : IValidationResult) : void {
 function assertResultHasError(result : IValidationResult, location: string, message : string) : void {
     expect(result.isValid()).toBeFalsy();
     expect(result.errors()).toHaveLength(1);
-    expect(result.errors()[0].location).toEqual(location);
-    expect(result.errors()[0].message).toEqual(message);
+    assertResultHasErrorAtIndex(result, location, message, 0);
 }
 
 function assertResultHasErrorAtIndex(
-    result : IValidationResult, 
-    location: string, 
-    message : string, 
-    index : number
+    result : IValidationResult, location: string, message : string, index : number
 ) : void {
+    expect(result.isValid()).toBeFalsy();
     expect(result.errors()[index].location).toEqual(location);
     expect(result.errors()[index].message).toEqual(message);
 }

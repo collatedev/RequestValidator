@@ -18,4 +18,12 @@ export default class IsType {
 	public static isPrimative(fieldType : string) : boolean {
 		return this.PrimativeTypes.includes(fieldType);
 	}
+
+	public static isNestedObject(value : any) : boolean {
+		return typeof value === 'object' && !Array.isArray(value);
+	}
+
+	public static isAnyType(type : string) : boolean {
+		return type === "any";
+	}
 }

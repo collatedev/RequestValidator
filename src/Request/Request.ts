@@ -24,6 +24,10 @@ export default class Request implements IRequest {
     }
 
 	public getRequest() : IRequestMapping {
+		return new RequestMapping(this.toJson());
+	}
+
+	public toJson() : any {
 		const json : any = {};
 		if (this.body) {
 			json.body = this.body;
@@ -40,6 +44,6 @@ export default class Request implements IRequest {
 		if (this.query) {
 			json.query = this.query;
 		}
-		return new RequestMapping(json);
+		return json;
 	}
 }
