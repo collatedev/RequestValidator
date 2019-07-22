@@ -1,7 +1,6 @@
 import IValidator from '../../src/Validator/IValidator';
 import IValidationResult from '../../src/ValidationResult/IValidationResult';
 import Validator from '../../src/Validator/Validator';
-import ValidationSchema from '../../src/ValidationSchema/ValidationSchema';
 import IRequestBuilder from '../../src/Request/IRequestBuilder';
 import RequestBuilder from '../../src/Request/RequestBuilder';
 import IRequest from '../../src/Request/IRequest';
@@ -495,7 +494,7 @@ test('Validates a request with an incorrect enum value', () => {
 });
 
 function getValidator(schemaIndex : number) : IValidator {
-    return new Validator(new ValidationSchema(ValidatorTestSchemas.schemas[schemaIndex]));
+    return new Validator(ValidatorTestSchemas.schemas[schemaIndex]);
 }
 
 function assertValidResult(result : IValidationResult) : void {

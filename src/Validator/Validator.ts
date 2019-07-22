@@ -18,20 +18,20 @@ import ITypeChecker from "../Types/ITypeChecker";
 import TypeChecker from "../Types/TypeChecker";
 import IsType from "../Types/IsType";
 import RequestMapping from "../Request/RequestMapping";
+import ValidationSchema from "../ValidationSchema/ValidationSchema";
 
 const RootType : string = "request";
 
 export default class Validator implements IValidator {
-	private readonly schema : IValidationSchema;
-
+	private schema : IValidationSchema;
 	private errorHandler : IErrorHandler;
 	private pathBuilder : IPathBuilder;
 	private sanitizer : ISanitizer;
 	private typeChecker : ITypeChecker;
 	private result : IValidationResult;
 
-	constructor(schema : IValidationSchema) {
-		this.schema = schema;
+	constructor() {
+		this.schema = new ValidationSchema({ types : {}});
 		this.pathBuilder = new PathBuilder();
 		this.sanitizer = new Santizer(this.pathBuilder, this.schema);
 		this.typeChecker = new TypeChecker(this.pathBuilder, this.schema);
@@ -39,7 +39,8 @@ export default class Validator implements IValidator {
 		this.result = new ValidationResult(this.errorHandler);
 	}
 
-	public validate(request : IRequest) : IValidationResult {
+	public validate(request : IRequest, rawSchema : any) : IValidationResult {
+		this.schema = new ValidationSchema(rawSchema);
 		this.pathBuilder = new PathBuilder();
 		this.sanitizer = new Santizer(this.pathBuilder, this.schema);
 		this.typeChecker = new TypeChecker(this.pathBuilder, this.schema);
