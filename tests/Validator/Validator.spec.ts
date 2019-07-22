@@ -22,7 +22,11 @@ test('Validates request with schema', () => {
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder.build();
 
-    assertResultHasError(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), "", "Unknown type 'request'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "", 
+        "Unknown type 'request'"
+    );
 });
 
 
@@ -50,7 +54,11 @@ test('Validates a body that is a wrong type', () => {
     const requestBuilder : IRequestBuilder = new RequestBuilder();
     const request : IRequest = requestBuilder.setBody(true).build();
 
-    assertResultHasError(validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), "body", "Property 'body' should be type 'number'");
+    assertResultHasError(
+        validator.validate(request, ValidatorTestSchemas.schemas[schemaIndex]), 
+        "body", 
+        "Property 'body' should be type 'number'"
+    );
 });
 
 
