@@ -39,8 +39,8 @@ export default class Validator implements IValidator {
 		this.result = new ValidationResult(this.errorHandler);
 	}
 
-	public validate(request : IRequest, rawSchema : any) : IValidationResult {
-		this.schema = new ValidationSchema(rawSchema);
+	public validate(request : IRequest, schema : IValidationSchema) : IValidationResult {
+		this.schema = schema;
 		this.pathBuilder = new PathBuilder();
 		this.sanitizer = new Santizer(this.pathBuilder, this.schema);
 		this.typeChecker = new TypeChecker(this.pathBuilder, this.schema);
