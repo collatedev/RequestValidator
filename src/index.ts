@@ -1,15 +1,15 @@
 import Validator from "./Validator/Validator";
 import IValidator from "./Validator/IValidator";
-import IRequest from './Request/IRequest';
-import Request from './Request/Request';
+import IRequestBuilder from './Request/IRequestBuilder';
+import RequestBuilder from './Request/RequestBuilder';
 import IValidationSchema from './ValidationSchema/IValidationSchema';
 import ValidationSchema from './ValidationSchema/ValidationSchema';
 
 export {
     Validator,
     IValidator,
-    IRequest,
-    Request,
+    IRequestBuilder,
+    RequestBuilder,
     IValidationSchema,
     ValidationSchema
 };
