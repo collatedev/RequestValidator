@@ -1,8 +1,8 @@
 {
   "name": "@collate/request-validator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A request validator",
-  "main": "./dist/index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "build": "tsc -p ./tsconfig.prod.json",
     "test": "jest",
@@ -32,13 +32,24 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^8.0.1"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./lib/index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "tests"
   },
   "keywords": [
     "request",
-    "validation"
+    "validation",
+    "request validation",
+    "express",
+    "collate",
+    "typescript",
+    "json",
+    "schema",
+    "schema validation",
+    "sanitization",
+    "type checking",
+    "type",
+    "check"
   ]
 }
