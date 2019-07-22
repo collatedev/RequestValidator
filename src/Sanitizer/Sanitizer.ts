@@ -207,23 +207,4 @@ export default class Santizer implements ISanitizer {
         
         this.pathBuilder.popComponent();
     }
-
-    // private sanitizeObjectElement(element : any, arrayConfiguration : IFieldConfiguration) : void {
-    //     const arrayTypes : string[] = ParseArrayElementType.parse(arrayConfiguration.type);
-    //         const elementName : string = arrayTypes[arrayTypes.length - 1];
-    //         const elementConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(elementName);
-
-    //     for (const elementFieldName of elementConfiguration.getFields()) {
-    //         const rootFieldName : string = this.fieldName;
-    //         const fieldConfiguration : IFieldConfiguration = elementConfiguration.getConfiguration(elementFieldName);
-
-    //         this.pathBuilder.addPathComponent(new PropertyPathComponent(elementFieldName));
-    //         this.fieldName = elementFieldName;
-
-    //         this.sanitizeValue(element[elementFieldName], fieldConfiguration);
-
-    //         this.fieldName = rootFieldName;
-    //         this.pathBuilder.popComponent();
-    //     }
-    // }
 }
