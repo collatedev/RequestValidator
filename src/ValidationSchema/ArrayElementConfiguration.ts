@@ -1,30 +1,24 @@
-import IType from "./IType";
-import IFieldConfiguration from "../ValidationSchema/IFieldConfiguration";
-import ParseArrayElementType from "./ParseArrayElementType";
-import FieldConfiguration from "../ValidationSchema/FieldConfiguration";
+import IFieldConfiguration from "./IFieldConfiguration";
+import ParseArrayElementType from "../Types/ParseArrayElementType";
+import FieldConfiguration from "./FieldConfiguration";
 
-export default class ArrayType implements IType {
-    private _configuration : IFieldConfiguration;
-    private _arrayStructure : string[];
-    private _nestedType : string;
+export default class ArrayElementConfiguration implements IFieldConfiguration {
+    public readonly required: boolean;
+    public readonly type: string;
+    public readonly values?: string[] | undefined;
+    public readonly range?: number[] | undefined;
+    public readonly isURL?: boolean | undefined;
+    public readonly startsWith?: string | undefined;
+    public readonly length?: number | undefined;
+    public readonly arrayLengths?: number[] | undefined;
 
-    constructor(configuration : IFieldConfiguration, arrayStructure : string[]) {
-        this._configuration = configuration;
-        this._arrayStructure = arrayStructure;
-        this._nestedType = arrayStructure[0];
+    constructor() {
+        this.required = false;
+        this.type = "";
     }
 
-    public arrayStructure() : string[] {
-        return this._arrayStructure;
-    }
-
-    public getType() : string {
-        return this._nestedType;
-    }
-
-    public configuration() : IFieldConfiguration {
-        return this._configuration;
-    }
+    // TODO :
+    // convert this static function to the constructor
 
     public static getElementType(configuration : IFieldConfiguration) : IFieldConfiguration {
         // gets the element type of the array

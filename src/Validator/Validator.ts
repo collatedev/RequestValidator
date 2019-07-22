@@ -46,16 +46,16 @@ export default class Validator implements IValidator {
 		this.errorHandler = new ValidatorErrorHandler(this.pathBuilder);
 		this.result = new ValidationResult(this.errorHandler);
 
+		this.validateRequestStructure(RootType, request.getRequest());
+
 		if (this.schema.hasType(RootType)) {
-			this.typeCheckRoot(request);
+			this.typeCheckAndSanitizeRequest(request);
 		}		
-		
-		this.validateType(RootType, request.getRequest());
 
 		return this.result;
 	}
 
-	private typeCheckRoot(request : IRequest) : void {
+	private typeCheckAndSanitizeRequest(request : IRequest) : void {
 		const rootConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(RootType);
 		for (const field of rootConfiguration.getFields()) {
 			if (this.schema.hasType(field)) {
@@ -63,15 +63,17 @@ export default class Validator implements IValidator {
 				const configuration : ITypeConfiguration = this.schema.getTypeConfiguration(field);
 				this.pathBuilder.addPathComponent(new PropertyPathComponent(field));
 				this.result.join(this.typeChecker.typeCheck(value, configuration));
+				this.result.join(this.sanitizer.sanitize(value, configuration));
 				this.pathBuilder.popComponent();
 			} else {
 				const value : any = request.toJson();
 				this.result.join(this.typeChecker.typeCheck(value, rootConfiguration));
+				this.result.join(this.sanitizer.sanitize(value, rootConfiguration));
 			}
 		}
 	}
 
-	private validateType(typeName : string, mapping : IRequestMapping) : void {
+	private validateRequestStructure(typeName : string, mapping : IRequestMapping) : void {
 		if (this.schema.hasType(typeName)) {
 			const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
 			this.checkForMissingProperties(mapping, typeConfiguration);
@@ -107,10 +109,8 @@ export default class Validator implements IValidator {
 				const value : any = mapping.value(fieldName);
 				this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
 
-				this.result.join(this.sanitizer.sanitize(fieldName, value, configuration));
-
 				if (this.schema.hasType(configuration.type) && IsType.isNestedObject(value)) {
-					this.validateType(configuration.type, new RequestMapping(value));
+					this.validateRequestStructure(configuration.type, new RequestMapping(value));
 				}
 
 				this.pathBuilder.popComponent();

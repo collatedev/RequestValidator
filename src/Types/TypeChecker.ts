@@ -7,7 +7,7 @@ import IsType from "./IsType";
 import ValidationResult from "../ValidationResult/ValidationResult";
 import ValidatorErrorHandler from "../ErrorHandler/ValidatorErrorHandler";
 import ErrorType from "../ErrorHandler/ErrorType";
-import ArrayType from "./ArrayType";
+import ArrayType from "../ValidationSchema/ArrayElementConfiguration";
 import IndexPathComponent from "../PathBuilder/IndexPathComponent";
 import PropertyPathComponent from "../PathBuilder/PropertyPathComponent";
 import ITypeConfiguration from "../ValidationSchema/ITypeConfiguration";
@@ -41,14 +41,16 @@ export default class TypeChecker implements ITypeChecker {
 
     private typeCheckType(value : any, configuration : ITypeConfiguration) : void {
         for (const field of configuration.getFields()) {
-            const fieldConfiguration : IFieldConfiguration =  configuration.getConfiguration(field);
-            
-            if (Object.keys(value).includes(field)) {
+            if (this.valueHasProperty(value, field)) {
                 this.pathBuilder.addPathComponent(new PropertyPathComponent(field));
-                this.typeCheckField(field, value[field], fieldConfiguration);
+                this.typeCheckField(field, value[field], configuration.getConfiguration(field));
                 this.pathBuilder.popComponent();
             }
         }
+    }
+
+    private valueHasProperty(value : any, field : string) : boolean {
+        return Object.keys(value).includes(field);
     }
 
     private typeCheckField(fieldName : string, value : any, configuration : IFieldConfiguration) : void {

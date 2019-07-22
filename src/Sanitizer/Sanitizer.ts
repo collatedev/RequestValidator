@@ -9,7 +9,7 @@ import ErrorType from "../ErrorHandler/ErrorType";
 import IndexPathComponent from "../PathBuilder/IndexPathComponent";
 import INestedArray from "../NestedArray/INestedArray";
 import NestedArray from "../NestedArray/NestedArray";
-import ArrayType from "../Types/ArrayType";
+import ArrayType from "../ValidationSchema/ArrayElementConfiguration";
 import URLChecker from "./URLChecker";
 import IValidationSchema from "../ValidationSchema/IValidationSchema";
 import IsType from "../Types/IsType";
@@ -34,14 +34,29 @@ export default class Santizer implements ISanitizer {
         this.fieldName = "";
     }
 
-    public sanitize(fieldName : string, value : any, configuration : IFieldConfiguration) : IValidationResult {
-        this.fieldName = fieldName;
+    public sanitize(value : any, configuration : ITypeConfiguration) : IValidationResult {
         this.errorHandler = new SanitizerErrorHandler(this.pathBuilder);
         this.result = new ValidationResult(this.errorHandler);
 
-        this.sanitizeValue(value, configuration);
+        this.sanitizeType(value, configuration);
 
         return this.result;
+    }
+
+    private sanitizeType(value : any, configuration : ITypeConfiguration) : void {
+        for (const fieldName of configuration.getFields()) {
+            this.fieldName = fieldName;
+
+            if (this.valueHasProperty(value, fieldName)) {
+                this.pathBuilder.addPathComponent(new PropertyPathComponent(fieldName));
+                this.sanitizeValue(value[fieldName], configuration.getConfiguration(fieldName));
+                this.pathBuilder.popComponent();
+            }
+        }
+    }
+
+    private valueHasProperty(value : any, field : string) : boolean {
+        return Object.keys(value).includes(field);
     }
 
     private sanitizeValue(value : any, configuration : IFieldConfiguration) : void {
@@ -56,6 +71,9 @@ export default class Santizer implements ISanitizer {
         }
         if (configuration.type.startsWith("array") && Array.isArray(value)) {
             this.sanitizeArray(value, configuration);
+        }
+        if (this.schema.hasType(configuration.type) && IsType.isNestedObject(value)) {
+            this.sanitizeType(value, this.schema.getTypeConfiguration(configuration.type));
         }
     }
 
@@ -139,7 +157,7 @@ export default class Santizer implements ISanitizer {
         const expectedLength : number = arrayLengths[nestedArray.depth()];
         if (nestedArray.value().length !== expectedLength) {
             this.errorHandler.handleError(
-                [`${this.fieldName}${this.pathBuilder.getPath()}`, nestedArray.value().length, expectedLength],
+                [this.pathBuilder.getPath(), nestedArray.value().length, expectedLength],
                 ErrorType.IllegalArrayLength
             );
         }
@@ -177,7 +195,11 @@ export default class Santizer implements ISanitizer {
         this.pathBuilder.addPathComponent(new IndexPathComponent(index));
 
         if (IsType.isTypeOf("object", element)) {
-            this.sanitizeObjectElement(element, configuration);
+            const arrayTypes : string[] = ParseArrayElementType.parse(configuration.type);
+            const elementName : string = arrayTypes[arrayTypes.length - 1];
+            const elementConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(elementName);
+
+            this.sanitizeType(element, elementConfiguration);
         } else {
             const elementConfiguration : IFieldConfiguration = ArrayType.getElementType(configuration);
             this.sanitizeValue(element, elementConfiguration);
@@ -186,22 +208,22 @@ export default class Santizer implements ISanitizer {
         this.pathBuilder.popComponent();
     }
 
-    private sanitizeObjectElement(element : any, arrayConfiguration : IFieldConfiguration) : void {
-        const arrayTypes : string[] = ParseArrayElementType.parse(arrayConfiguration.type);
-        const typeName : string = arrayTypes[arrayTypes.length - 1];
-        const typeConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(typeName);
+    // private sanitizeObjectElement(element : any, arrayConfiguration : IFieldConfiguration) : void {
+    //     const arrayTypes : string[] = ParseArrayElementType.parse(arrayConfiguration.type);
+    //         const elementName : string = arrayTypes[arrayTypes.length - 1];
+    //         const elementConfiguration : ITypeConfiguration = this.schema.getTypeConfiguration(elementName);
 
-        for (const elementFieldName of typeConfiguration.getFields()) {
-            const rootFieldName : string = this.fieldName;
-            const fieldConfiguration : IFieldConfiguration = typeConfiguration.getConfiguration(elementFieldName);
+    //     for (const elementFieldName of elementConfiguration.getFields()) {
+    //         const rootFieldName : string = this.fieldName;
+    //         const fieldConfiguration : IFieldConfiguration = elementConfiguration.getConfiguration(elementFieldName);
 
-            this.pathBuilder.addPathComponent(new PropertyPathComponent(elementFieldName));
-            this.fieldName = elementFieldName;
+    //         this.pathBuilder.addPathComponent(new PropertyPathComponent(elementFieldName));
+    //         this.fieldName = elementFieldName;
 
-            this.sanitizeValue(element[elementFieldName], fieldConfiguration);
+    //         this.sanitizeValue(element[elementFieldName], fieldConfiguration);
 
-            this.fieldName = rootFieldName;
-            this.pathBuilder.popComponent();
-        }
-    }
+    //         this.fieldName = rootFieldName;
+    //         this.pathBuilder.popComponent();
+    //     }
+    // }
 }
