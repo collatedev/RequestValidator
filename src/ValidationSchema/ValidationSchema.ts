@@ -5,7 +5,7 @@ import TypeConfiguration from "./TypeConfiguration";
 import IFieldConfiguration from "./IFieldConfiguration";
 
 const TypeNameKeywords : string[] = [
-    "string", "number", "boolean", "enum"
+    "string", "number", "boolean", "enum", "any"
 ];
 
 export default class ValidationSchema implements IValidationSchema {
