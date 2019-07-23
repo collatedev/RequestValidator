@@ -1,6 +1,6 @@
 {
   "name": "@collate/request-validator",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A request validator",
   "main": "./lib/index.js",
   "scripts": {
