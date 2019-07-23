@@ -8,6 +8,10 @@ export default class PropertyPathComponent implements IPathComponent {
     }
 
     public toString() : string {
-        return `.${this.property}`;
+        if (this.property.includes(".")) {
+            return `."${this.property}"`;
+        } else {
+            return `.${this.property}`;
+        }
     }
 }
