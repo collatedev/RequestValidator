@@ -7,6 +7,9 @@ import ValidationSchema from './ValidationSchema/ValidationSchema';
 import IValidationResult from './ValidationResult/IValidationResult';
 import ValidationResult from './ValidationResult/ValidationResult';
 import IValidationError from './ValidationResult/IValidationError';
+import IRequest from './Request/IRequest';
+import Request from './Request/Request';
+import Validatable from './Request/Validatable';
 
 export {
     Validator,
@@ -18,4 +21,7 @@ export {
     IValidationResult,
     ValidationResult,
     IValidationError,
+    IRequest,
+    Request,
+    Validatable
 };
